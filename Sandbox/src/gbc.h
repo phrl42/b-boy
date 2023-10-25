@@ -15,8 +15,13 @@
 #define TFT_WIDTH 160
 #define TFT_HEIGHT 144
 
-// 32 KiB
-#define GBC_RAM_SIZE 32768
+// 64 KiB address space:
+//   8 KiB Work Ram
+//   8 KiB Display
+//   32 KiB ROM of which 16 KiB is switchable
+#define GBC_RAM_SIZE 32768 * 2
+// note:
+// there are up to 16 x 8 KiB working RAM Pages in the cartridge ( 128 KiB Max )
 
 namespace GBC
 {

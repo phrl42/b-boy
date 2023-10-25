@@ -19,13 +19,13 @@ namespace GBC
       return false;
     }
 
+    // get file length
     int length = 0;
     file.seekg(0, file.end);
     length = file.tellg();
     file.seekg(0, file.beg);
       
-    // put all 4096 bytes into ram
-    //file.read((char*)(spec->ram + entry), length);
+    // put all 32 KiB KiB into ram
     char byte = 0;
     uint16_t index = 0;
     while(file.get(byte))
