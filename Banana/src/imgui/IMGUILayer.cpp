@@ -119,12 +119,12 @@ namespace Banana
 
     ImGui::Text(msg.c_str());
 
-    // Edit a color (stored as ~4 floats)
-    ImGui::ColorEdit4("FG", Stats::color);
-
+    // put debug shit in here
     ImGui::End();
     
     ImGui::Begin("Info", nullptr, 0);
+    // maybe put rom name here
+    // maybe but restart buttons and stuff in here
     ImGui::Text("Info text");
     ImGui::End();
     

@@ -25,9 +25,9 @@ namespace GBC
     length = file.tellg();
     file.seekg(0, file.beg);
       
-    // put all 32 KiB KiB into ram
+    // put all 32 KiB into ram
     char byte = 0;
-    uint16_t index = 0;
+    uint16_t index = entry;
     while(file.get(byte))
     {
       spec->ram[index] = byte;
@@ -81,11 +81,13 @@ namespace GBC
     {
       GBC_LOG("Could not load ROM at: " + std::string(rom_path));
     }
-    
-    GBC_LOG("Loaded ROM '" + std::string(rom_path) + "'");
-    
+    else
+    {
+      GBC_LOG("Loaded ROM '" + std::string(rom_path) + "'");
+    }
+
     spec->state = State::RUN;
-    spec->PC = 0; // set Program Counter to entry
+    spec->PC = entry; // set Program Counter to entry
     spec->rom = rom_path;
   }
 
@@ -94,12 +96,20 @@ namespace GBC
     uint16_t opcode = Combine(spec->ram[spec->PC], spec->ram[spec->PC+1]);
     uint16_t prefix = opcode >> 12;
 
+    // splits up in multiple files
+    switch()
+    {
+
+    }
     spec->PC += 2;
   }
   
   void Update(Spec *spec)
   {
-    Validate_Opcode(spec);
+    if(spec->state == State::RUN)
+    {
+      Validate_Opcode(spec);
+    }
   }
   
 };

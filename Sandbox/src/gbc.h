@@ -15,16 +15,18 @@
 #define TFT_WIDTH 160
 #define TFT_HEIGHT 144
 
-// 64 KiB address space:
-//   8 KiB Work Ram
-//   8 KiB Display
-//   32 KiB ROM of which 16 KiB is switchable
+// 64 KiB address space
 #define GBC_RAM_SIZE 32768 * 2
-// note:
-// there are up to 16 x 8 KiB working RAM Pages in the cartridge ( 128 KiB Max )
+// 16 KiB for ROM Bank 00
+// 16 KiB for ROM Bank 01 - NN (switchable)
+// 8 KiB for VRAM
+// 8 KiB for External RAM
+// 4 KiB for WRAM (Work RAM) 
+// 4 KiB for WRAM (switchable 0-7)
 
 namespace GBC
 {
+  const uint16_t entry = 0;
   enum State
   {
     RUN = 0, PAUSE, QUIT
@@ -43,8 +45,6 @@ namespace GBC
 
     // read sprites from I and save them here
     bool display[TFT_HEIGHT][TFT_WIDTH];
-
-    std::stack<uint16_t> stack; // Subroutine stack
   };
 
   //void Load_Font(Spec *spec);

@@ -3,8 +3,7 @@
 
 struct Stats
 {
-  static inline float color[4] = {1, 1, 1, 1};
-  
+  // put vars in here
 private:
   inline Stats() {}
   inline ~Stats() {}

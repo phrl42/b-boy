@@ -1,27 +1,32 @@
-# chip-8 interpreter
+# GameBoy Color Emulator
 
-read the title, that's what it is. a masochist way of learning low level systems
+Currently Work In Progress!
 
 # Resources:
-
-<a href="https://en.wikipedia.org/wiki/CHIP-8">Wikipedia</a>
-<a href="https://tobiasvl.github.io/blog/write-a-chip-8-emulator/">some blog</a>
-<a href="http://devernay.free.fr/hacks/chip8/C8TECH10.HTM#2.0">Technical Reference</a>
+<a href="https://en.wikipedia.org/wiki/Game_Boy_Color">Wikipedia</a>
+<a href="https://gbdev.io/pandocs/Specifications.html">Reference</a>
 
 # Instructions
 
-In order to generate makefiles, run:
+Generate build files:
+
+## Windows:
+
+```run.bat```
+
+Then open the Visual Studio Solution and compile the "Sandbox" Project.
+
+## Linux:
+
+You should install premake5 on linux.
 
 ```premake5 gmake2```
-
-Compile as follows:
 
 ```make```
 
 Run game binary:
 
-```bin/target/Debug/Sandbox/Sandbox```
-
+```./run.sh```
 
 # Info
-Feel free to contribute
+This is Linux and Windows compatible. All dependencies are within this repository.

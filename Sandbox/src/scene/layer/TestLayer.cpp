@@ -14,7 +14,7 @@ namespace SANDBOX
   TestLayer::TestLayer(const std::string& name)
     : name(name), sound(Banana::Sound("assets/sounds/test.wav", false))
   {
-    GBC::Init_Spec(&spec, "assets/roms/Test.gbc");
+    GBC::Init_Spec(&spec, "assets/roms/Tetris.gb");
   }
 
   TestLayer::~TestLayer()

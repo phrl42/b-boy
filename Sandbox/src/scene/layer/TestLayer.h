@@ -25,7 +25,7 @@ namespace SANDBOX
   private:
     std::string name;
     Banana::Sound sound;
-    Banana::Entity ent[32][64];
+    Banana::Entity ent[TFT_HEIGHT][TFT_WIDTH];
     GBC::Spec spec;
   };
 
