@@ -1,8 +1,9 @@
 #include <cstring>
 #include <sstream>
 #include <cstdlib>
+
 #include "gbc/gbc.h"
-#include "gbc/opfunctions.h"
+#include "gbc/opfunction.h"
 
 namespace GBC 
 {
