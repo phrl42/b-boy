@@ -105,9 +105,36 @@ namespace GBC
       // no operation
       break;
     }
-
+    
+    // NOP
     case 0x01:
     {
+      spec->PC += 2;
+      LD16(&spec->BC, Combine(spec->ram[spec->PC], spec->ram[spec->PC + 1]));
+      break;
+    }
+    
+    // LD [BC], A
+    case 0x02:
+    {
+      uint8_t register_a = (spec->AF >> 8);
+      
+      spec->PC += 2;
+      spec->ram[spec->BC] = register_a;
+      break;
+    }
+
+    // INC BC
+    case 0x03:
+    {
+      INC16(&spec->BC);
+      break;
+    }
+
+    // INC A
+    case 0x04:
+    {
+      INC8(&spec->BC, true);
       break;
     }
 
