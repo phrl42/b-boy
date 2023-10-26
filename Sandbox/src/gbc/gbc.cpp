@@ -1,7 +1,8 @@
-#include "gbc.h"
 #include <cstring>
 #include <sstream>
 #include <cstdlib>
+#include "gbc/gbc.h"
+#include "gbc/opfunctions.h"
 
 namespace GBC 
 {
@@ -94,12 +95,28 @@ namespace GBC
   void Validate_Opcode(Spec *spec)
   {
     uint16_t opcode = Combine(spec->ram[spec->PC], spec->ram[spec->PC+1]);
-    uint16_t prefix = opcode >> 12;
 
     // splits up in multiple files
-    switch()
+    switch(opcode)
     {
+    case 0x00:
+    {
+      // no operation
+      break;
+    }
 
+    case 0x01:
+    {
+      break;
+    }
+
+    default:
+    {
+      std::stringstream ss;
+      ss << std::hex << opcode << std::endl;
+      GBC_LOG("Instruction " + ss.str() + " unknown");
+      break;
+    }
     }
     spec->PC += 2;
   }

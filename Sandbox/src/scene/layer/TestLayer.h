@@ -3,7 +3,7 @@
 #include "Banana.h"
 #include "renderer/Texture.h"
 #include "generic/Sound.h"
-#include "gbc.h"
+#include "gbc/gbc.h"
 
 namespace SANDBOX
 {

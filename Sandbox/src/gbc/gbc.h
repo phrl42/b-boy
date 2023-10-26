@@ -34,17 +34,22 @@ namespace GBC
   
   struct Spec
   {
-    State state;              // Declare current gbc state
+    State state;               // Declare current gbc state
 
     uint8_t ram[GBC_RAM_SIZE]; // Emulate original gbc ram size
 
-    uint16_t I;               // Index register (used for sprites)
-    uint16_t PC;              // Program Counter
+    // Registers
+    uint16_t AF;               // Accumulator Flags
+    uint16_t BC;               // BC
+    uint16_t DE;               // DE
+    uint16_t HL;               // HL
+    uint16_t SP;               // Stack Pointer
+    uint16_t PC;               // Program Counter
 
-    const char *rom;          // Running rom
+    const char *rom;           // Running rom
 
-    // read sprites from I and save them here
-    bool display[TFT_HEIGHT][TFT_WIDTH];
+    // 15-Bit RGB Color
+    uint16_t display[TFT_HEIGHT][TFT_WIDTH];
   };
 
   //void Load_Font(Spec *spec);
