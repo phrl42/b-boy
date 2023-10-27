@@ -141,7 +141,7 @@ namespace GBC
     // DEC B
     case 0x05:
     {
-      DEC8(spec->BC, true);
+      DEC8(&spec->BC, true);
       break;
     }
 
@@ -179,7 +179,7 @@ namespace GBC
     // LD A, [BC]
     case 0x0A:
     {
-      LD8(&spec->AB, spec->ram[spec->BC], true);
+      LD8(&spec->AF, spec->ram[spec->BC], true);
       break;
     }
 
@@ -213,16 +213,34 @@ namespace GBC
       break;
     }
 
+    
     case 0x0F:
     {
       break;
     }
 
+    // STOP n8
+    case 0x10:
+    {
+      spec->PC += 2;
+      spec->state = State::STOP;
+      break;
+    }
+
+    // LD DE, n16
+    case 0x11:
+    {
+      spec->PC += 2;
+      LD16(&spec->DE, Combine(spec->ram[spec->PC+1], spec->ram[spec->PC]));
+      break;
+    }
+
+    //
     
     default:
     {
       std::stringstream ss;
-      ss << std::hex << opcode << std::endl;
+      ss << std::hex << opcode;
       GBC_LOG("Instruction " + ss.str() + " unknown");
       break;
     }
