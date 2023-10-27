@@ -29,7 +29,7 @@ namespace GBC
   const uint16_t entry = 0;
   enum State
   {
-    RUN = 0, PAUSE, QUIT
+    STOP, RUN, HALT
   };
   
   struct Spec

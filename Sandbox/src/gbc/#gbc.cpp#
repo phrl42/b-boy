@@ -213,11 +213,18 @@ namespace GBC
       break;
     }
 
+    
     case 0x0F:
     {
       break;
     }
 
+    // STOP n8
+    case 0x10:
+    {
+      spec->PC += 2;
+      break;
+    }
     
     default:
     {
