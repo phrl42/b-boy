@@ -342,14 +342,12 @@ namespace GBC
       uint8_t z = spec->AF;
       z >>= 7;
 
+      spec->PC++;
+
       if(!z)
       {
-	spec->PC++;
 	spec->PC += spec->ram[spec->PC];
-      }
-      else
-      {
-	spec->PC++;
+	spec->PC--;
       }
       break;
     }
@@ -360,7 +358,6 @@ namespace GBC
       spec->PC++;
       LD16(&spec->HL, Combine(spec->ram[spec->PC+1], spec->ram[spec->PC]));
       spec->PC++;
-
       break;
     }
 
@@ -401,10 +398,222 @@ namespace GBC
       break;
     }
 
+    // DAA 
     case 0x27:
     {
       break;
     }
+
+    // JR Z, e8
+    case 0x28:
+    {
+      uint8_t z = spec->AF;
+      z >>= 7;
+      spec->PC++;
+
+      if(z)
+      {
+	spec->PC += spec->ram[spec->PC];
+	spec->PC--;
+      }
+      break;
+    }
+
+    // ADD HL, HL
+    case 0x29:
+    {
+      spec->HL += spec->HL;
+      break;
+    }
+
+    // LD A, [HL+]
+    case 0x2A:
+    {
+      uint16_t AF = (spec->AF << 8);
+      AF >>= 8;
+
+      AF |= (spec->ram[spec->HL] << 8);
+      
+      spec->AF = AF;
+      
+      spec->HL += 1;
+      
+      break;
+    }
+
+    // DEC HL
+    case 0x2B:
+    {
+      DEC16(&spec->HL);
+      break;
+    }
+
+    // INC L
+    case 0x2C:
+    {
+      INC8(&spec->HL, false);
+      break;
+    }
+
+    // DEC L
+    case 0x2D:
+    {
+      DEC8(&spec->HL, false);
+      break;
+    }
+
+    // LD L, n8
+    case 0x2E:
+    {
+      spec->PC++;
+      LD8(&spec->HL, spec->ram[spec->PC], false);
+      break;
+    }
+
+    // CPL
+    case 0x2F:
+    {
+      break;
+    }
+
+    // JR NC, e8
+    case 0x30:
+    {
+      uint8_t c = (spec->BC << 8) >> 8;
+
+      spec->PC++;
+
+      if(!c)
+      {
+	spec->PC += spec->ram[spec->PC];
+	spec->PC--;
+      }
+      break;
+    }
+
+    // LD SP, n16
+    case 0x31:
+    {
+      spec->PC++;
+      LD16(&spec->SP, Combine(spec->ram[spec->PC+1], spec->ram[spec->PC]));
+      spec->PC++;
+      break;
+    }
+
+    // LD [HL-], A
+    case 0x32:
+    {
+      spec->ram[spec->HL] = (spec->AF >> 8);
+      spec->HL--;
+      break;
+    }
+
+    // INC SP
+    case 0x33:
+    {
+      INC16(&spec->SP);
+      break;
+    }
+
+    // INC [HL]
+    case 0x34:
+    {
+      spec->ram[spec->HL] += 1;
+      break;
+    }
+
+    // DEC [HL]
+    case 0x35:
+    {
+      spec->ram[spec->HL] -= 1;
+      break;
+    }
+
+    // LD [HL], n8
+    case 0x36:
+    {
+      spec-PC++;
+      spec->ram[spec->HL] = spec->ram[spec->PC];
+      break;
+    }
+
+    // SCF
+    case 0x37:
+    {
+      break;
+    }
+
+    // JR C, e8
+    case 0x38:
+    {
+      uint8_t c = (spec->BC << 8) >> 8;
+
+      spec->PC++;
+
+      if(c)
+      {
+	spec->PC += spec->ram[spec->PC];
+	spec->PC--;
+      }
+      break;
+    }
+
+    // ADD HL, SP
+    case 0x39:
+    {
+      spec->HL += spec->SP;
+      break;
+    }
+
+    // LD A, [HL-]
+    case 0x3A:
+    {
+      uint16_t AF = (spec->AF << 8);
+      AF >>= 8;
+
+      AF |= (spec->ram[spec->HL] << 8);
+      
+      spec->AF = AF;
+      
+      spec->HL -= 1;
+      break;
+    }
+
+    // DEC SP
+    case 0x3B:
+    {
+      DEC16(&spec->SP);
+      break;
+    }
+
+    // INC A
+    case 0x3C:
+    {
+      INC8(&spec->AF, true);
+      break;
+    }
+
+    // DEC A
+    case 0x3D:
+    {
+      DEC8(&spec->AF, true);
+      break;
+    }
+
+    // LD A, n8
+    case 0x3E:
+    {
+      spec->PC++;
+      LD8(&spec->AF, spec->ram[spec->PC], true);
+      break;
+    }
+
+    // CCF
+    case 0x3F:
+    {
+      break;
+    }
+    
     default:
     {
       std::stringstream ss;
