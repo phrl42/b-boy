@@ -4,14 +4,6 @@
 
 #define GBC_LOG(x) std::cout << "[GameBoy] " << x << std::endl;
 
-// this is haunting me in my dreams
-#define A 10
-#define B 11
-#define C 12
-#define D 13
-#define E 14
-#define F 15
-
 #define TFT_WIDTH 160
 #define TFT_HEIGHT 144
 
