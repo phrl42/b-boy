@@ -1431,7 +1431,13 @@ namespace GBC
 
       if(!z)
       {
-	
+	uint8_t c = spec->ram[spec->SP];
+	spec->SP++;
+	uint8_t p = spec->ram[spec->SP];
+	spec->SP++;
+
+	spec->PC = (p << 8) | c;
+	spec->PC--;
       }
       break;
     }
@@ -1439,24 +1445,62 @@ namespace GBC
     // POP BC
     case 0xc1:
     {
+      LD8(&spec->BC, spec->ram[spec->SP], false);
+      spec->SP++;
+      LD8(&spec->BC, spec->ram[spec->SP], true);
+      spec->SP++;
       break;
     }
 
     // JP NZ, a16
     case 0xc2:
     {
+      uint8_t z = spec->AF;
+      z >>= 7;
+
+      if(!z)
+      {
+	uint16_t address = 0;
+	spec->PC++;
+	address = (spec->ram[spec->PC+1] << 8) | spec->ram[spec->PC];
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
 
     // JP a16
     case 0xc3:
     {
+      uint8_t z = spec->AF;
+      z >>= 7;
+
+      uint16_t address = 0;
+      spec->PC++;
+      address = (spec->ram[spec->PC+1] << 8) | spec->ram[spec->PC];
+
+      spec->PC = address;
+      spec->PC--;
       break;
     }
 
     // CALL NZ, a16
     case 0xc4:
     {
+      uint8_t z = spec->AF;
+      z >>= 7;
+
+      if(!z)
+      {
+	spec->PC++;
+	uint16_t address = (spec->ram[spec->PC+1] << 8) || spec->ram[spec->PC];
+	spec->ram[spec->SP] = spec->PC;
+	spec->ram[spec->SP+1] = spec->PC >> 8;
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
 
