@@ -1,11 +1,6 @@
 #pragma once
 #include "Sandbox.h"
-#include <stack>
-
-#define GBC_LOG(x) std::cout << "[GameBoy] " << x << std::endl;
-
-#define TFT_WIDTH 160
-#define TFT_HEIGHT 144
+#include "gbc/ppu.h"
 
 // 64 KiB address space
 #define GBC_RAM_SIZE 32768 * 2
@@ -28,30 +23,23 @@ namespace GBC
   {
     State state;               // Declare current gbc state
 
-    uint8_t ram[GBC_RAM_SIZE]; // Emulate original gbc ram size
+    std::array<uint8_t, GBC_RAM_SIZE> ram = {0}; // Emulate original gbc ram size
 
     // Registers
-    uint16_t AF;               // Accumulator Flags
-    uint16_t BC;               // BC
-    uint16_t DE;               // DE
-    uint16_t HL;               // HL
-    uint16_t SP;               // Stack Pointer
-    uint16_t PC;               // Program Counter
+    uint16_t AF = 0;               // Accumulator Flags
+    uint16_t BC = 0;               // BC
+    uint16_t DE = 0;               // DE
+    uint16_t HL = 0;               // HL
+    uint16_t SP = 0;               // Stack Pointer
+    uint16_t PC = 0;               // Program Counter
 
-    const char *rom;           // Running rom
+    const char *rom;               // Running rom
 
-    // 15-Bit RGB Color
-    uint16_t display[TFT_HEIGHT][TFT_WIDTH];
+    GPU gpu;                       // PPU Area
   };
-
-  //void Load_Font(Spec *spec);
-  //uint16_t Character_Address(uint8_t ch);
 
   bool Load_Rom(Spec *spec, const char* rom_path);
 
-  uint16_t Combine(uint8_t first, uint8_t second);
-  uint16_t Get_Value_N(uint16_t opcode, uint8_t n);
-  
   void Init_Spec(Spec *spec, const char* rom_path);
 
   void Validate_Opcode(Spec *spec);

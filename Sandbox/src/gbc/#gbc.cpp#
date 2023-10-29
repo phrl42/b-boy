@@ -3,7 +3,6 @@
 #include <cstdlib>
 
 #include "gbc/gbc.h"
-#include "gbc/bitwise.h"
 #include "gbc/cpu.h"
 
 namespace GBC 

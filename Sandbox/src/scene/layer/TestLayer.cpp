@@ -54,7 +54,7 @@ namespace SANDBOX
 	ent[y][x].transform.proj = Banana::Projection::NONE;
 	ent[y][x].transform.pos = {(x * one_width) - 1, (((y * one_height) * -1) + 1) - one_height, 0};
 	ent[y][x].transform.size = {one_width, one_height, 0};
-	ent[y][x].transform.color = {spec.display[y][x], spec.display[y][x], spec.display[y][x], 1};
+	ent[y][x].transform.color = {spec.gpu.display[y][x], spec.gpu.display[y][x], spec.gpu.display[y][x], 1};
 	ent[y][x].Render(dt);
       }
     }
