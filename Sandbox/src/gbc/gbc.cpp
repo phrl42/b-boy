@@ -451,14 +451,14 @@ namespace GBC
     // INC L
     case 0x2C:
     {
-      INC8(&spec->HL, false);
+      INC8(&spec->AF, &spec->HL, false);
       break;
     }
 
     // DEC L
     case 0x2D:
     {
-      DEC8(&spec->HL, false);
+      DEC8(&spec->AF, &spec->HL, false);
       break;
     }
 
@@ -532,7 +532,7 @@ namespace GBC
     // LD [HL], n8
     case 0x36:
     {
-      spec-PC++;
+      spec->PC++;
       spec->ram[spec->HL] = spec->ram[spec->PC];
       break;
     }
@@ -589,14 +589,14 @@ namespace GBC
     // INC A
     case 0x3C:
     {
-      INC8(&spec->AF, true);
+      INC8(&spec->AF, &spec->AF, true);
       break;
     }
 
     // DEC A
     case 0x3D:
     {
-      DEC8(&spec->AF, true);
+      DEC8(&spec->AF, &spec->AF, true);
       break;
     }
 
@@ -613,7 +613,1100 @@ namespace GBC
     {
       break;
     }
+
+    // LD B, B
+    case 0x40:
+    {
+      LD8(&spec->BC, spec->BC >> 8, true);
+      break;
+    }
+
+    // LD B, C
+    case 0x41:
+    {
+      LD8(&spec->BC, spec->BC, true);
+      break;
+    }
+
+    // LD B, D
+    case 0x42:
+    {
+      LD8(&spec->BC, spec->DE >> 8, true);
+      break;
+    }
+
+    // LD B, E
+    case 0x43:
+    {
+      LD8(&spec->BC, spec->DE, true);
+      break;
+    }
+
+    // LD B, H
+    case 0x44:
+    {
+      LD8(&spec->BC, spec->HL >> 8, true);
+      break;
+    }
+
+    // LD B, L
+    case 0x45:
+    {
+      LD8(&spec->BC, spec->HL, true);
+      break;
+    }
+
+    // LD B, [HL]
+    case 0x46:
+    {
+      LD8(&spec->BC, spec->ram[spec->HL], true);
+      break;
+    }
+
+    // LD B, A
+    case 0x47:
+    {
+      LD8(&spec->BC, spec->AF >> 8, true);
+      break;
+    }
+
+    // LD C, B
+    case 0x48:
+    {
+      LD8(&spec->BC, spec->BC >> 8, false);
+      break;
+    }
+
+    // LD C, C
+    case 0x49:
+    {
+      LD8(&spec->BC, spec->BC, false);
+      break;
+    }
+
+    // LD C, D
+    case 0x4a:
+    {
+      LD8(&spec->BC, spec->DE >> 8, false);
+      break;
+    }
+
+    // LD C, E
+    case 0x4b:
+    {
+      LD8(&spec->BC, spec->DE, false);
+      break;
+    }
+
+    // LD C, H
+    case 0x4c:
+    {
+      LD8(&spec->BC, spec->HL >> 8, false);
+      break;
+    }
+
+    // LD C, L
+    case 0x4d:
+    {
+      LD8(&spec->BC, spec->HL, false);
+      break;
+    }
+
+    // LD C, [HL]
+    case 0x4e:
+    {
+      LD8(&spec->BC, spec->ram[spec->HL], false);
+      break;
+    }
+
+    // LD C, A
+    case 0x4f:
+    {
+      LD8(&spec->BC, spec->AF >> 8, false);
+      break;
+    }
+
+    // LD D, B
+    case 0x50:
+    {
+      LD8(&spec->DE, spec->BC >> 8, true);
+      break;
+    }
+
+    // LD D, C
+    case 0x51:
+    {
+      LD8(&spec->DE, spec->BC, true);
+      break;
+    }
+
+    // LD D, D
+    case 0x52:
+    {
+      LD8(&spec->DE, spec->DE >> 8, true);
+      break;
+    }
+
+    // LD D, E
+    case 0x53:
+    {
+      LD8(&spec->DE, spec->DE, true);
+      break;
+    }
+
+    // LD D, H
+    case 0x54:
+    {
+      LD8(&spec->DE, spec->HL >> 8, true);
+      break;
+    }
+
+    // LD D, L
+    case 0x55:
+    {
+      LD8(&spec->DE, spec->HL, true);
+      break;
+    }
+
+    // LD D, [HL]
+    case 0x56:
+    {
+      LD8(&spec->DE, spec->ram[spec->HL], true);
+      break;
+    }
+
+    // LD D, A
+    case 0x57:
+    {
+      LD8(&spec->DE, spec->AF >> 8, true);
+      break;
+    }
+
+    // LD E, B
+    case 0x58:
+    {
+      LD8(&spec->DE, spec->BC >> 8, false);
+      break;
+    }
+
+    // LD E, C
+    case 0x59:
+    {
+      LD8(&spec->DE, spec->BC, false);
+      break;
+    }
+
+    // LD E, D
+    case 0x5a:
+    {
+      LD8(&spec->DE, spec->DE >> 8, false);
+      break;
+    }
+
+    // LD E, E
+    case 0x5b:
+    {
+      LD8(&spec->DE, spec->DE, false);
+      break;
+    }
+
+    // LD E, H
+    case 0x5c:
+    {
+      LD8(&spec->DE, spec->HL >> 8, false);
+      break;
+    }
+
+    // LD E, L
+    case 0x5d:
+    {
+      LD8(&spec->DE, spec->HL, false);
+      break;
+    }
+
+    // LD E, [HL]
+    case 0x5e:
+    {
+      LD8(&spec->DE, spec->ram[spec->HL], false);
+      break;
+    }
+
+    // LD E, A
+    case 0x5f:
+    {
+      LD8(&spec->DE, spec->AF, false);
+      break;
+    }
+
+    // LD H, B
+    case 0x60:
+    {
+      LD8(&spec->HL, spec->BC >> 8, true);
+      break;
+    }
+
+    // LD H, C 
+    case 0x61:
+    {
+      LD8(&spec->HL, spec->BC, true);
+      break;
+    }
+
+    // LD H, D
+    case 0x62:
+    {
+      LD8(&spec->HL, spec->DE >> 8, true);
+      break;
+    }
+
+    // LD H, E
+    case 0x63:
+    {
+      LD8(&spec->HL, spec->DE, true);
+      break;
+    }
+
+    // LD H, H
+    case 0x64:
+    {
+      LD8(&spec->HL, spec->HL >> 8, true);
+      break;
+    }
+
+    // LD H, L
+    case 0x65:
+    {
+      LD8(&spec->HL, spec->HL, true);
+      break;
+    }
+
+    // LD H, [HL]
+    case 0x66:
+    {
+      LD8(&spec->HL, spec->ram[spec->HL], true);
+      break;
+    }
+
+    // LD H, A
+    case 0x67:
+    {
+      LD8(&spec->HL, spec->AF >> 8, true);
+      break;
+    }
+
+    // LD L, B
+    case 0x68:
+    {
+      LD8(&spec->HL, spec->BC >> 8, false);
+      break;
+    }
+
+    // LD L, C
+    case 0x69:
+    {
+      LD8(&spec->HL, spec->BC, false);
+      break;
+    }
+
+    // LD L, D
+    case 0x6a:
+    {
+      LD8(&spec->HL, spec->DE >> 8, false);
+      break;
+    }
+
+    // LD L, E
+    case 0x6b:
+    {
+      LD8(&spec->HL, spec->DE, false);
+      break;
+    }
+
+    // LD L, H
+    case 0x6c:
+    {
+      LD8(&spec->HL, spec->HL >> 8, false);
+      break;
+    }
+
+    // LD L, L
+    case 0x6d:
+    {
+      LD8(&spec->HL, spec->HL, false);
+      break;
+    }
+
+    // LD L, [HL]
+    case 0x6e:
+    {
+      LD8(&spec->HL, spec->ram[spec->HL], false);
+      break;
+    }
+
+    // LD L, A
+    case 0x6f:
+    {
+      LD8(&spec->HL, spec->AF >> 8, false);
+      break;
+    }
+
+    // LD [HL], B
+    case 0x70:
+    {
+      spec->ram[spec->HL] = spec->BC >> 8;
+      break;
+    }
+
+    // LD [HL], C
+    case 0x71:
+    {
+      spec->ram[spec->HL] = spec->BC;
+      break;
+    }
+
+    // LD [HL], D
+    case 0x72:
+    {
+      spec->ram[spec->HL] = spec->DE >> 8;
+      break;
+    }
+
+    // LD [HL], E
+    case 0x73:
+    {
+      spec->ram[spec->HL] = spec->DE;
+      break;
+    }
+
+    // LD [HL], H
+    case 0x74:
+    {
+      spec->ram[spec->HL] = spec->HL >> 8;
+      break;
+    }
+
+    // LD [HL], L
+    case 0x75:
+    {
+      spec->ram[spec->HL] = spec->HL;
+      break;
+    }
+
+    // HALT
+    case 0x76:
+    {
+      spec->State = State::HALT;
+      break;
+    }
     
+    // LD [HL], A
+    case 0x77:
+    {
+      spec->ram[spec->HL] = spec->AF >> 8;
+      break;
+    }
+
+    // LD A, B
+    case 0x78:
+    {
+      LD8(&spec->AF, spec->BC >> 8, true);
+      break;
+    }
+
+    // LD A, C
+    case 0x79:
+    {
+      LD8(&spec->AF, spec->BC, true);
+      break;
+    }
+
+    // LD A, D
+    case 0x7a:
+    {
+      LD8(&spec->AF, spec->DE >> 8, true);
+      break;
+    }
+
+    // LD A, E
+    case 0x7b:
+    {
+      LD8(&spec->AF, spec->DE, true);
+      break;
+    }
+    
+    // LD A, H
+    case 0x7c:
+    {
+      LD8(&spec->AF, spec->HL >> 8, true);
+      break;
+    }
+
+    // LD A, L
+    case 0x7d:
+    {
+      LD8(&spec->AF, spec->HL, true);
+      break;
+    }
+
+    // LD A, [HL]
+    case 0x7e:
+    {
+      LD8(&spec->AF, spec->ram[spec->HL], true);
+      break;
+    }
+
+    // LD A, A
+    case 0x7f:
+    {
+      LD8(&spec->AF, spec->AF >> 8, true);
+      break;
+    }
+
+    // ADD A, B
+    case 0x80:
+    {
+      break;
+    }
+
+    // ADD A, C
+    case 0x81:
+    {
+      break;
+    }
+
+    // ADD A, D
+    case 0x82:
+    {
+      break;
+    }
+    
+    // ADD A, E
+    case 0x83:
+    {
+      break;
+    }
+
+    // ADD A, H
+    // sus
+    case 0x84:
+    {
+      break;
+    }
+
+    case 0x85:
+    {
+      break;
+    }
+
+    case 0x86:
+    {
+      break;
+    }
+
+    case 0x87:
+    {
+      break;
+    }
+
+    case 0x88:
+    {
+      break;
+    }
+
+    case 0x89:
+    {
+      break;
+    }
+
+    case 0x8a:
+    {
+      break;
+    }
+
+    case 0x8b:
+    {
+      break;
+    }
+
+    case 0x8c:
+    {
+      break;
+    }
+
+    case 0x8d:
+    {
+      break;
+    }
+
+    case 0x8e:
+    {
+      break;
+    }
+
+    case 0x8f:
+    {
+      break;
+    }
+
+    case 0x90:
+    {
+      break;
+    }
+
+    case 0x91:
+    {
+      break;
+    }
+
+    case 0x92:
+    {
+      break;
+    }
+
+    case 0x93:
+    {
+      break;
+    }
+
+    case 0x94:
+    {
+      break;
+    }
+
+    case 0x95:
+    {
+      break;
+    }
+
+    case 0x96:
+    {
+      break;
+    }
+
+    case 0x97:
+    {
+      break;
+    }
+
+    case 0x98:
+    {
+      break;
+    }
+
+    case 0x99:
+    {
+      break;
+    }
+
+    case 0x9a:
+    {
+      break;
+    }
+
+    case 0x9b:
+    {
+      break;
+    }
+
+    case 0x9c:
+    {
+      break;
+    }
+
+    case 0x9d:
+    {
+      break;
+    }
+
+    case 0x9e:
+    {
+      break;
+    }
+
+    case 0x9f:
+    {
+      break;
+    }
+
+    case 0xa0:
+    {
+      break;
+    }
+
+    case 0xa1:
+    {
+      break;
+    }
+
+    case 0xa2:
+    {
+      break;
+    }
+
+    case 0xa3:
+    {
+      break;
+    }
+
+    case 0xa4:
+    {
+      break;
+    }
+
+    case 0xa5:
+    {
+      break;
+    }
+
+    case 0xa6:
+    {
+      break;
+    }
+
+    case 0xa7:
+    {
+      break;
+    }
+
+    case 0xa8:
+    {
+      break;
+    }
+
+    case 0xa9:
+    {
+      break;
+    }
+
+    case 0xaa:
+    {
+      break;
+    }
+
+    case 0xab:
+    {
+      break;
+    }
+
+    case 0xac:
+    {
+      break;
+    }
+
+    case 0xad:
+    {
+      break;
+    }
+
+    case 0xae:
+    {
+      break;
+    }
+
+    case 0xaf:
+    {
+      break;
+    }
+
+    case 0xb0:
+    {
+      break;
+    }
+
+    case 0xb1:
+    {
+      break;
+    }
+
+    case 0xb2:
+    {
+      break;
+    }
+
+    case 0xb3:
+    {
+      break;
+    }
+
+    case 0xb4:
+    {
+      break;
+    }
+
+    case 0xb5:
+    {
+      break;
+    }
+
+    case 0xb6:
+    {
+      break;
+    }
+
+    case 0xb7:
+    {
+      break;
+    }
+
+    case 0xb8:
+    {
+      break;
+    }
+
+    case 0xb9:
+    {
+      break;
+    }
+
+    case 0xba:
+    {
+      break;
+    }
+
+    case 0xbb:
+    {
+      break;
+    }
+
+    case 0xbc:
+    {
+      break;
+    }
+
+    case 0xbd:
+    {
+      break;
+    }
+
+    case 0xbe:
+    {
+      break;
+    }
+
+    case 0xbf:
+    {
+      break;
+    }
+
+    case 0xc0:
+    {
+      break;
+    }
+
+    case 0xc1:
+    {
+      break;
+    }
+
+    case 0xc2:
+    {
+      break;
+    }
+
+    case 0xc3:
+    {
+      break;
+    }
+
+    case 0xc4:
+    {
+      break;
+    }
+
+    case 0xc5:
+    {
+      break;
+    }
+
+    case 0xc6:
+    {
+      break;
+    }
+
+    case 0xc7:
+    {
+      break;
+    }
+
+    case 0xc8:
+    {
+      break;
+    }
+
+    case 0xc9:
+    {
+      break;
+    }
+
+    case 0xca:
+    {
+      break;
+    }
+
+    case 0xcb:
+    {
+      break;
+    }
+
+    case 0xcc:
+    {
+      break;
+    }
+
+    case 0xcd:
+    {
+      break;
+    }
+
+    case 0xce:
+    {
+      break;
+    }
+
+    case 0xcf:
+    {
+      break;
+    }
+
+    case 0xd0:
+    {
+      break;
+    }
+
+    case 0xd1:
+    {
+      break;
+    }
+
+    case 0xd2:
+    {
+      break;
+    }
+
+    case 0xd3:
+    {
+      break;
+    }
+
+    case 0xd4:
+    {
+      break;
+    }
+
+    case 0xd5:
+    {
+      break;
+    }
+
+    case 0xd6:
+    {
+      break;
+    }
+
+    case 0xd7:
+    {
+      break;
+    }
+
+    case 0xd8:
+    {
+      break;
+    }
+
+    case 0xd9:
+    {
+      break;
+    }
+
+    case 0xda:
+    {
+      break;
+    }
+
+    case 0xdb:
+    {
+      break;
+    }
+
+    case 0xdc:
+    {
+      break;
+    }
+
+    case 0xdd:
+    {
+      break;
+    }
+
+    case 0xde:
+    {
+      break;
+    }
+
+    case 0xdf:
+    {
+      break;
+    }
+
+    case 0xe0:
+    {
+      break;
+    }
+
+    case 0xe1:
+    {
+      break;
+    }
+
+    case 0xe2:
+    {
+      break;
+    }
+
+    case 0xe3:
+    {
+      break;
+    }
+
+    case 0xe4:
+    {
+      break;
+    }
+
+    case 0xe5:
+    {
+      break;
+    }
+
+    case 0xe6:
+    {
+      break;
+    }
+
+    case 0xe7:
+    {
+      break;
+    }
+
+    case 0xe8:
+    {
+      break;
+    }
+
+    case 0xe9:
+    {
+      break;
+    }
+
+    case 0xea:
+    {
+      break;
+    }
+
+    case 0xeb:
+    {
+      break;
+    }
+
+    case 0xec:
+    {
+      break;
+    }
+
+    case 0xed:
+    {
+      break;
+    }
+
+    case 0xee:
+    {
+      break;
+    }
+
+    case 0xef:
+    {
+      break;
+    }
+
+    case 0xf0:
+    {
+      break;
+    }
+
+    case 0xf1:
+    {
+      break;
+    }
+
+    case 0xf2:
+    {
+      break;
+    }
+
+    case 0xf3:
+    {
+      break;
+    }
+
+    case 0xf4:
+    {
+      break;
+    }
+
+    case 0xf5:
+    {
+      break;
+    }
+
+    case 0xf6:
+    {
+      break;
+    }
+
+    case 0xf7:
+    {
+      break;
+    }
+
+    case 0xf8:
+    {
+      break;
+    }
+
+    case 0xf9:
+    {
+      break;
+    }
+
+    case 0xfa:
+    {
+      break;
+    }
+
+    case 0xfb:
+    {
+      break;
+    }
+
+    case 0xfc:
+    {
+      break;
+    }
+
+    case 0xfd:
+    {
+      break;
+    }
+
+    case 0xfe:
+    {
+      break;
+    }
+
+    case 0xff:
+    {
+      break;
+    }  
     default:
     {
       std::stringstream ss;
