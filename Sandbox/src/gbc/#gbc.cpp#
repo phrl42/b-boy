@@ -1283,6 +1283,7 @@ namespace GBC
     // SBC A, A
     case 0x9f:
     {
+      SBC8(&spec->AF, &spec->AF, spec->AF >> 8, true);
       break;
     }
 
