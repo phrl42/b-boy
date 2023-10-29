@@ -1283,484 +1283,613 @@ namespace GBC
     // SBC A, A
     case 0x9f:
     {
+      SBC8(&spec->AF, &spec->AF, spec->AF >> 8, true);
       break;
     }
 
+    // AND A, B
     case 0xa0:
     {
+      AND8(&spec->AF, &spec->AF, spec->BC >> 8, true);
       break;
     }
 
+    // AND A, C
     case 0xa1:
     {
+      AND8(&spec->AF, &spec->AF, spec->BC, true);
       break;
     }
 
+    // AND A, D
     case 0xa2:
     {
+      AND8(&spec->AF, &spec->AF, spec->DE >> 8, true);
       break;
     }
 
+    // AND A, E
     case 0xa3:
     {
+      AND8(&spec->AF, &spec->AF, spec->DE, true);
       break;
     }
 
+    // AND A, H
     case 0xa4:
     {
+      AND8(&spec->AF, &spec->AF, spec->HL >> 8, true);
       break;
     }
 
+    // AND A, L
     case 0xa5:
     {
+      AND8(&spec->AF, &spec->AF, spec->HL, true);
       break;
     }
 
+    // AND A, [HL]
     case 0xa6:
     {
+      AND8(&spec->AF, &spec->AF, spec->ram[spec->HL], true);
       break;
     }
 
+    // AND A, A
     case 0xa7:
     {
+      AND8(&spec->AF, &spec->AF, spec->AF >> 8, true);
       break;
     }
 
+    // XOR A, B
     case 0xa8:
     {
+      XOR8(&spec->AF, &spec->AF, spec->BC >> 8, true);
       break;
     }
 
+    // XOR A, C
     case 0xa9:
     {
+      XOR8(&spec->AF, &spec->AF, spec->BC, true);
       break;
     }
 
+    // XOR A, D
     case 0xaa:
     {
+      XOR8(&spec->AF, &spec->AF, spec->DE >> 8, true);
       break;
     }
 
+    // XOR A, E
     case 0xab:
     {
+      XOR8(&spec->AF, &spec->AF, spec->DE, true);
       break;
     }
 
+    // XOR A, H
     case 0xac:
     {
+      XOR8(&spec->AF, &spec->AF, spec->HL >> 8, true);
       break;
     }
 
+    // XOR A, L
     case 0xad:
     {
+      XOR8(&spec->AF, &spec->AF, spec->HL, true);
       break;
     }
 
+    // XOR A, [HL]
     case 0xae:
     {
+      XOR8(&spec->AF, &spec->AF, spec->ram[spec->HL], true);
       break;
     }
 
+    // XOR A, A
     case 0xaf:
     {
+      XOR8(&spec->AF, &spec->AF, spec->AF >> 8, true);
       break;
     }
 
+    // OR A, B
     case 0xb0:
     {
+      OR8(&spec->AF, &spec->AF, spec->BC >> 8, true);
       break;
     }
 
+    // OR A, C
     case 0xb1:
     {
+      OR8(&spec->AF, &spec->AF, spec->BC, true);
       break;
     }
 
+    // OR A, D
     case 0xb2:
     {
+      OR8(&spec->AF, &spec->AF, spec->DE >> 8, true);
       break;
     }
 
+    // OR A, E
     case 0xb3:
     {
+      OR8(&spec->AF, &spec->AF, spec->DE, true);
       break;
     }
 
+    // OR A, H
     case 0xb4:
     {
+      OR8(&spec->AF, &spec->AF, spec->HL >> 8, true);
       break;
     }
 
+    // OR A, L
     case 0xb5:
     {
+      OR8(&spec->AF, &spec->AF, spec->HL, true);
       break;
     }
 
+    // OR A, [HL]
     case 0xb6:
     {
+      OR8(&spec->AF, &spec->AF, spec->ram[spec->HL], true);
       break;
     }
 
+    // OR A, A
     case 0xb7:
     {
+      OR8(&spec->AF, &spec->AF, spec->AF >> 8, true);
       break;
     }
 
+    // CP A, B
     case 0xb8:
     {
+      CP8(&spec->AF, &spec->AF, spec->BC >> 8, true);
       break;
     }
 
+    // CP A, C
     case 0xb9:
     {
+      CP8(&spec->AF, &spec->AF, spec->BC, true);
       break;
     }
 
+    // CP A, D
     case 0xba:
     {
+      CP8(&spec->AF, &spec->AF, spec->DE >> 8, true);
       break;
     }
 
+    // CP A, E
     case 0xbb:
     {
+      CP8(&spec->AF, &spec->AF, spec->DE, true);
       break;
     }
 
+    // CP A, H
     case 0xbc:
     {
+      CP8(&spec->AF, &spec->AF, spec->HL >> 8, true);
       break;
     }
 
+    // CP A, L
     case 0xbd:
     {
+      CP8(&spec->AF, &spec->AF, spec->HL, true);
       break;
     }
 
+    // CP A, [HL]
     case 0xbe:
     {
+      CP8(&spec->AF, &spec->AF, spec->ram[spec->HL], true);
       break;
     }
 
+    // CP A, A
     case 0xbf:
     {
+      CP8(&spec->AF, &spec->AF, spec->AF >> 8, true);
       break;
     }
 
+    // RET NZ
     case 0xc0:
     {
       break;
     }
 
+    // POP BC
     case 0xc1:
     {
       break;
     }
 
+    // JP NZ, a16
     case 0xc2:
     {
       break;
     }
 
+    // JP a16
     case 0xc3:
     {
       break;
     }
 
+    // CALL NZ, a16
     case 0xc4:
     {
       break;
     }
 
+    // PUSH BC
     case 0xc5:
     {
       break;
     }
 
+    // ADD A, n8
     case 0xc6:
     {
       break;
     }
 
+    // RST $00
     case 0xc7:
     {
       break;
     }
 
+    // RET Z
     case 0xc8:
     {
       break;
     }
 
+    // RET
     case 0xc9:
     {
       break;
     }
 
+    // JP Z, a16
     case 0xca:
     {
       break;
     }
 
+    // pain incoming
     case 0xcb:
     {
       break;
     }
 
+    // CALL Z, a16
     case 0xcc:
     {
       break;
     }
 
+    // CALL a16
     case 0xcd:
     {
       break;
     }
 
+    // ADC A, n8
     case 0xce:
     {
       break;
     }
 
+    // RST $08
     case 0xcf:
     {
       break;
     }
 
+    // RET NC
     case 0xd0:
     {
       break;
     }
 
+    // POP DE
     case 0xd1:
     {
       break;
     }
 
+    // JP NC, a16
     case 0xd2:
     {
       break;
     }
 
+    // -
     case 0xd3:
     {
       break;
     }
 
+    // CALL NC, a16
     case 0xd4:
     {
       break;
     }
 
+    // PUSH DE
     case 0xd5:
     {
       break;
     }
 
+    // SUB A, n8
     case 0xd6:
     {
       break;
     }
 
+    // RST $10
     case 0xd7:
     {
       break;
     }
 
+    // RET C
     case 0xd8:
     {
       break;
     }
 
+    // RETI
     case 0xd9:
     {
       break;
     }
 
+    // JP C, a16
     case 0xda:
     {
       break;
     }
-
+    
+    // -
     case 0xdb:
     {
       break;
     }
 
+    // JP C, a16
     case 0xdc:
     {
       break;
     }
 
+    // -
     case 0xdd:
     {
       break;
     }
 
+    // SBC A, n8
     case 0xde:
     {
       break;
     }
 
+    // RST $18
     case 0xdf:
     {
       break;
     }
 
+    // LDH [a8], A
     case 0xe0:
     {
       break;
     }
 
+    // POP HL
     case 0xe1:
     {
       break;
     }
 
+    // LD [C], A
     case 0xe2:
     {
       break;
     }
 
+    // -
     case 0xe3:
     {
       break;
     }
 
+    // -
     case 0xe4:
     {
       break;
     }
 
+    // PUSH HL
     case 0xe5:
     {
       break;
     }
 
+    // AND A, n8
     case 0xe6:
     {
       break;
     }
 
+    // RST $20
     case 0xe7:
     {
       break;
     }
 
+    // ADD SP, e8
     case 0xe8:
     {
       break;
     }
 
+    // JP HL
     case 0xe9:
     {
       break;
     }
 
+    // LD [a16], A
     case 0xea:
     {
       break;
     }
 
+    // -
     case 0xeb:
     {
       break;
     }
 
+    // -
     case 0xec:
     {
       break;
     }
 
+    // -
     case 0xed:
     {
       break;
     }
 
+    // SBC A, n8
     case 0xee:
     {
       break;
     }
 
+    // RST $28
     case 0xef:
     {
       break;
     }
 
+    // LDH A, [a8]
     case 0xf0:
     {
       break;
     }
 
+    // POP AF
     case 0xf1:
     {
       break;
     }
 
+    // LD A, [C]
     case 0xf2:
     {
       break;
     }
 
+    // DI
     case 0xf3:
     {
       break;
     }
 
+    // -
     case 0xf4:
     {
       break;
     }
 
+    // PUSH AF
     case 0xf5:
     {
       break;
     }
 
+    // OR A, n8
     case 0xf6:
     {
       break;
     }
 
+    // RST $30
     case 0xf7:
     {
       break;
     }
 
+    // LD HL, SP + e8
     case 0xf8:
     {
       break;
     }
 
+    // LD SP, HL
     case 0xf9:
     {
       break;
     }
 
+    // LD A, [a16]
     case 0xfa:
     {
       break;
     }
 
+    // EI
     case 0xfb:
     {
       break;
     }
 
+    // -
     case 0xfc:
     {
       break;
     }
 
+    // -
     case 0xfd:
     {
       break;
     }
 
+    // CP A, n8
     case 0xfe:
     {
       break;
     }
 
+    // RST $38
     case 0xff:
     {
       break;
