@@ -2,50 +2,324 @@
 
 namespace GBC
 {
+
+  //Todo: re-do flags oml
+  
+  // starts counting from LSB
+  void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val)
+  {
+    // todo: assert
+    if(val > 1)
+    {
+      GBC_LOG("Cannot set bit. Val > 1");
+      return;
+    }
+    if(n > 16)
+    {
+      GBC_LOG("Could not set bit. n > 16");
+      return;
+    }
+
+    uint16_t n_val = *reg;
+    n_val <<= 15 - n;
+    n_val >>= 15;
+
+    if(val == n_val)
+    {
+      return;
+    }
+    n_val = val;
+    uint16_t s_reg = n_val;
+    s_reg <<= n;
+    s_reg |= *reg;
+
+    *reg = s_reg;
+
+    return;
+  }
   // Exceptions are in the switch statement. Such as: 0x08 (LD [a16], SP)
   // Relative Jumps are also there
 
   // LoaD 8-Bit value from RAM into Register
-  void LD8(uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void LD8(uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t l = reg;
+      reg = src_value << 8 | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      reg = h << 8 | src_value;
+    }
+    *dest_register = reg;
+    return;
+  }
 
   // LoaD 16-Bit value from 
-  void LD16(uint16_t *dest_register, uint16_t src_value){}
-
+  void LD16(uint16_t *dest_register, uint16_t src_value)
+  {
+    *dest_register = src_value;
+    return;
+  }
 
   // Increment 8-Bit Register
-  void INC8(uint16_t *flags_register, uint16_t *dest_register, bool higher_half){}
+  void INC8(uint16_t *flags_register, uint16_t *dest_register, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t h = reg >> 8;
+      if(((uint16_t)h)+1 > 255)
+      {
+	Set_Bit_N(flags_register, 5, 1);
+      }
+
+      h++;
+
+      if(h == 0)
+      {
+	Set_Bit_N(flags_register, 7, 1);
+      }
+      uint8_t l = reg;
+      reg = (h << 8) | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+      if(((uint16_t)l)+1 > 255)
+      {
+	Set_Bit_N(flags_register, 5, 1);
+      }
+      l++;
+      if(l == 0)
+      {
+	Set_Bit_N(flags_register, 7, 1);
+      }
+      reg = (h << 8) | l;
+    }
+
+    Set_Bit_N(flags_register, 6, 0);
+    *dest_register = reg;
+    return;
+  }
   
   // Increment 16-Bit Register
-  void INC16(uint16_t *dest_register){}
+  void INC16(uint16_t *dest_register)
+  {
+    *dest_register++;
+    return;
+  }
 
   
   // Decrement 8-Bit Register
-  void DEC8(uint16_t *flags_register, uint16_t *dest_register, bool higher_half){}
+  void DEC8(uint16_t *flags_register, uint16_t *dest_register, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t h = reg >> 8;
+      if(((int16_t)h)-1 < 0)
+      {
+	Set_Bit_N(flags_register, 5, 1);
+      }
+      h--;
+      if(!h)
+      {
+	Set_Bit_N(flags_register, 7, 1);
+      }
+      uint8_t l = reg;
+      reg = (h << 8) | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      if(((int16_t)l)-1 < 0)
+      {
+	Set_Bit_N(flags_register, 5, 1);
+      } 
+      l--;
+      if(!l)
+      {
+	Set_Bit_N(flags_register, 7, 1);
+      }
+      reg = (h << 8) | l;
+    }
+
+    Set_Bit_N(flags_register, 6, 1);
+
+    *dest_register = reg;
+    return;
+  }
 
   // Decrement 16-Bit Register
-  void DEC16(uint16_t *dest_register){}
+  void DEC16(uint16_t *dest_register)
+  {
+    *dest_register--;
+    return;
+  }
 
-  
   // ADD 8-Bit value to Register
-  void ADD8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void ADD8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      if(((uint16_t)h)+1 > 255)
+      {
+	Set_Bit_N(flags_register, 5, 1);
+      }
+
+      h += src_value;
+      if(!h)
+      {
+	Set_Bit_N(flags_register, 7, 1);
+      }
+      reg = h << 8 | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      if(((uint16_t)l)+1 > 255)
+      {
+	Set_Bit_N(flags_register, 5, 1);
+      }
+      
+      l += src_value;
+
+      if(!l)
+      {
+	Set_Bit_N(flags_register, 7, 1);
+      }
+      reg = (h << 8) | l;
+    }
+    *dest_register = reg;
+
+    Set_Bit_N(flags_register, 6, 0);
+    return;
+  }
 
   // ADD 16-Bit value to Register
-  void ADD16(uint16_t *flags_register, uint16_t *dest_register, uint16_t src_value){}
+  void ADD16(uint16_t *flags_register, uint16_t *dest_register, uint16_t src_value)
+  {
+    if()
+    {
+
+    }
+    
+    *dest_register += src_value;
+
+    Set_Bit_N(flags_register, 6, 1);
+    return;
+  }
 
   // SUB 8-Bit value from Register
-  void SUB8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void SUB8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      h -= src_value;
+      reg = h << 8 | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      l -= src_value;
+      reg = (h << 8) | l;
+    }
+    *dest_register = reg;
+    return;
+  }
 
   
   // These ones only modify Register 'A' so I could remove the general part
   // Bitwise AND Register with value
-  void AND8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void AND8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      h &= src_value;
+      reg = h << 8 | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      l &= src_value;
+      reg = (h << 8) | l;
+    }
+    *dest_register = reg;
+    return;
+  }
 
   // Bitwise OR on Register with value
-  void OR8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void OR8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      h |= src_value;
+      reg = h << 8 | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      l |= src_value;
+      reg = (h << 8) | l;
+    }
+    *dest_register = reg;
+    return;
+  }
 
   // Bitwise XOR on Register with value
   // keep exception at 0xAF in mind
-  void XOR8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void XOR8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+    uint16_t reg = *dest_register;
+    if(higher_half)
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      h ^= src_value;
+      reg = h << 8 | l;
+    }
+    else
+    {
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
+
+      l ^= src_value;
+      reg = (h << 8) | l;
+    }
+    *dest_register = reg;
+  }
 
   
   // Custom operation on Register with 8-Bit value
