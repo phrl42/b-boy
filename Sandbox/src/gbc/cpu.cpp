@@ -194,7 +194,7 @@ namespace GBC
     // JR e8
     case 0x18:
     {
-      spec->PC += spec->ram[spec->PC+1];
+      spec->PC += (int8_t)spec->ram[spec->PC+1];
       spec->PC--;
       break;
     }
@@ -258,7 +258,7 @@ namespace GBC
 
       if(!z)
       {
-	spec->PC += spec->ram[spec->PC];
+	spec->PC += (int8_t)spec->ram[spec->PC];
 	spec->PC--;
       }
       break;
@@ -325,7 +325,7 @@ namespace GBC
 
       if(z)
       {
-	spec->PC += spec->ram[spec->PC];
+	spec->PC += (int8_t)spec->ram[spec->PC];
 	spec->PC--;
       }
       break;
@@ -391,13 +391,15 @@ namespace GBC
     // JR NC, e8
     case 0x30:
     {
-      uint8_t c = (spec->BC << 8) >> 8;
-
+      uint8_t c = spec->AF;
+      c <<= 3;
+      c >>= 7;
+      
       spec->PC++;
 
       if(!c)
       {
-	spec->PC += spec->ram[spec->PC];
+	spec->PC += (uint8_t)spec->ram[spec->PC];
 	spec->PC--;
       }
       break;
@@ -458,13 +460,15 @@ namespace GBC
     // JR C, e8
     case 0x38:
     {
-      uint8_t c = (spec->BC << 8) >> 8;
+      uint8_t c = spec->AF;
+      c <<= 3;
+      c >>= 7;
 
       spec->PC++;
 
       if(c)
       {
-	spec->PC += spec->ram[spec->PC];
+	spec->PC += (int8_t)spec->ram[spec->PC];
 	spec->PC--;
       }
       break;
@@ -1495,8 +1499,8 @@ namespace GBC
       {
 	spec->PC++;
 	uint16_t address = (spec->ram[spec->PC+1] << 8) || spec->ram[spec->PC];
-	spec->ram[spec->SP] = spec->PC;
-	spec->ram[spec->SP+1] = spec->PC >> 8;
+	spec->ram[spec->SP+1] = spec->PC+2;
+	spec->ram[spec->SP+2] = spec->PC+2 >> 8;
 
 	spec->PC = address;
 	spec->PC--;
@@ -1507,36 +1511,80 @@ namespace GBC
     // PUSH BC
     case 0xc5:
     {
+      spec->ram[spec->SP-1] = spec->BC >> 8;
+      spec->ram[spec->SP-2] = spec->BC;
+      spec->SP -= 2;
       break;
     }
 
     // ADD A, n8
     case 0xc6:
     {
+      spec->PC++;
+      ADD8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $00
     case 0xc7:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0] << 8) | (spec->ram[0]);
+      spec->PC--;
       break;
     }
 
     // RET Z
     case 0xc8:
     {
+      uint8_t z = spec->AF;
+      z >>= 7;
+
+      if(z)
+      {
+	uint8_t c = spec->ram[spec->SP];
+	spec->SP++;
+	uint8_t p = spec->ram[spec->SP];
+	spec->SP++;
+
+	spec->PC = (p << 8) | c;
+	spec->PC--;
+      }
       break;
     }
 
     // RET
     case 0xc9:
     {
-      break;
+      	uint8_t c = spec->ram[spec->SP];
+	spec->SP++;
+	uint8_t p = spec->ram[spec->SP];
+	spec->SP++;
+
+	spec->PC = (p << 8) | c;
+	spec->PC--;
+	break;
     }
 
     // JP Z, a16
     case 0xca:
     {
+      uint8_t z = spec->AF;
+      z >>= 7;
+
+      if(z)
+      {
+	uint16_t address = 0;
+	spec->PC++;
+	address = (spec->ram[spec->PC+1] << 8) | spec->ram[spec->PC];
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
 
@@ -1549,42 +1597,102 @@ namespace GBC
     // CALL Z, a16
     case 0xcc:
     {
+      uint8_t z = spec->AF;
+      z >>= 7;
+
+      if(z)
+      {
+	spec->PC++;
+	uint16_t address = (spec->ram[spec->PC+1] << 8) || spec->ram[spec->PC];
+	spec->ram[spec->SP+1] = spec->PC+2;
+	spec->ram[spec->SP+2] = spec->PC+2 >> 8;
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
 
     // CALL a16
     case 0xcd:
     {
+      spec->PC++;
+      uint16_t address = (spec->ram[spec->PC+1] << 8) || spec->ram[spec->PC];
+      spec->ram[spec->SP+1] = spec->PC+2;
+      spec->ram[spec->SP+2] = spec->PC+2 >> 8;
+
+      spec->PC = address;
+      spec->PC--;
       break;
     }
 
     // ADC A, n8
     case 0xce:
     {
+      spec->PC++;
+      ADC8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $08
     case 0xcf:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0x00] << 8) | (spec->ram[0x08]);
+      spec->PC--;
       break;
     }
 
     // RET NC
     case 0xd0:
     {
+      uint8_t rc = spec->AF;
+      rc <<= 3;
+      rc >>= 7;
+      
+      if(!rc)
+      {
+	uint8_t c = spec->ram[spec->SP];
+	spec->SP++;
+	uint8_t p = spec->ram[spec->SP];
+	spec->SP++;
+
+	spec->PC = (p << 8) | c;
+	spec->PC--;
+      }
       break;
     }
 
     // POP DE
     case 0xd1:
     {
+      LD8(&spec->DE, spec->ram[spec->SP], false);
+      spec->SP++;
+      LD8(&spec->DE, spec->ram[spec->SP], true);
+      spec->SP++;
       break;
     }
 
     // JP NC, a16
     case 0xd2:
     {
+      uint8_t c = spec->AF;
+      c <<= 3;
+      c >>= 7;
+
+      if(!c)
+      {
+	uint16_t address = 0;
+	spec->PC++;
+	address = (spec->ram[spec->PC+1] << 8) | spec->ram[spec->PC];
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
 
@@ -1597,42 +1705,96 @@ namespace GBC
     // CALL NC, a16
     case 0xd4:
     {
+      uint8_t c = spec->AF;
+      c <<= 3;
+      c >>= 7;
+      
+      if(!c)
+      {
+	spec->PC++;
+	uint16_t address = (spec->ram[spec->PC+1] << 8) || spec->ram[spec->PC];
+	spec->ram[spec->SP+1] = spec->PC+2;
+	spec->ram[spec->SP+2] = spec->PC+2 >> 8;
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
 
     // PUSH DE
     case 0xd5:
     {
+      spec->ram[spec->SP-1] = spec->DE >> 8;
+      spec->ram[spec->SP-2] = spec->DE;
+      spec->SP -= 2;
       break;
     }
 
     // SUB A, n8
     case 0xd6:
     {
+      spec->PC++;
+      SUB8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $10
     case 0xd7:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0x00] << 8) | (spec->ram[0x10]);
+      spec->PC--;
       break;
     }
 
     // RET C
     case 0xd8:
     {
+      uint8_t rc = spec->AF;
+      rc <<= 3;
+      rc >>= 7;
+
+      if(rc)
+      {
+	uint8_t c = spec->ram[spec->SP];
+	spec->SP++;
+	uint8_t p = spec->ram[spec->SP];
+	spec->SP++;
+
+	spec->PC = (p << 8) | c;
+	spec->PC--;
+      }
       break;
     }
 
     // RETI
     case 0xd9:
     {
+      
       break;
     }
 
     // JP C, a16
     case 0xda:
     {
+      uint8_t c = spec->AF;
+      c <<= 3;
+      c >>= 7;
+
+      if(c)
+      {
+	uint16_t address = 0;
+	spec->PC++;
+	address = (spec->ram[spec->PC+1] << 8) | spec->ram[spec->PC];
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
     
@@ -1642,9 +1804,23 @@ namespace GBC
       break;
     }
 
-    // JP C, a16
+    // CALL C, a16
     case 0xdc:
     {
+      uint8_t c = spec->AF;
+      c <<= 3;
+      c >>= 7;
+      
+      if(c)
+      {
+	spec->PC++;
+	uint16_t address = (spec->ram[spec->PC+1] << 8) || spec->ram[spec->PC];
+	spec->ram[spec->SP+1] = spec->PC+2;
+	spec->ram[spec->SP+2] = spec->PC+2 >> 8;
+
+	spec->PC = address;
+	spec->PC--;
+      }
       break;
     }
 
@@ -1657,30 +1833,48 @@ namespace GBC
     // SBC A, n8
     case 0xde:
     {
+      spec->PC++;
+      SBC8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $18
     case 0xdf:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0x00] << 8) | (spec->ram[0x18]);
+      spec->PC--;
       break;
     }
 
     // LDH [a8], A
     case 0xe0:
     {
+      spec->PC++;
+      uint8_t a8 = spec->ram[spec->PC];
+
+      spec->ram[0xFF00 + a8] = spec->AF >> 8;
       break;
     }
 
     // POP HL
     case 0xe1:
     {
+      LD8(&spec->HL, spec->ram[spec->SP], false);
+      spec->SP++;
+      LD8(&spec->HL, spec->ram[spec->SP], true);
+      spec->SP++;
       break;
     }
 
     // LD [C], A
     case 0xe2:
     {
+      spec->ram[spec->BC] = spec->AF >> 8;
       break;
     }
 
@@ -1699,36 +1893,56 @@ namespace GBC
     // PUSH HL
     case 0xe5:
     {
+      spec->ram[spec->SP-1] = spec->HL >> 8;
+      spec->ram[spec->SP-2] = spec->HL;
+      spec->SP -= 2; 
       break;
     }
 
     // AND A, n8
     case 0xe6:
     {
+      spec->PC++;
+      AND8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $20
     case 0xe7:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0x00] << 8) | (spec->ram[0x20]);
+      spec->PC--;
       break;
     }
 
     // ADD SP, e8
+    // flags tbd 
     case 0xe8:
     {
+      spec->PC++;
+      ADD16(&spec->AF, &spec->SP, (int8_t)spec->ram[spec->PC]);
       break;
     }
 
     // JP HL
     case 0xe9:
     {
+      spec->PC = spec->HL - 1;
       break;
     }
 
     // LD [a16], A
     case 0xea:
     {
+      spec->PC++;
+      uint16_t address = (spec->ram[spec->PC+1] << 8) |spec->ram[spec->PC];
+      spec->ram[address] = spec->AF >> 8;
+      spec->PC++;
       break;
     }
 
@@ -1753,30 +1967,48 @@ namespace GBC
     // SBC A, n8
     case 0xee:
     {
+      spec->PC++;
+      SBC8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $28
     case 0xef:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0x00] << 8) | (spec->ram[0x28]);
+      spec->PC--;
       break;
     }
 
     // LDH A, [a8]
     case 0xf0:
     {
+      spec->PC++;
+      uint8_t F = spec->AF;
+      uint8_t A = spec->ram[spec->PC] + 0xFF00;
+      spec->AF = A << 8 | F;
       break;
     }
 
     // POP AF
     case 0xf1:
     {
+      LD8(&spec->AF, spec->ram[spec->SP], false);
+      spec->SP++;
+      LD8(&spec->AF, spec->ram[spec->SP], true);
+      spec->SP++;
       break;
     }
 
     // LD A, [C]
     case 0xf2:
     {
+      LD8(&spec->AF, spec->ram[spec->BC], true);
       break;
     }
 
@@ -1795,36 +2027,54 @@ namespace GBC
     // PUSH AF
     case 0xf5:
     {
+      spec->ram[spec->SP-1] = spec->AF >> 8;
+      spec->ram[spec->SP-2] = spec->AF;
+      spec->SP -= 2;
       break;
     }
 
     // OR A, n8
     case 0xf6:
     {
+      spec->PC++;
+      OR8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $30
     case 0xf7:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0x00] << 8) | (spec->ram[0x30]);
+      spec->PC--;
       break;
     }
 
     // LD HL, SP + e8
     case 0xf8:
     {
+      spec->PC++;
+      LD16(&spec->HL, spec->SP + (int8_t)spec->ram[spec->PC]);
       break;
     }
 
     // LD SP, HL
     case 0xf9:
     {
+      LD16(&spec->SP, spec->HL);
       break;
     }
 
     // LD A, [a16]
     case 0xfa:
     {
+      spec->PC++;
+      uint16_t address = spec->ram[spec->PC+1] << 8 | spec->ram[spec->PC];
+      LD8(&spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
@@ -1849,12 +2099,21 @@ namespace GBC
     // CP A, n8
     case 0xfe:
     {
+      spec->PC++;
+      CP8(&spec->AF, &spec->AF, spec->ram[spec->PC], true);
       break;
     }
 
     // RST $38
     case 0xff:
     {
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC >> 8;
+      spec->SP -= 1;
+      spec->ram[spec->SP] = spec->PC;
+
+      spec->PC = (spec->ram[0] << 8) | (spec->ram[0x38]);
+      spec->PC--;
       break;
     }
     
