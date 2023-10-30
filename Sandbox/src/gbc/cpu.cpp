@@ -399,7 +399,7 @@ namespace GBC
 
       if(!c)
       {
-	spec->PC += (uint8_t)spec->ram[spec->PC];
+	spec->PC += (int8_t)spec->ram[spec->PC];
 	spec->PC--;
       }
       break;
