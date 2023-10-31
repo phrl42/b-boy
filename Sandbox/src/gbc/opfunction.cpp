@@ -1,4 +1,5 @@
 #include "gbc/opfunction.h"
+#include "gbc/bitwise.h"
 
 #define Z_FLAG 7
 #define N_FLAG 6
@@ -42,16 +43,10 @@ namespace GBC
 
   uint16_t Get_Bit_N(uint16_t src, uint8_t n)
   {
-    // todo: assert
-    if(val > 1)
-    {
-      GBC_LOG("Cannot set bit. Val > 1");
-      return;
-    }
     if(n > 16)
     {
-      GBC_LOG("Could not set bit. n > 16");
-      return;
+      GBC_LOG("Could not get bit. n > 16");
+      return 0;
     }
 
     src <<= n - 15;
@@ -356,7 +351,7 @@ namespace GBC
   void SBC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
     *dest_register -= src_value;
-    *dest_register -= Get_Bit_N(flags_register, 4);
+    *dest_register -= Get_Bit_N(*flags_register, 4);
     
     Set_Bit_N(flags_register, N_FLAG, 1);
   }
@@ -365,7 +360,7 @@ namespace GBC
   void ADC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
     *dest_register += src_value;
-    *dest_register += Get_Bit_N(flags_register, 4);
+    *dest_register += Get_Bit_N(*flags_register, 4);
      
     Set_Bit_N(flags_register, N_FLAG, 0);
   }
@@ -376,7 +371,7 @@ namespace GBC
   // this instruction is unclear
   void CP8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
-    uint16_t cc = (flags_register >> 8) - *dest_register;
+    uint16_t cc = (*flags_register >> 8) - *dest_register;
 
     if(cc == *dest_register)
     {
