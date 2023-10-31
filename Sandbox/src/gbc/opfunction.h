@@ -4,6 +4,8 @@
 namespace GBC
 {
   void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
+  uint16_t Get_Bit_N(uint16_t src, uint8_t n);
+  
   // Exceptions are in the switch statement. Such as: 0x08 (LD [a16], SP)
   // Relative Jumps are also there
   // LoaD 8-Bit value from RAM into Register

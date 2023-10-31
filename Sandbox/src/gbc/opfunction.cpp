@@ -39,6 +39,27 @@ namespace GBC
 
     return;
   }
+
+  uint16_t Get_Bit_N(uint16_t src, uint8_t n)
+  {
+    // todo: assert
+    if(val > 1)
+    {
+      GBC_LOG("Cannot set bit. Val > 1");
+      return;
+    }
+    if(n > 16)
+    {
+      GBC_LOG("Could not set bit. n > 16");
+      return;
+    }
+
+    src <<= n - 15;
+    src >>= 15;
+
+    return src;
+  }
+
   // Exceptions are in the switch statement. Such as: 0x08 (LD [a16], SP)
   // Relative Jumps are also there
 
@@ -334,20 +355,34 @@ namespace GBC
   // keep exception at 0x9F in mind
   void SBC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
-
+    *dest_register -= src_value;
+    *dest_register -= Get_Bit_N(flags_register, 4);
+    
+    Set_Bit_N(flags_register, N_FLAG, 1);
   }
 
   // Custom operation on Register with 8-Bit value
   void ADC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
-
+    *dest_register += src_value;
+    *dest_register += Get_Bit_N(flags_register, 4);
+     
+    Set_Bit_N(flags_register, N_FLAG, 0);
   }
 
   // Custom operation on Register with 8-Bit value
   // keep exception at 0xBF in mind
+  
+  // this instruction is unclear
   void CP8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
+    uint16_t cc = (flags_register >> 8) - *dest_register;
 
+    if(cc == *dest_register)
+    {
+      Set_Bit_N(flags_register, Z_FLAG, 1);
+    }
+    Set_Bit_N(flags_register, N_FLAG, 1);
   }
 
 };
