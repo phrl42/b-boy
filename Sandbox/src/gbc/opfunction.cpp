@@ -1,10 +1,12 @@
 #include "gbc/opfunction.h"
 
+#define Z_FLAG 7
+#define N_FLAG 6
+#define H_FLAG 5
+#define C_FLAG 4
+
 namespace GBC
 {
-
-  //Todo: re-do flags oml
-  
   // starts counting from LSB
   void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val)
   {
@@ -72,16 +74,11 @@ namespace GBC
     if(higher_half)
     {
       uint8_t h = reg >> 8;
-      if(((uint16_t)h)+1 > 255)
-      {
-	Set_Bit_N(flags_register, 5, 1);
-      }
-
       h++;
 
       if(h == 0)
       {
-	Set_Bit_N(flags_register, 7, 1);
+	Set_Bit_N(flags_register, Z_FLAG, 1);
       }
       uint8_t l = reg;
       reg = (h << 8) | l;
@@ -90,19 +87,15 @@ namespace GBC
     {
       uint8_t h = reg >> 8;
       uint8_t l = reg;
-      if(((uint16_t)l)+1 > 255)
-      {
-	Set_Bit_N(flags_register, 5, 1);
-      }
       l++;
       if(l == 0)
       {
-	Set_Bit_N(flags_register, 7, 1);
+	Set_Bit_N(flags_register, Z_FLAG, 1);
       }
       reg = (h << 8) | l;
     }
 
-    Set_Bit_N(flags_register, 6, 0);
+    Set_Bit_N(flags_register, N_FLAG, 0);
     *dest_register = reg;
     return;
   }
@@ -122,14 +115,10 @@ namespace GBC
     if(higher_half)
     {
       uint8_t h = reg >> 8;
-      if(((int16_t)h)-1 < 0)
-      {
-	Set_Bit_N(flags_register, 5, 1);
-      }
       h--;
       if(!h)
       {
-	Set_Bit_N(flags_register, 7, 1);
+	Set_Bit_N(flags_register, Z_FLAG, 1);
       }
       uint8_t l = reg;
       reg = (h << 8) | l;
@@ -139,19 +128,15 @@ namespace GBC
       uint8_t h = reg >> 8;
       uint8_t l = reg;
 
-      if(((int16_t)l)-1 < 0)
-      {
-	Set_Bit_N(flags_register, 5, 1);
-      } 
       l--;
       if(!l)
       {
-	Set_Bit_N(flags_register, 7, 1);
+	Set_Bit_N(flags_register, Z_FLAG, 1);
       }
       reg = (h << 8) | l;
     }
 
-    Set_Bit_N(flags_register, 6, 1);
+    Set_Bit_N(flags_register, N_FLAG, 1);
 
     *dest_register = reg;
     return;
@@ -173,15 +158,10 @@ namespace GBC
       uint8_t h = reg >> 8;
       uint8_t l = reg;
 
-      if(((uint16_t)h)+1 > 255)
-      {
-	Set_Bit_N(flags_register, 5, 1);
-      }
-
       h += src_value;
       if(!h)
       {
-	Set_Bit_N(flags_register, 7, 1);
+	Set_Bit_N(flags_register, Z_FLAG, 1);
       }
       reg = h << 8 | l;
     }
@@ -189,37 +169,27 @@ namespace GBC
     {
       uint8_t h = reg >> 8;
       uint8_t l = reg;
-
-      if(((uint16_t)l)+1 > 255)
-      {
-	Set_Bit_N(flags_register, 5, 1);
-      }
       
       l += src_value;
 
       if(!l)
       {
-	Set_Bit_N(flags_register, 7, 1);
+	Set_Bit_N(flags_register, Z_FLAG, 1);
       }
       reg = (h << 8) | l;
     }
     *dest_register = reg;
 
-    Set_Bit_N(flags_register, 6, 0);
+    Set_Bit_N(flags_register, N_FLAG, 0);
     return;
   }
 
   // ADD 16-Bit value to Register
   void ADD16(uint16_t *flags_register, uint16_t *dest_register, uint16_t src_value)
   {
-    if()
-    {
-
-    }
-    
     *dest_register += src_value;
 
-    Set_Bit_N(flags_register, 6, 1);
+    Set_Bit_N(flags_register, N_FLAG, 0);
     return;
   }
 
@@ -244,6 +214,8 @@ namespace GBC
       reg = (h << 8) | l;
     }
     *dest_register = reg;
+
+    Set_Bit_N(flags_register, N_FLAG, 1);
     return;
   }
 
@@ -259,6 +231,10 @@ namespace GBC
       uint8_t l = reg;
 
       h &= src_value;
+      if(!h)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
       reg = h << 8 | l;
     }
     else
@@ -267,9 +243,17 @@ namespace GBC
       uint8_t l = reg;
 
       l &= src_value;
+      if(!l)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
       reg = (h << 8) | l;
     }
     *dest_register = reg;
+
+    Set_Bit_N(flags_register, N_FLAG, 0);
+    Set_Bit_N(flags_register, H_FLAG, 1);
+    Set_Bit_N(flags_register, C_FLAG, 0);
     return;
   }
 
@@ -283,6 +267,10 @@ namespace GBC
       uint8_t l = reg;
 
       h |= src_value;
+      if(!h)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
       reg = h << 8 | l;
     }
     else
@@ -291,9 +279,17 @@ namespace GBC
       uint8_t l = reg;
 
       l |= src_value;
+      if(!l)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
       reg = (h << 8) | l;
     }
     *dest_register = reg;
+
+    Set_Bit_N(flags_register, N_FLAG, 0);
+    Set_Bit_N(flags_register, H_FLAG, 0);
+    Set_Bit_N(flags_register, C_FLAG, 0);
     return;
   }
 
@@ -308,6 +304,10 @@ namespace GBC
       uint8_t l = reg;
 
       h ^= src_value;
+      if(!h)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
       reg = h << 8 | l;
     }
     else
@@ -316,21 +316,38 @@ namespace GBC
       uint8_t l = reg;
 
       l ^= src_value;
+      if(!l)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
       reg = (h << 8) | l;
     }
     *dest_register = reg;
+
+    Set_Bit_N(flags_register, N_FLAG, 0);
+    Set_Bit_N(flags_register, H_FLAG, 0);
+    Set_Bit_N(flags_register, C_FLAG, 0);
   }
 
   
   // Custom operation on Register with 8-Bit value
   // keep exception at 0x9F in mind
-  void SBC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void SBC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+
+  }
 
   // Custom operation on Register with 8-Bit value
-  void ADC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void ADC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+
+  }
 
   // Custom operation on Register with 8-Bit value
   // keep exception at 0xBF in mind
-  void CP8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half){}
+  void CP8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
+  {
+
+  }
 
 };
