@@ -8,6 +8,7 @@ namespace GBC
   
   void Set_Half_Carry(uint16_t *flags_register, uint16_t src_register, uint16_t val, bool bit8);
   void Set_Carry_Plus(uint16_t *flags_register, uint16_t src_register, uint16_t val, bool bit8);
+  void Set_Carry_Minus(uint16_t *flags_register, uint16_t src_register, uint16_t val);
   
   // Exceptions are in the switch statement. Such as: 0x08 (LD [a16], SP)
   // Relative Jumps are also there

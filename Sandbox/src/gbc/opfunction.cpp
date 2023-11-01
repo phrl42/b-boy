@@ -8,9 +8,6 @@
 
 // IMPORTANT:
 
-// OML I think I was drunk when I wrote this. I have to rewrite most of the opfunctions because they
-// are written extremely complicated
-
 namespace GBC
 {
   // starts counting from LSB
@@ -82,6 +79,14 @@ namespace GBC
 
   }
 
+  void Set_Carry_Minus(uint16_t *flags_register, uint16_t src_register, uint16_t val)
+  {
+    if((int)(src_register - val) < 0)
+    {
+      Set_Bit_N(flags_register, C_FLAG, 1);
+    }
+  }
+  
   uint16_t Get_Bit_N(uint16_t src, uint8_t n)
   {
     if(n > 16)
@@ -174,6 +179,9 @@ namespace GBC
     if(higher_half)
     {
       uint8_t h = reg >> 8;
+
+      Set_Half_Carry(flags_register, h, -1, true);
+
       h--;
       if(!h)
       {
@@ -186,6 +194,8 @@ namespace GBC
     {
       uint8_t h = reg >> 8;
       uint8_t l = reg;
+
+      Set_Half_Carry(flags_register, l, -1, true);
 
       l--;
       if(!l)
@@ -217,6 +227,9 @@ namespace GBC
       uint8_t h = reg >> 8;
       uint8_t l = reg;
 
+      Set_Carry_Plus(flags_register, h, src_value, true);
+      Set_Half_Carry(flags_register, h, src_value, true);
+      
       h += src_value;
       if(!h)
       {
@@ -228,7 +241,9 @@ namespace GBC
     {
       uint8_t h = reg >> 8;
       uint8_t l = reg;
-      
+
+      Set_Carry_Plus(flags_register, l, src_value, true);
+      Set_Half_Carry(flags_register, l, src_value, true);
       l += src_value;
 
       if(!l)
@@ -246,8 +261,11 @@ namespace GBC
   // ADD 16-Bit value to Register
   void ADD16(uint16_t *flags_register, uint16_t *dest_register, uint16_t src_value)
   {
-    *dest_register += src_value;
+    Set_Half_Carry(flags_register, *dest_register, src_value, false);
+    Set_Carry_Plus(flags_register, *dest_register, src_value, false);
 
+    *dest_register += src_value;
+ 
     Set_Bit_N(flags_register, N_FLAG, 0);
     return;
   }
@@ -261,15 +279,33 @@ namespace GBC
       uint8_t h = reg >> 8;
       uint8_t l = reg;
 
+      Set_Half_Carry(flags_register, h, -1 * src_value, true);
+
+      Set_Carry_Minus(flags_register, h, src_value);
       h -= src_value;
-      reg = h << 8 | l;
+      if(!h)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
+      
+     reg = h << 8 | l;
     }
     else
     {
       uint8_t h = reg >> 8;
       uint8_t l = reg;
 
+      Set_Half_Carry(flags_register, l, -1 * src_value, true);
+      
+      Set_Carry_Minus(flags_register, l, src_value);
+
       l -= src_value;
+
+      if(!l)
+      {
+	Set_Bit_N(flags_register, Z_FLAG, 1);
+      }
+
       reg = (h << 8) | l;
     }
     *dest_register = reg;
@@ -393,8 +429,16 @@ namespace GBC
   // keep exception at 0x9F in mind
   void SBC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
-    *dest_register -= src_value;
-    *dest_register -= Get_Bit_N(*flags_register, 4);
+    uint16_t val = src_value - Get_Bit_N(*flags_register, 4);
+    Set_Half_Carry(flags_register, *dest_register, -1 * val, true);
+    Set_Carry_Minus(flags_register, *dest_register, val);
+    
+    *dest_register -= val;
+
+    if(*dest_register == 0)
+    {
+      Set_Bit_N(flags_register, Z_FLAG, 1);
+    }
     
     Set_Bit_N(flags_register, N_FLAG, 1);
   }
@@ -402,8 +446,16 @@ namespace GBC
   // Custom operation on Register with 8-Bit value
   void ADC8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
-    *dest_register += src_value;
-    *dest_register += Get_Bit_N(*flags_register, 4);
+    uint16_t val = src_value + Get_Bit_N(*flags_register, C_FLAG);
+    
+    Set_Half_Carry(flags_register, *dest_register, val, true);
+    Set_Carry_Plus(flags_register, *dest_register, val, true);
+    *dest_register += val;
+
+    if(*dest_register == 0)
+    {
+      Set_Bit_N(flags_register, Z_FLAG, 1);
+    }
      
     Set_Bit_N(flags_register, N_FLAG, 0);
   }
@@ -413,8 +465,13 @@ namespace GBC
   
   void CP8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
-    uint16_t cc = (*flags_register >> 8) - *dest_register;
+    uint16_t cc = *flags_register >> 8;
+    uint16_t sub = src_value + Get_Bit_N(*flags_register, C_FLAG);
 
+    Set_Half_Carry(flags_register, cc, -1 * sub, true);
+    Set_Carry_Minus(flags_register, cc, sub);
+    cc -= src_value;
+    
     if(!cc)
     {
       Set_Bit_N(flags_register, Z_FLAG, 1);
