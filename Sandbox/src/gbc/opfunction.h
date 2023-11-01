@@ -6,6 +6,9 @@ namespace GBC
   void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
   uint16_t Get_Bit_N(uint16_t src, uint8_t n);
   
+  void Set_Half_Carry(uint16_t *flags_register, uint16_t src_register, uint16_t val, bool bit8);
+  void Set_Carry_Plus(uint16_t *flags_register, uint16_t src_register, uint16_t val, bool bit8);
+  
   // Exceptions are in the switch statement. Such as: 0x08 (LD [a16], SP)
   // Relative Jumps are also there
   // LoaD 8-Bit value from RAM into Register

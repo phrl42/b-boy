@@ -6,6 +6,11 @@
 #define H_FLAG 5
 #define C_FLAG 4
 
+// IMPORTANT:
+
+// OML I think I was drunk when I wrote this. I have to rewrite most of the opfunctions because they
+// are written extremely complicated
+
 namespace GBC
 {
   // starts counting from LSB
@@ -39,6 +44,42 @@ namespace GBC
     *reg = s_reg;
 
     return;
+  }
+
+  void Set_Half_Carry(uint16_t *flags_register, uint16_t src_register, uint16_t val, bool bit8)
+  {
+    uint16_t erase_val = 0x0F;
+    uint16_t check_val = 0x10;
+    if(!bit8)
+    {
+      erase_val = 0x0F00;
+      check_val = 0x1000;
+    }
+
+    src_register &= erase_val;
+    val &= erase_val;
+    
+    src_register += val;
+    if((src_register & check_val) == check_val)
+    {
+      Set_Bit_N(flags_register, H_FLAG, 1);
+    }      
+    return;
+  }
+
+  void Set_Carry_Plus(uint16_t *flags_register, uint16_t src_register, uint16_t val, bool bit8)
+  {
+    uint16_t check_val = 0xFF;
+    if(!bit8)
+    {
+      check_val = 0xFFFF;
+    }
+
+    if((int)(src_register + val) > check_val)
+    {
+      Set_Bit_N(flags_register, C_FLAG, 1);
+    }
+
   }
 
   uint16_t Get_Bit_N(uint16_t src, uint8_t n)
@@ -90,6 +131,8 @@ namespace GBC
     if(higher_half)
     {
       uint8_t h = reg >> 8;
+
+      Set_Half_Carry(flags_register, h, 1, true);
       h++;
 
       if(h == 0)
@@ -368,12 +411,11 @@ namespace GBC
   // Custom operation on Register with 8-Bit value
   // keep exception at 0xBF in mind
   
-  // this instruction is unclear
   void CP8(uint16_t *flags_register, uint16_t *dest_register, uint8_t src_value, bool higher_half)
   {
     uint16_t cc = (*flags_register >> 8) - *dest_register;
 
-    if(cc == *dest_register)
+    if(!cc)
     {
       Set_Bit_N(flags_register, Z_FLAG, 1);
     }
