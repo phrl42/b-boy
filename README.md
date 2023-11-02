@@ -6,6 +6,13 @@ Currently Work In Progress!
 <a href="https://en.wikipedia.org/wiki/Game_Boy_Color">Wikipedia</a>
 <a href="https://gbdev.io/pandocs/Specifications.html">Reference</a>
 
+# To-Do
+
+- [ ] cpu clock cycles
+- [ ] switch between 4.19 MHz and 8.4 MHz
+- [ ] basic ppu graphics
+- [ ] current opcode mnemonic ( big pain, I know )
+
 # Instructions
 
 Generate build files:
