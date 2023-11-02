@@ -8,7 +8,6 @@ namespace GBC
   void Validate_Opcode(Spec *spec)
   {
     uint8_t opcode = spec->ram[spec->PC];
-    printf("[0x%x]: 0x%x\n", spec->PC, opcode);
     // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
     switch(opcode)
     {

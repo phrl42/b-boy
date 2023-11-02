@@ -12,6 +12,8 @@
 
 #include "../Sandbox/src/imgui_debug.h"
 
+#include <sstream>
+
 namespace Banana
 {
 
@@ -59,6 +61,17 @@ namespace Banana
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+  }
+
+  const char* Hex_To_CString(const uint16_t val, const char* prefix)
+  {
+    std::string ret;
+    std::stringstream hex;
+
+    hex << std::hex << val;
+    ret = std::string(prefix) + "0x" + hex.str();
+
+    return ret.c_str();
   }
 
   void IMGUILayer::OnUpdate(float dt)
@@ -119,7 +132,14 @@ namespace Banana
 
     ImGui::Text(msg.c_str());
 
-    // put debug shit in here
+    ImGui::Text(Hex_To_CString(Stats::PC, "PC: "));
+    ImGui::Text(Hex_To_CString(Stats::SP, "SP: "));
+    ImGui::Text(Hex_To_CString(Stats::AF, "AF: "));
+    ImGui::Text(Hex_To_CString(Stats::BC, "BC: "));
+    ImGui::Text(Hex_To_CString(Stats::DE, "DE: "));
+    ImGui::Text(Hex_To_CString(Stats::HL, "HL: "));
+    ImGui::Text(Hex_To_CString(Stats::opval, "[PC]: "));
+    
     ImGui::End();
     
     ImGui::Begin("Info", nullptr, 0);

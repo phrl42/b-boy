@@ -58,7 +58,14 @@ namespace SANDBOX
 	ent[y][x].Render(dt);
       }
     }
-    
+
+    Stats::PC = spec.PC;
+    Stats::SP = spec.SP;
+    Stats::AF = spec.AF;
+    Stats::BC = spec.BC;
+    Stats::DE = spec.DE;
+    Stats::HL = spec.HL;
+    Stats::opval = spec.ram[spec.PC];
     GBC::Update(&spec);
 
   }

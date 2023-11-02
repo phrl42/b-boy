@@ -69,6 +69,18 @@ namespace GBC
     {
       Validate_Opcode(spec);
     }
+
+    for(int y = 0; y < TFT_HEIGHT; y++)
+    {
+      for(int x = 0; x < TFT_WIDTH; x++)
+      {
+	if(spec->gpu.display[y][x])
+	{
+	  GBC_LOG("well shit");
+	}
+      }
+    }
+
   }
   
 };
