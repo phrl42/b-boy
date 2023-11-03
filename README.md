@@ -8,8 +8,6 @@ Currently Work In Progress!
 
 # To-Do
 
-- [ ] cpu clock cycles
-- [ ] switch between 4.19 MHz and 8.4 MHz
 - [ ] basic ppu graphics
 
 # Instructions
