@@ -11,7 +11,6 @@ Currently Work In Progress!
 - [ ] cpu clock cycles
 - [ ] switch between 4.19 MHz and 8.4 MHz
 - [ ] basic ppu graphics
-- [ ] current opcode mnemonic ( big pain, I know )
 
 # Instructions
 
