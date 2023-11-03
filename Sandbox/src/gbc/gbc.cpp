@@ -63,13 +63,15 @@ namespace GBC
     spec->rom = rom_path;
   }
 
-  void Update(Spec *spec)
+  void Update(float dt, Spec *spec)
   {
+    // emulate cpu speed
+    Emulate_Cycle(opcycle[spec->ram[spec->PC]], true);
+
     if(spec->state == State::RUN)
     {
       Validate_Opcode(spec);
     }
-
   }
   
 };

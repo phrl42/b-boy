@@ -43,6 +43,6 @@ namespace GBC
   void Init_Spec(Spec *spec, const char* rom_path);
 
   void Validate_Opcode(Spec *spec);
-  void Update(Spec *spec);
+  void Update(float dt, Spec *spec);
   
 };

@@ -66,7 +66,7 @@ namespace SANDBOX
     Stats::DE = spec.DE;
     Stats::HL = spec.HL;
     Stats::opval = spec.ram[spec.PC];
-    GBC::Update(&spec);
+    GBC::Update(dt, &spec);
 
   }
 };

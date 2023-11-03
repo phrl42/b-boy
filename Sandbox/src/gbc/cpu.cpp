@@ -3,12 +3,32 @@
 #include "gbc/bitwise.h"
 #include "gbc/opfunction.h"
 
+#include "Application.hpp"
+
 namespace GBC
 {
+
+  void Emulate_Cycle(uint8_t n, bool normal)
+  {
+    uint8_t cpu_speed = NORMAL_SPEED;
+    if(!normal)
+    {
+      cpu_speed = DOUBLE_SPEED;
+    }
+
+    double elapsed_time = Banana::Application::GetInstance().GetWindow().GetTime();
+    while(elapsed_time < (double)((1 / (cpu_speed * 1000)) * n))
+    {
+      double begin = Banana::Application::GetInstance().GetWindow().GetTime();
+      double end = Banana::Application::GetInstance().GetWindow().GetTime();
+      elapsed_time += (double)((end - begin));
+    }
+  }
+  
   void Validate_Opcode(Spec *spec)
   {
     uint8_t opcode = spec->ram[spec->PC];
-    // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
+   // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
     switch(opcode)
     {
     // NOP
