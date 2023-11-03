@@ -5,4 +5,5 @@
 namespace GBC
 {
   void Validate_Opcode(Spec *spec);
+
 };

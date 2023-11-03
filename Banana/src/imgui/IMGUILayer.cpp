@@ -11,6 +11,7 @@
 #include "event/KeyCode.h"
 
 #include "../Sandbox/src/imgui_debug.h"
+#include "../Sandbox/src/gbc/info.h"
 
 #include <sstream>
 
@@ -139,7 +140,8 @@ namespace Banana
     ImGui::Text(Hex_To_CString(Stats::DE, "DE: "));
     ImGui::Text(Hex_To_CString(Stats::HL, "HL: "));
     ImGui::Text(Hex_To_CString(Stats::opval, "[PC]: "));
-    
+    ImGui::Text(opcode_info[Stats::opval]);
+
     ImGui::End();
     
     ImGui::Begin("Info", nullptr, 0);
