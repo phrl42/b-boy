@@ -70,7 +70,7 @@ namespace Banana
     std::stringstream hex;
 
     hex << std::hex << val;
-    ret = std::string(prefix) + "0x" + hex.str();
+    ret = std::string(prefix) + hex.str();
 
     return ret.c_str();
   }
@@ -134,13 +134,13 @@ namespace Banana
 
     ImGui::Text(msg.c_str());
 
-    ImGui::Text(Hex_To_CString(Stats::PC, "PC: "));
-    ImGui::Text(Hex_To_CString(Stats::SP, "SP: "));
-    ImGui::Text(Hex_To_CString(Stats::AF, "AF: "));
-    ImGui::Text(Hex_To_CString(Stats::BC, "BC: "));
-    ImGui::Text(Hex_To_CString(Stats::DE, "DE: "));
-    ImGui::Text(Hex_To_CString(Stats::HL, "HL: "));
-    ImGui::Text(Hex_To_CString(Stats::opval, "[PC]: "));
+    ImGui::Text(Hex_To_CString(Stats::PC, "PC: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::SP, "SP: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::AF, "AF: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::BC, "BC: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::DE, "DE: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::HL, "HL: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::opval, "[PC]: $"));
     ImGui::Text(opcode_info[Stats::opval]);
 
     ImGui::End();

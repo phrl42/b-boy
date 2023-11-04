@@ -8,7 +8,9 @@ Currently Work In Progress!
 
 # To-Do
 
-- [ ] basic ppu graphics
+- [ ] ppu
+- [ ] sound
+- [ ] timer
 
 # Instructions
 
