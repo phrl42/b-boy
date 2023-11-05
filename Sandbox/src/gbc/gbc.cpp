@@ -8,7 +8,7 @@
 
 namespace GBC 
 {
-  bool Load_Rom(Spec *spec, const char* rom_path)
+  bool Spec::Load_Rom(const char* rom_path)
   {
     std::ifstream file(rom_path);
     
@@ -28,7 +28,7 @@ namespace GBC
     uint16_t index = entry;
     while(file.get(byte))
     {
-      spec->ram[index] = byte;
+      bus.Write(index, byte);
       index += 1;
     }
     GBC_LOG("Loaded " + std::to_string(index - entry) + " bytes");
@@ -38,18 +38,18 @@ namespace GBC
   }
 
   
-  void Init_Spec(Spec *spec, const char* rom_path)
+  void Spec::Init(const char* rom_path)
   {
     // zero all arrays
     for(int y = 0; y < TFT_HEIGHT; y++)
     {
       for(int x = 0; x < TFT_WIDTH; x++)
       {
-	spec->gpu.display[y][x] = 0;
+	ppu.display[y][x] = 0;
       }
     }
 
-    if(!Load_Rom(spec, rom_path))
+    if(!Load_Rom(rom_path))
     {
       GBC_LOG("Could not load ROM at: " + std::string(rom_path));
     }
@@ -58,19 +58,19 @@ namespace GBC
       GBC_LOG("Loaded ROM '" + std::string(rom_path) + "'");
     }
 
-    spec->state = State::RUN;
-    spec->PC = entry; // set Program Counter to entry
-    spec->rom = rom_path;
+    state = State::RUN;
+    cpu.PC = entry; // set Program Counter to entry
+    rom = rom_path;
   }
 
-  void Update(float dt, Spec *spec)
+  void Spec::Update(float dt)
   {
     // emulate cpu speed
-    Emulate_Cycle(opcycle[spec->ram[spec->PC]], true);
+    bus.Emulate_Cycle(opcycle[bus.Read(cpu.PC)], true);
 
-    if(spec->state == State::RUN)
+    if(state == State::RUN)
     {
-      Validate_Opcode(spec);
+      cpu.Validate_Opcode(&bus);
     }
   }
   

@@ -4,7 +4,7 @@
 
 namespace GBC
 {
-  struct GPU
+  struct PPU
   {
     // 15-Bit RGB Color
     uint16_t display[TFT_HEIGHT][TFT_WIDTH];

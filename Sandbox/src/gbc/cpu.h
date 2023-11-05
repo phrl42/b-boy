@@ -1,15 +1,31 @@
 #pragma once
 #include "Sandbox.h"
-#include "gbc/gbc.h"
-
-#define NORMAL_SPEED 4.2
-#define DOUBLE_SPEED 8.4
+#include "gbc/bus.h"
 
 namespace GBC
 {
-  void Emulate_Cycle(uint8_t n, bool normal);
-  void Validate_Opcode(Spec *spec);
 
+  struct CPU
+  {
+    // Registers
+    uint8_t A = 0;
+    uint8_t F = 0; // Flags
+    
+    uint8_t B = 0;
+    uint8_t C = 0;
+
+    uint8_t D = 0;
+    uint8_t E = 0;
+
+    uint8_t H = 0;
+    uint8_t L = 0;
+    
+    uint16_t SP = 0; // Stack Pointer
+    uint16_t PC = 0; // Program Counter
+ 
+    void Validate_Opcode(Bus *bus);
+  };
+  
   static inline const uint8_t opcycle[256] =
     {
       4,

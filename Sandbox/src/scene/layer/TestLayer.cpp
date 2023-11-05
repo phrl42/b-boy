@@ -14,7 +14,7 @@ namespace SANDBOX
   TestLayer::TestLayer(const std::string& name)
     : name(name), sound(Banana::Sound("assets/sounds/test.wav", false))
   {
-    GBC::Init_Spec(&spec, "assets/roms/Tetris.gb");
+    spec.Init("assets/roms/Tetris.gb");
   }
 
   TestLayer::~TestLayer()
@@ -59,14 +59,15 @@ namespace SANDBOX
       }
     }
 
-    Stats::PC = spec.PC;
-    Stats::SP = spec.SP;
-    Stats::AF = spec.AF;
-    Stats::BC = spec.BC;
-    Stats::DE = spec.DE;
-    Stats::HL = spec.HL;
-    Stats::opval = spec.ram[spec.PC];
-    GBC::Update(dt, &spec);
+    Stats::PC = spec.cpu.PC;
+    Stats::SP = spec.cpu.SP;
+    //Stats::AF = spec.cpu.AF;
+    //Stats::BC = spec.cpu.BC;
+    //Stats::DE = spec.cpu.DE;
+    //Stats::HL = spec.cpu.HL;
+    Stats::opval = spec.bus.Read(spec.cpu.PC);
+
+    spec.Update(dt);
 
   }
 };

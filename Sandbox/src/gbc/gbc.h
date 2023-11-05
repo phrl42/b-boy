@@ -1,19 +1,14 @@
 #pragma once
 #include "Sandbox.h"
-#include "gbc/ppu.h"
 
-// 64 KiB address space
-#define GBC_RAM_SIZE 32768 * 2
-// 16 KiB for ROM Bank 00
-// 16 KiB for ROM Bank 01 - NN (switchable)
-// 8 KiB for VRAM
-// 8 KiB for External RAM
-// 4 KiB for WRAM (Work RAM) 
-// 4 KiB for WRAM (switchable 0-7)
+#include "gbc/ppu.h"
+#include "gbc/bus.h"
+#include "gbc/cpu.h"
 
 namespace GBC
 {
   const uint16_t entry = 0;
+
   enum State
   {
     STOP, RUN, HALT
@@ -21,28 +16,19 @@ namespace GBC
   
   struct Spec
   {
-    State state;               // Declare current gbc state
+    State state;
 
-    std::array<uint8_t, GBC_RAM_SIZE> ram = {0}; // Emulate original gbc ram size
+    Bus bus;
+    CPU cpu;
+    PPU ppu;
 
-    // Registers
-    uint16_t AF = 0;               // Accumulator Flags
-    uint16_t BC = 0;               // BC
-    uint16_t DE = 0;               // DE
-    uint16_t HL = 0;               // HL
-    uint16_t SP = 0;               // Stack Pointer
-    uint16_t PC = 0;               // Program Counter
+    const char* rom;
 
-    const char *rom;               // Running rom
+    void Init(const char* rom_path);
+    void Update(float dt);
 
-    GPU gpu;                       // PPU Area
+  private:
+    bool Load_Rom(const char* rom_path);
   };
-
-  bool Load_Rom(Spec *spec, const char* rom_path);
-
-  void Init_Spec(Spec *spec, const char* rom_path);
-
-  void Validate_Opcode(Spec *spec);
-  void Update(float dt, Spec *spec);
-  
+ 
 };
