@@ -1,17 +1,11 @@
 #include "gbc/opfunction.h"
-#include "gbc/bitwise.h"
-
-#define Z_FLAG 7
-#define N_FLAG 6
-#define H_FLAG 5
-#define C_FLAG 4
 
 // IMPORTANT:
 
 namespace GBC
 {
   // starts counting from LSB
-  void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val)
+/*  void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val)
   {
     // todo: assert
     if(val > 1)
@@ -478,5 +472,5 @@ namespace GBC
     }
     Set_Bit_N(flags_register, N_FLAG, 1);
   }
-
+*/
 };
