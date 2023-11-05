@@ -4,7 +4,19 @@
 
 namespace GBC
 {
+  struct Instruction
+  {
+    std::string mnemonic;
 
+    uint8_t cycle;
+
+    uint8_t(*opfun)(uint16_t*, uint16_t, bool);
+
+    uint16_t dest;
+    uint16_t src;
+  };
+
+  
   struct CPU
   {
     uint16_t AF = 0; // Accumulator and Flags
@@ -19,6 +31,10 @@ namespace GBC
  
     void Validate_Opcode(Bus *bus);
 
+    inline Instruction instructions[256] = {
+      {"nop", 8, &nop, },
+      {},
+    };
   private:
     void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
     uint16_t Get_Bit_N(uint16_t src, uint8_t n);
@@ -41,6 +57,7 @@ namespace GBC
     // Increment 16-Bit Register
     uint8_t INC16(uint16_t *dest_register, uint16_t src_value, bool higher_half);
 
+    inline void nop(){}
   
     // Decrement 8-Bit Register
     uint8_t DEC8(uint16_t *dest_register, uint16_t src_value, bool higher_half);
@@ -82,14 +99,4 @@ namespace GBC
     uint8_t CP8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
   };
 
-
-  struct Instruction
-  {
-    std::string mnemonic;
-
-    uint8_t(*opfun)(uint16_t*, uint16_t, bool);
-
-    uint8_t cycle;
-  };
-  
 };
