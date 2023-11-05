@@ -22,6 +22,9 @@ namespace GBC
 
     void Emulate_Cycle(uint8_t n, bool normal);
 
+    // needed for accurate timing
+    double begin;
+    double end;
   private:
     uint8_t space[GBC_RAM_SIZE] = {0}; // Emulate original gbc ram size
   };

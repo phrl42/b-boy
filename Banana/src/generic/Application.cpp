@@ -110,7 +110,7 @@ namespace Banana
     double begin_time = 0.0f;
     double dt = 0.1f;
 
-    window->SetVSync(1);
+    window->SetVSync(0);
     
     while(running)
     {
@@ -154,10 +154,10 @@ namespace Banana
 
         }
 
-        for(Scene* scene : scene_stack)
-        {
-          scene->OnUpdate(dt);
-        }
+	for(Scene* scene : scene_stack)
+	{
+	  scene->OnUpdate(dt);
+	}
 
       }
       

@@ -1,4 +1,5 @@
 #include "gbc/bus.h"
+
 #include "Application.hpp"
 
 namespace GBC
@@ -11,18 +12,22 @@ namespace GBC
       cpu_speed = DOUBLE_SPEED;
     }
 
-    double elapsed_time = Banana::Application::GetInstance().GetWindow().GetTime();
-    while(elapsed_time < (double)((1 / (cpu_speed * 1000)) * n))
+    // todo
+    /*while(dt < (double)((1 / (cpu_speed * 1000000)) * n))
     {
-      double begin = Banana::Application::GetInstance().GetWindow().GetTime();
-      double end = Banana::Application::GetInstance().GetWindow().GetTime();
-      elapsed_time += (double)((end - begin));
+      double b = Banana::Application::GetInstance().GetWindow().GetTime();
+      double e = Banana::Application::GetInstance().GetWindow().GetTime();
+      dt += (double)((e - b));
+      std::cout << "testing calculation" << std::endl;
     }
+
+    begin = Banana::Application::GetInstance().GetWindow().GetTime();
+    */
   }
 
   uint8_t Bus::Read(uint16_t address)
   {
-    // simple for now
+    Emulate_Cycle(4, true);
     return space[address];
   }
   

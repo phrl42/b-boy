@@ -25,7 +25,7 @@ namespace GBC
     const char* rom;
 
     void Init(const char* rom_path);
-    void Update(float dt);
+    void Update();
 
   private:
     bool Load_Rom(const char* rom_path);

@@ -67,7 +67,7 @@ namespace SANDBOX
     //Stats::HL = spec.cpu.HL;
     Stats::opval = spec.bus.Read(spec.cpu.PC);
 
-    spec.Update(dt);
+    spec.Update();
 
   }
 };

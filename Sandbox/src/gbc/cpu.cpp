@@ -3,10 +3,14 @@
 #include "gbc/bitwise.h"
 #include "gbc/opfunction.h"
 
+#include "Application.hpp"
+
 namespace GBC
 {
   void CPU::Validate_Opcode(Bus *bus)
   {
+    bus->begin = Banana::Application::GetInstance().GetWindow().GetTime();
+    
     uint8_t opcode = bus->Read(PC);
    // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
     /*switch(opcode)

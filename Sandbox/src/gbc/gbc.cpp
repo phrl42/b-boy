@@ -63,11 +63,8 @@ namespace GBC
     rom = rom_path;
   }
 
-  void Spec::Update(float dt)
+  void Spec::Update()
   {
-    // emulate cpu speed
-    bus.Emulate_Cycle(opcycle[bus.Read(cpu.PC)], true);
-
     if(state == State::RUN)
     {
       cpu.Validate_Opcode(&bus);
