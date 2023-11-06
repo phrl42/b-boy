@@ -4,16 +4,25 @@
 
 namespace GBC
 {
+
+  // toggles higher_half, lower_half and 16-bit mode in opfunctions
+  enum IMode
+  {
+    NONE=0x00, LOW, HIGH, ALL, MEM, N8, N16, A8, A16, E8
+  };
+
   struct Instruction
   {
     std::string mnemonic;
 
     uint8_t cycle;
 
-    uint8_t(*opfun)(uint16_t*, uint16_t, bool);
+    uint8_t (*opfun)(uint16_t*, IMode, uint16_t*, IMode);
+    IMode w;
+    uint16_t *dest;
 
-    uint16_t dest;
-    uint16_t src;
+    IMode r;
+    uint16_t *src;
   };
 
   
@@ -31,72 +40,42 @@ namespace GBC
  
     void Validate_Opcode(Bus *bus);
 
-    inline Instruction instructions[256] = {
-      {"nop", 8, &nop, },
-      {},
-    };
+    Instruction instructions[1] = 
+    {{"NOP", 8, &GBC::CPU::nop, IMode::NONE, nullptr, IMode::NONE, nullptr}};
   private:
     void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
     uint16_t Get_Bit_N(uint16_t src, uint8_t n);
   
-    void Set_Half_Carry( uint16_t src_register, uint16_t val, bool bit8);
-    void Set_Carry_Plus( uint16_t src_register, uint16_t val, bool bit8);
-    void Set_Carry_Minus( uint16_t src_register, uint16_t val);
+    void Set_Half_Carry(uint16_t src_register, uint16_t val, bool bit8);
+    void Set_Carry_Plus(uint16_t src_register, uint16_t val, bool bit8);
+    void Set_Carry_Minus(uint16_t src_register, uint16_t val);
   
-    // Exceptions are in the switch statement. Such as: 0x08 (LD [a16], SP)
-    // Relative Jumps are also there
-    // LoaD 8-Bit value from RAM into Register
-    uint8_t LD8(uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static inline uint8_t nop(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
 
-    // LoaD 16-Bit value from 
-    uint8_t LD16(uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    // Increment 8-Bit Register
-    uint8_t INC8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
   
-    // Increment 16-Bit Register
-    uint8_t INC16(uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    inline void nop(){}
-  
-    // Decrement 8-Bit Register
-    uint8_t DEC8(uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    // Decrement 16-Bit Register
-    uint8_t DEC16(uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-  
-    // ADD 8-Bit value to Register
-    uint8_t ADD8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    // ADD 16-Bit value to Register
-    uint8_t ADD16( uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    // SUB 8-Bit value from Register
-    uint8_t SUB8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
-  
-    // These ones only modify Register 'A' so I could remove the general part
-    // Bitwise AND Register with value
-    uint8_t AND8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
-
-    // Bitwise OR on Register with value
-    uint8_t OR8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
-
-    // Bitwise XOR on Register with value
     // keep exception at 0xAF in mind
-    uint8_t XOR8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-  
-    // Custom operation on Register with 8-Bit value
     // keep exception at 0x9F in mind
-    uint8_t SBC8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    // Custom operation on Register with 8-Bit value
-    uint8_t ADC8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    // Custom operation on Register with 8-Bit value
     // keep exception at 0xBF in mind
-    uint8_t CP8( uint16_t *dest_register, uint16_t src_value, bool higher_half);
+    static uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
   };
 
 };

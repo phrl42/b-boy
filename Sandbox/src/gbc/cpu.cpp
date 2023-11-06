@@ -2226,7 +2226,7 @@ namespace GBC
   // Relative Jumps are also there
 
   // LoaD 8-Bit value from RAM into Register
-  uint8_t CPU::LD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  /*uint8_t CPU::LD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
@@ -2606,5 +2606,46 @@ namespace GBC
 
     return 1;
   }
+  */
 
+  uint8_t LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+    
+  }
+
+  uint8_t INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+    
+  }
+  
+  uint8_t DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  uint8_t ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  uint8_t SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  // keep exception at 0xAF in mind
+  uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  // keep exception at 0x9F in mind
+  uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+
+  // keep exception at 0xBF in mind
+  uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {}
+   
 };
