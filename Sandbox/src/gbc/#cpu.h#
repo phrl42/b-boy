@@ -7,14 +7,14 @@ namespace GBC
 
   // toggles higher_half, lower_half and 16-bit mode in opfunctions
   enum IMode
-  {
-    NONE=0x00, LOW, HIGH, ALL, MEM, N8, N16, A8, A16, E8
-  };
+    {
+      NONE=0x00, LOW, HIGH, ALL, MEM, N8, N16, A8, A16, E8
+    };
 
   enum Jump
-  {
-    Z, NZ, C, NC
-  };
+    {
+      Z, NZ, C, NC
+    };
 
   struct Instruction
   {
@@ -31,9 +31,9 @@ namespace GBC
   };
 
   enum State
-  {
-    STOP, RUN, HALT
-  };
+    {
+      STOP, RUN, HALT
+    };
    
   struct CPU
   {
@@ -318,60 +318,60 @@ namespace GBC
     void Set_Carry_Plus(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Carry_Minus(uint16_t src_register, uint16_t val);
   
-    static inline uint8_t NOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-    static inline uint8_t HALT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-    static inline uint8_t STOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-
-    // 0xCB devil
-    static inline uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-    
-    static uint8_t EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    // keep exception at 0xAF in mind
-    static uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t RST(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    
-    // keep exception at 0x9F in mind
-    static uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    // keep exception at 0xBF in mind
-    static uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
   };
+  inline uint8_t NOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+  inline uint8_t HALT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+  inline uint8_t STOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
 
+  // 0xCB devil
+  inline uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+    
+  uint8_t EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  // keep exception at 0xAF in mind
+  uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t RST(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    
+  // keep exception at 0x9F in mind
+  uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  // keep exception at 0xBF in mind
+  uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+ 
 };

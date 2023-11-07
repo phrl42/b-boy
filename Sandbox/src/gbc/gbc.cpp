@@ -58,14 +58,14 @@ namespace GBC
       GBC_LOG("Loaded ROM '" + std::string(rom_path) + "'");
     }
 
-    state = State::RUN;
+    cpu.state = State::RUN;
     cpu.PC = entry; // set Program Counter to entry
     rom = rom_path;
   }
 
   void Spec::Update()
   {
-    if(state == State::RUN)
+    if(cpu.state == State::RUN)
     {
       cpu.Validate_Opcode(&bus);
     }

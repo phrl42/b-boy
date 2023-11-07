@@ -8,16 +8,9 @@
 namespace GBC
 {
   const uint16_t entry = 0;
-
-  enum State
-  {
-    STOP, RUN, HALT
-  };
-  
+ 
   struct Spec
   {
-    State state;
-
     Bus bus;
     CPU cpu;
     PPU ppu;

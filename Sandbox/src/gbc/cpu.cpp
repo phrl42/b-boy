@@ -34,7 +34,7 @@ namespace GBC
     // LD [BC], A
     case 0x02:
     {
-      uint8_t CPU::register_a = (AF >> 4);
+      uint8_t register_a = (AF >> 4);
       
       PC += 2;
       bus->Write(BC, register_a);
@@ -255,7 +255,7 @@ namespace GBC
     // JR NZ, e8
     case 0x20:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       spec->PC++;
@@ -323,7 +323,7 @@ namespace GBC
     // JR Z, e8
     case 0x28:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
       spec->PC++;
 
@@ -395,7 +395,7 @@ namespace GBC
     // JR NC, e8
     case 0x30:
     {
-      uint8_t CPU::c = spec->AF;
+      uint8_t c = spec->AF;
       c <<= 3;
       c >>= 7;
       
@@ -464,7 +464,7 @@ namespace GBC
     // JR C, e8
     case 0x38:
     {
-      uint8_t CPU::c = spec->AF;
+      uint8_t c = spec->AF;
       c <<= 3;
       c >>= 7;
 
@@ -1434,14 +1434,14 @@ namespace GBC
     // RET NZ
     case 0xc0:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       if(!z)
       {
-	uint8_t CPU::c = spec->ram[spec->SP];
+	uint8_t c = spec->ram[spec->SP];
 	spec->SP++;
-	uint8_t CPU::p = spec->ram[spec->SP];
+	uint8_t p = spec->ram[spec->SP];
 	spec->SP++;
 
 	spec->PC = (p << 8) | c;
@@ -1463,7 +1463,7 @@ namespace GBC
     // JP NZ, a16
     case 0xc2:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       if(!z)
@@ -1481,7 +1481,7 @@ namespace GBC
     // JP a16
     case 0xc3:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       uint16_t address = 0;
@@ -1496,7 +1496,7 @@ namespace GBC
     // CALL NZ, a16
     case 0xc4:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       if(!z)
@@ -1545,14 +1545,14 @@ namespace GBC
     // RET Z
     case 0xc8:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       if(z)
       {
-	uint8_t CPU::c = spec->ram[spec->SP];
+	uint8_t c = spec->ram[spec->SP];
 	spec->SP++;
-	uint8_t CPU::p = spec->ram[spec->SP];
+	uint8_t p = spec->ram[spec->SP];
 	spec->SP++;
 
 	spec->PC = (p << 8) | c;
@@ -1564,9 +1564,9 @@ namespace GBC
     // RET
     case 0xc9:
     {
-      	uint8_t CPU::c = spec->ram[spec->SP];
+      	uint8_t c = spec->ram[spec->SP];
 	spec->SP++;
-	uint8_t CPU::p = spec->ram[spec->SP];
+	uint8_t p = spec->ram[spec->SP];
 	spec->SP++;
 
 	spec->PC = (p << 8) | c;
@@ -1577,7 +1577,7 @@ namespace GBC
     // JP Z, a16
     case 0xca:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       if(z)
@@ -1601,7 +1601,7 @@ namespace GBC
     // CALL Z, a16
     case 0xcc:
     {
-      uint8_t CPU::z = spec->AF;
+      uint8_t z = spec->AF;
       z >>= 7;
 
       if(z)
@@ -1654,15 +1654,15 @@ namespace GBC
     // RET NC
     case 0xd0:
     {
-      uint8_t CPU::rc = spec->AF;
+      uint8_t rc = spec->AF;
       rc <<= 3;
       rc >>= 7;
       
       if(!rc)
       {
-	uint8_t CPU::c = spec->ram[spec->SP];
+	uint8_t c = spec->ram[spec->SP];
 	spec->SP++;
-	uint8_t CPU::p = spec->ram[spec->SP];
+	uint8_t p = spec->ram[spec->SP];
 	spec->SP++;
 
 	spec->PC = (p << 8) | c;
@@ -1684,7 +1684,7 @@ namespace GBC
     // JP NC, a16
     case 0xd2:
     {
-      uint8_t CPU::c = spec->AF;
+      uint8_t c = spec->AF;
       c <<= 3;
       c >>= 7;
 
@@ -1709,7 +1709,7 @@ namespace GBC
     // CALL NC, a16
     case 0xd4:
     {
-      uint8_t CPU::c = spec->AF;
+      uint8_t c = spec->AF;
       c <<= 3;
       c >>= 7;
       
@@ -1759,15 +1759,15 @@ namespace GBC
     // RET C
     case 0xd8:
     {
-      uint8_t CPU::rc = spec->AF;
+      uint8_t rc = spec->AF;
       rc <<= 3;
       rc >>= 7;
 
       if(rc)
       {
-	uint8_t CPU::c = spec->ram[spec->SP];
+	uint8_t c = spec->ram[spec->SP];
 	spec->SP++;
-	uint8_t CPU::p = spec->ram[spec->SP];
+	uint8_t p = spec->ram[spec->SP];
 	spec->SP++;
 
 	spec->PC = (p << 8) | c;
@@ -1786,7 +1786,7 @@ namespace GBC
     // JP C, a16
     case 0xda:
     {
-      uint8_t CPU::c = spec->AF;
+      uint8_t c = spec->AF;
       c <<= 3;
       c >>= 7;
 
@@ -1811,7 +1811,7 @@ namespace GBC
     // CALL C, a16
     case 0xdc:
     {
-      uint8_t CPU::c = spec->AF;
+      uint8_t c = spec->AF;
       c <<= 3;
       c >>= 7;
       
@@ -1859,7 +1859,7 @@ namespace GBC
     case 0xe0:
     {
       spec->PC++;
-      uint8_t CPU::a8 = spec->ram[spec->PC];
+      uint8_t a8 = spec->ram[spec->PC];
 
       spec->ram[0xFF00 + a8] = spec->AF >> 8;
       break;
@@ -1993,8 +1993,8 @@ namespace GBC
     case 0xf0:
     {
       spec->PC++;
-      uint8_t CPU::F = spec->AF;
-      uint8_t CPU::A = spec->ram[spec->PC] + 0xFF00;
+      uint8_t F = spec->AF;
+      uint8_t A = spec->ram[spec->PC] + 0xFF00;
       spec->AF = A << 8 | F;
       break;
     }
@@ -2226,17 +2226,17 @@ namespace GBC
   // Relative Jumps are also there
 
   // LoaD 8-Bit value from RAM into Register
-  /*uint8_t CPU::CPU::LD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  /*uint8_t CPU::LD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::l = reg;
+      uint8_t l = reg;
       reg = src_value << 8 | l;
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
+      uint8_t h = reg >> 8;
       reg = h << 8 | src_value;
     }
     *dest_register = reg;
@@ -2244,19 +2244,19 @@ namespace GBC
   }
 
   // LoaD 16-Bit value from 
-  uint8_t CPU::CPU::LD16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::LD16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     *dest_register = src_value;
     return 1;
   }
 
   // Increment 8-Bit Register
-  uint8_t CPU::CPU::INC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::INC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::h = reg >> 8;
+      uint8_t h = reg >> 8;
 
       Set_Half_Carry(h, 1, true);
       h++;
@@ -2265,13 +2265,13 @@ namespace GBC
       {
 	Set_Bit_N(&AF, Z_FLAG, 1);
       }
-      uint8_t CPU::l = reg;
+      uint8_t l = reg;
       reg = (h << 8) | l;
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
       l++;
       if(l == 0)
       {
@@ -2286,7 +2286,7 @@ namespace GBC
   }
   
   // Increment 16-Bit Register
-  uint8_t CPU::CPU::INC16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::INC16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     *dest_register++;
     return 1;
@@ -2294,12 +2294,12 @@ namespace GBC
 
   
   // Decrement 8-Bit Register
-  uint8_t CPU::CPU::DEC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::DEC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::h = reg >> 8;
+      uint8_t h = reg >> 8;
 
       Set_Half_Carry(h, -1, true);
 
@@ -2308,13 +2308,13 @@ namespace GBC
       {
 	Set_Bit_N(&AF, Z_FLAG, 1);
       }
-      uint8_t CPU::l = reg;
+      uint8_t l = reg;
       reg = (h << 8) | l;
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       Set_Half_Carry(l, -1, true);
 
@@ -2333,20 +2333,20 @@ namespace GBC
   }
 
   // Decrement 16-Bit Register
-  uint8_t CPU::CPU::DEC16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::DEC16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     *dest_register--;
     return 1;
   }
 
   // ADD 8-Bit value to Register
-  uint8_t CPU::CPU::ADD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::ADD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       Set_Carry_Plus(h, src_value, true);
       Set_Half_Carry(h, src_value, true);
@@ -2360,8 +2360,8 @@ namespace GBC
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       Set_Carry_Plus(l, src_value, true);
       Set_Half_Carry(l, src_value, true);
@@ -2380,7 +2380,7 @@ namespace GBC
   }
 
   // ADD 16-Bit value to Register
-  uint8_t CPU::CPU::ADD16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::ADD16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     Set_Half_Carry(*dest_register, src_value, false);
     Set_Carry_Plus(*dest_register, src_value, false);
@@ -2392,13 +2392,13 @@ namespace GBC
   }
 
   // SUB 8-Bit value from Register
-  uint8_t CPU::CPU::SUB8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::SUB8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       Set_Half_Carry(h, -1 * src_value, true);
 
@@ -2413,8 +2413,8 @@ namespace GBC
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       Set_Half_Carry(l, -1 * src_value, true);
       
@@ -2438,13 +2438,13 @@ namespace GBC
   
   // These ones only modify Register 'A' so I could remove the general part
   // Bitwise AND Register with value
-  uint8_t CPU::CPU::AND8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::AND8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       h &= src_value;
       if(!h)
@@ -2455,8 +2455,8 @@ namespace GBC
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       l &= src_value;
       if(!l)
@@ -2474,13 +2474,13 @@ namespace GBC
   }
 
   // Bitwise OR on Register with value
-  uint8_t CPU::CPU::OR8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::OR8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       h |= src_value;
       if(!h)
@@ -2491,8 +2491,8 @@ namespace GBC
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       l |= src_value;
       if(!l)
@@ -2511,13 +2511,13 @@ namespace GBC
 
   // Bitwise XOR on Register with value
   // keep exception at 0xAF in mind
-  uint8_t CPU::CPU::XOR8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::XOR8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t reg = *dest_register;
     if(higher_half)
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       h ^= src_value;
       if(!h)
@@ -2528,8 +2528,8 @@ namespace GBC
     }
     else
     {
-      uint8_t CPU::h = reg >> 8;
-      uint8_t CPU::l = reg;
+      uint8_t h = reg >> 8;
+      uint8_t l = reg;
 
       l ^= src_value;
       if(!l)
@@ -2549,7 +2549,7 @@ namespace GBC
   
   // Custom operation on Register with 8-Bit value
   // keep exception at 0x9F in mind
-  uint8_t CPU::CPU::SBC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::SBC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t val = src_value - Get_Bit_N(AF, 4);
     Set_Half_Carry(*dest_register, -1 * val, true);
@@ -2568,7 +2568,7 @@ namespace GBC
   }
 
   // Custom operation on Register with 8-Bit value
-  uint8_t CPU::CPU::ADC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::ADC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t val = src_value + Get_Bit_N(AF, C_FLAG);
     
@@ -2589,7 +2589,7 @@ namespace GBC
   // Custom operation on Register with 8-Bit value
   // keep exception at 0xBF in mind
   
-  uint8_t CPU::CPU::CP8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
+  uint8_t CPU::CP8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
   {
     uint16_t cc = AF >> 8;
     uint16_t sub = src_value + Get_Bit_N(AF, C_FLAG);
@@ -2608,143 +2608,143 @@ namespace GBC
   }
   */
 
-  uint8_t CPU::EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-
-  uint8_t CPU::LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-  uint8_t CPU::LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-  uint8_t CPU::LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
-  uint8_t CPU::INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-
-  uint8_t CPU::ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-  uint8_t CPU::SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
-  uint8_t CPU::AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+
+  uint8_t ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+  uint8_t SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+
+  uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+  uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
   // keep exception at 0xAF in mind
-  uint8_t CPU::XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
-  uint8_t CPU::POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-
-  uint8_t CPU::JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-  uint8_t CPU::JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-  uint8_t CPU::CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
-  uint8_t CPU::RST(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::RET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-
-  uint8_t CPU::CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
-  {
-
-  }
-  uint8_t CPU::CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
-  uint8_t CPU::DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t RST(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t RET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+  uint8_t RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
-  uint8_t CPU::RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+
+  uint8_t DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
-  uint8_t CPU::RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+
+  uint8_t RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+  uint8_t RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+  uint8_t RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+  uint8_t RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
     
   // keep exception at 0x9F in mind
-  uint8_t CPU::SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
-  uint8_t CPU::ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
 
   // keep exception at 0xBF in mind
-  uint8_t CPU::CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
