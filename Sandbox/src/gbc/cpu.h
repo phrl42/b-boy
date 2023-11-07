@@ -34,7 +34,62 @@ namespace GBC
   {
     STOP, RUN, HALT
   };
-   
+
+  inline uint8_t NOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+  inline uint8_t OPHALT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+  inline uint8_t OPSTOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+
+  // 0xCB devil
+  inline uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+    
+  uint8_t EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  // keep exception at 0xAF in mind
+  uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t RST(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+  uint8_t RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    
+  // keep exception at 0x9F in mind
+  uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
+  // keep exception at 0xBF in mind
+  uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    
   struct CPU
   {
     uint16_t AF = 0; // Accumulator and Flags
@@ -52,7 +107,7 @@ namespace GBC
     void Validate_Opcode(Bus *bus);
 
     Instruction instructions[256] = 
-    {
+      {
       {"NOP", 4, &NOP, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x00
       {"LD BC, n16", 12, &LD, IMode::ALL, &BC, IMode::N16, nullptr}, //0x01
       {"LD BC, A", 8, &LD, IMode::MEM, &BC, IMode::HIGH, &AF}, //0x02
@@ -69,7 +124,7 @@ namespace GBC
       {"DEC C", 4, &DEC, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x0D
       {"LD C, n8", 8, &LD, IMode::LOW, &BC, IMode::N8, nullptr}, //0x0E
       {"RRCA", 4, &RRCA, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x0F
-      {"STOP n8", 4, &STOP, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x10
+      {"STOP n8", 4, &OPSTOP, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x10
       {"LD DE, n16", 12, &LD, IMode::ALL, &DE, IMode::N16, nullptr}, //0x11
       {"LD DE, A", 8, &LD, IMode::MEM, &DE, IMode::HIGH, &AF}, //0x12
       {"INC DE", 8, &INC, IMode::ALL, &DE, IMode::NONE, nullptr}, //0x13
@@ -171,7 +226,7 @@ namespace GBC
       {"LD HL, E", 8, &LD, IMode::MEM, &HL, IMode::LOW, &DE}, //0x73
       {"LD HL, H", 8, &LD, IMode::MEM, &HL, IMode::HIGH, &HL}, //0x74
       {"LD HL, L", 8, &LD, IMode::MEM, &HL, IMode::LOW, &HL}, //0x75
-      {"HALT", 4, &HALT, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x76
+      {"HALT", 4, &OPHALT, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x76
       {"LD HL, A", 8, &LD, IMode::MEM, &HL, IMode::HIGH, &AF}, //0x77
       {"LD A, B", 4, &LD, IMode::HIGH, &AF, IMode::HIGH, &BC}, //0x78
       {"LD A, C", 4, &LD, IMode::HIGH, &AF, IMode::LOW, &BC}, //0x79
@@ -309,7 +364,7 @@ namespace GBC
       {"ILLEGAL_FD", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xFD
       {"CP A, n8", 8, &CP, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xFE
       {"RST $38", 16, &RST, IMode::NONE, (uint16_t*)38, IMode::NONE, nullptr}, //0xFF
-    };
+      };
   private:
     void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
     uint16_t Get_Bit_N(uint16_t src, uint8_t n);
@@ -318,60 +373,6 @@ namespace GBC
     void Set_Carry_Plus(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Carry_Minus(uint16_t src_register, uint16_t val);
   
-    static inline uint8_t NOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-    static inline uint8_t HALT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-    static inline uint8_t STOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-
-    // 0xCB devil
-    static inline uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
-    
-    static uint8_t EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    // keep exception at 0xAF in mind
-    static uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t RST(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    static uint8_t RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    
-    // keep exception at 0x9F in mind
-    static uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    static uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-
-    // keep exception at 0xBF in mind
-    static uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
   };
 
 };
