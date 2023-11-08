@@ -2621,24 +2621,70 @@ namespace GBC
 
   uint8_t CPU::LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    uint16_t val;
-    uint16_t clock = 0;
+    uint16_t val = 0;
+
     if(r == IMode::HIGH)
     {
       val = (*src_value >> 8) << 8;
     }
+
     if(r == IMode::LOW)
     {
       val = (*src_value << 8) >> 8;
     }
+
     if(r == IMode::ALL)
     {
       val = *src_value;
     }
+
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
-      clock += 4;
+    }
+
+    if(r == IMode::MEMI)
+    {
+      val = bus->Read(*src_value);
+      *src_value += 1;
+    }
+
+    if(r == IMode::MEMD)
+    {
+      val = bus->Read(*src_value);
+      *src_value -= 1;
+    }
+
+    if(r == IMode::A16)
+    {
+      PC += 1;
+      uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC)); 
+      PC += 1;
+      val = bus->Read(addr);
+    }
+
+    if(r == IMode::N8)
+    {
+      PC += 1;
+      val = bus->Read(PC);
+    }
+    
+    if(r == IMode::N16)
+    {
+      PC += 1;
+      val = Combine(bus->Read(PC+1), bus->Read(PC));
+      PC += 1;
+    }
+
+    // only counts for 0x08
+    if(r == IMode::ALL && w == IMode::A16)
+    {
+      PC += 1;
+      uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC)); 
+      PC += 1;
+      bus->Write(addr, val);
+      bus->Write(addr+1, (val >> 8));
+      return 0;
     }
     
     if(w == IMode::HIGH)
@@ -2646,22 +2692,75 @@ namespace GBC
       *dest_register &= 0x0F;
       *dest_register |= val;
     }
+
     if(w == IMode::LOW)
     {
       *dest_register &= 0xF0;
       *dest_register |= val;
     }
+
+    if(r == IMode::ALL)
+    {
+      *dest_register = val;
+    }
+
     if(w == IMode::MEM)
     {
       *dest_register = val;
     }
-    return clock;
+
+    if(w == IMode::MEMI)
+    {
+      *dest_register = val;
+      *dest_register += 1;
+    }
+
+    if(w == IMode::MEMD)
+    {
+      *dest_register = val;
+      *dest_register -= 1;
+    }
+
+    if(w == IMode::A16)
+    {
+      PC += 1;
+      uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC));
+      PC += 1;
+
+      if(r == IMode::HIGH)
+      {
+	val >>= 8;
+      }
+      bus->Write(addr, val);
+    }
+
+    return 0;
   }
 
+
+  // only covers instructions 0xE2 and 0xF2
   uint8_t CPU::LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    // 0xE2
+    if(w == IMode::LOW)
+    {
+      uint8_t val = *src_value >> 8;
+      uint8_t addr = *dest_register;
+      
+      bus->Write(addr, val);
+      
+    } 
+    else // 0xF2
+    {
+      uint8_t val = bus->Read((uint8_t)(*src_value));
 
+      *dest_register &= 0x0F;
+      *dest_register |= (val << 8);
+    }
+
+    return 0;
   }
+  
   uint8_t CPU::LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 

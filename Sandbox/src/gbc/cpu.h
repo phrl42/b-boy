@@ -127,7 +127,7 @@ namespace GBC
       {"DEC B", 4, &CPU::DEC, IMode::HIGH, &BC, IMode::NONE, 0}, //0x05
       {"LD B, n8", 8, &CPU::LD, IMode::HIGH, &BC, IMode::N8, nullptr}, //0x06
       {"RLCA", 4, &CPU::RLCA, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x07
-      {"LD a16, SP", 20, &CPU::LDH, IMode::A16, nullptr, IMode::ALL, &SP}, //0x08
+      {"LD a16, SP", 20, &CPU::LD, IMode::A16, nullptr, IMode::ALL, &SP}, //0x08
       {"ADD HL, BC", 8, &CPU::ADD, IMode::ALL, &HL, IMode::ALL, &BC}, //0x09
       {"LD A, BC", 8, &CPU::LD, IMode::HIGH, &AF, IMode::MEM, &BC}, //0x0A
       {"DEC BC", 8, &CPU::DEC, IMode::ALL, &BC, IMode::NONE, 0}, //0x0B
