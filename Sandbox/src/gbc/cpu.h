@@ -367,7 +367,7 @@ namespace GBC
       {"PUSH AF", 16, &CPU::PUSH, IMode::NONE, &AF, IMode::NONE, nullptr}, //0xF5
       {"OR A, n8", 8, &CPU::OR, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xF6
       {"RST $30", 16, &CPU::RST, IMode::NONE, (uint16_t*)30, IMode::NONE, nullptr}, //0xF7
-      {"LD HL, SP", 12, &CPU::LD, IMode::ALL, &HL, IMode::ALL, &SP}, //0xF8
+      {"LD HL, SP + e8", 12, &CPU::LD, IMode::ALL, &HL, IMode::E8, &SP}, //0xF8
       {"LD SP, HL", 8, &CPU::LD, IMode::ALL, &SP, IMode::ALL, &HL}, //0xF9
       {"LD A, a16", 16, &CPU::LD, IMode::HIGH, &AF, IMode::A16, nullptr}, //0xFA
       {"EI", 4, &CPU::EI, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xFB

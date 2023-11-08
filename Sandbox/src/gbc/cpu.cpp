@@ -2676,6 +2676,13 @@ namespace GBC
       PC += 1;
     }
 
+    // special reading for 0xF8
+    if(r == IMode::E8)
+    {
+      PC += 1;
+      val = *src_value + bus->Read(PC);
+    }
+    
     // only counts for 0x08
     if(r == IMode::ALL && w == IMode::A16)
     {
@@ -2699,7 +2706,7 @@ namespace GBC
       *dest_register |= val;
     }
 
-    if(r == IMode::ALL)
+    if(w == IMode::ALL)
     {
       *dest_register = val;
     }
