@@ -2660,7 +2660,7 @@ namespace GBC
 
   uint8_t CPU::LDS(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    
   }
   uint8_t CPU::LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {

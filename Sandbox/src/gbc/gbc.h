@@ -11,6 +11,12 @@ namespace GBC
  
   struct Spec
   {
+    inline Spec()
+      :cpu(CPU(&bus))
+    {
+
+    }
+    
     Bus bus;
     CPU cpu;
     PPU ppu;

@@ -67,7 +67,7 @@ namespace GBC
   {
     if(cpu.state == State::RUN)
     {
-      cpu.Validate_Opcode(&bus);
+      cpu.Validate_Opcode();
     }
   }
   
