@@ -2713,18 +2713,18 @@ namespace GBC
 
     if(w == IMode::MEM)
     {
-      *dest_register = val;
+      bus->Write(val, *dest_register);
     }
 
     if(w == IMode::MEMI)
     {
-      *dest_register = val;
+      bus->Write(val, *dest_register);
       *dest_register += 1;
     }
 
     if(w == IMode::MEMD)
     {
-      *dest_register = val;
+      bus->Write(val, *dest_register);
       *dest_register -= 1;
     }
 
@@ -2770,22 +2770,96 @@ namespace GBC
   
   uint8_t CPU::LDH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    // 0xE0
+    if(w == IMode::HIGH)
+    {
+      PC += 1;
+      uint8_t a8 = bus->Read(PC);
+      bus->Write(0xFF00 + a8, *dest_register >> 8);
+    }
+    else // 0xF0
+    {
+      PC += 1;
+      uint8_t a8 = bus->Read(PC);
+      uint8_t val = bus->Read(0xFF00 + a8);
+      *dest_register &= 0x0F;
+      *dest_register |= val << 8;
+    }
+    return 0;
   }
 
   uint8_t CPU::INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    if(w == IMode::ALL)
+    {
+      *dest_register += 1;
+    }
+    
+    if(w == IMode::HIGH)
+    {
+      *dest_register += 0x10;
+    }
 
+    if(w == IMode::LOW)
+    {
+      *dest_register += 0x01;
+    }
   }
   uint8_t CPU::DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    if(w == IMode::ALL)
+    {
+      *dest_register += 1;
+    }
+    
+    if(w == IMode::HIGH)
+    {
+      *dest_register -= 0x10;
+    }
 
+    if(w == IMode::LOW)
+    {
+      *dest_register -= 0x01;
+    }
   }
 
   uint8_t CPU::ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint16_t val = 0;
 
+    if(r == IMode::HIGH)
+    {
+      val = (*src_value >> 8) << 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      val = (*src_value << 8) >> 8;
+    }
+
+    if(r == IMode::ALL)
+    {
+      val = *src_value;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+    }
+
+    if(r == IMode::N8)
+    {
+      PC += 1;
+      val = bus->Read(PC);
+    }
+
+    if()
+    {
+
+    }
+    
   }
+
   uint8_t CPU::SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
