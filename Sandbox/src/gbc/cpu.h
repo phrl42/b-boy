@@ -8,12 +8,7 @@ namespace GBC
   // toggles higher_half, lower_half and 16-bit mode in opfunctions
   enum IMode
     {
-      NONE=0x00, LOW, HIGH, ALL, MEM, MEMI, MEMD, N8, N16, A8, A16, E8
-    };
-
-  enum Jump
-    {
-      Z, NZ, C, NC
+      NONE=0x00, LOW, HIGH, ALL, MEM, MEMI, MEMD, N8, N16, A8, A16, E8, Z, NZ, C, NC
     };
 
   enum State
@@ -151,7 +146,7 @@ namespace GBC
       {"DEC E", 4, &CPU::DEC, IMode::LOW, &DE, IMode::NONE, 0}, //0x1D
       {"LD E, n8", 8, &CPU::LD, IMode::LOW, &DE, IMode::N8, nullptr}, //0x1E
       {"RRA", 4, &CPU::RRA, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x1F
-      {"JR NZ, e8", 12, &CPU::JR, IMode::NONE, (uint16_t*)Jump::NZ, IMode::E8, nullptr}, //0x20
+      {"JR NZ, e8", 12, &CPU::JR, IMode::NZ, nullptr, IMode::E8, nullptr}, //0x20
       {"LD HL, n16", 12, &CPU::LD, IMode::ALL, &HL, IMode::N16, nullptr}, //0x21
       {"LD HL, A", 8, &CPU::LD, IMode::MEM, &HL, IMode::HIGH, &AF}, //0x22
       {"INC HL", 8, &CPU::INC, IMode::ALL, &HL, IMode::NONE, 0}, //0x23
@@ -159,7 +154,7 @@ namespace GBC
       {"DEC H", 4, &CPU::DEC, IMode::HIGH, &HL, IMode::NONE, 0}, //0x25
       {"LD H, n8", 8, &CPU::LD, IMode::HIGH, &HL, IMode::N8, nullptr}, //0x26
       {"DAA", 4, &CPU::DAA, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x27
-      {"JR Z, e8", 12, &CPU::JR, IMode::NONE, (uint16_t*)Jump::Z, IMode::E8, nullptr}, //0x28
+      {"JR Z, e8", 12, &CPU::JR, IMode::Z, nullptr, IMode::E8, nullptr}, //0x28
       {"ADD HL, HL", 8, &CPU::ADD, IMode::ALL, &HL, IMode::ALL, &HL}, //0x29
       {"LD A, HL", 8, &CPU::LD, IMode::HIGH, &AF, IMode::MEM, &HL}, //0x2A
       {"DEC HL", 8, &CPU::DEC, IMode::ALL, &HL, IMode::NONE, 0}, //0x2B
@@ -167,7 +162,7 @@ namespace GBC
       {"DEC L", 4, &CPU::DEC, IMode::LOW, &HL, IMode::NONE, 0}, //0x2D
       {"LD L, n8", 8, &CPU::LD, IMode::LOW, &HL, IMode::N8, nullptr}, //0x2E
       {"CPL", 4, &CPU::CPL, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x2F
-      {"JR NC, e8", 12, &CPU::JR, IMode::NONE, (uint16_t*)Jump::NC, IMode::E8, nullptr}, //0x30
+      {"JR NC, e8", 12, &CPU::JR, IMode::NC, nullptr, IMode::E8, nullptr}, //0x30
       {"LD SP, n16", 12, &CPU::LD, IMode::ALL, &SP, IMode::N16, nullptr}, //0x31
       {"LD HL, A", 8, &CPU::LD, IMode::MEM, &HL, IMode::HIGH, &AF}, //0x32
       {"INC SP", 8, &CPU::INC, IMode::ALL, &SP, IMode::NONE, 0}, //0x33
@@ -175,7 +170,7 @@ namespace GBC
       {"DEC HL", 12, &CPU::DEC, IMode::MEM, &HL, IMode::NONE, 0}, //0x35
       {"LD HL, n8", 12, &CPU::LD, IMode::MEM, &HL, IMode::N8, nullptr}, //0x36
       {"SCF", 4, &CPU::SCF, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x37
-      {"JR C, e8", 12, &CPU::JR, IMode::NONE, (uint16_t*)Jump::C, IMode::E8, nullptr}, //0x38
+      {"JR C, e8", 12, &CPU::JR, IMode::C, nullptr, IMode::E8, nullptr}, //0x38
       {"ADD HL, SP", 8, &CPU::ADD, IMode::ALL, &HL, IMode::ALL, &SP}, //0x39
       {"LD A, HL", 8, &CPU::LD, IMode::HIGH, &AF, IMode::MEM, &HL}, //0x3A
       {"DEC SP", 8, &CPU::DEC, IMode::ALL, &SP, IMode::NONE, 0}, //0x3B
@@ -311,35 +306,35 @@ namespace GBC
       {"CP A, L", 4, &CPU::CP, IMode::HIGH, &AF, IMode::LOW, &HL}, //0xBD
       {"CP A, HL", 8, &CPU::CP, IMode::HIGH, &AF, IMode::MEM, &HL}, //0xBE
       {"CP A, A", 4, &CPU::CP, IMode::HIGH, &AF, IMode::HIGH, &AF}, //0xBF
-      {"RET NZ", 20, &CPU::RET, IMode::NONE, (uint16_t*)Jump::NZ, IMode::NONE, nullptr}, //0xC0
+      {"RET NZ", 20, &CPU::RET, IMode::NZ, nullptr, IMode::NONE, nullptr}, //0xC0
       {"POP BC", 12, &CPU::POP, IMode::NONE, &BC, IMode::NONE, nullptr}, //0xC1
-      {"JP NZ, a16", 16, &CPU::JP, IMode::NONE, (uint16_t*)Jump::NZ, IMode::A16, nullptr}, //0xC2
+      {"JP NZ, a16", 16, &CPU::JP, IMode::NZ, nullptr, IMode::A16, nullptr}, //0xC2
       {"JP a16", 16, &CPU::JP, IMode::A16, nullptr, IMode::NONE, nullptr}, //0xC3
-      {"CALL NZ, a16", 24, &CPU::CALL, IMode::NONE, (uint16_t*)Jump::NZ, IMode::A16, nullptr}, //0xC4
+      {"CALL NZ, a16", 24, &CPU::CALL, IMode::NZ, nullptr, IMode::A16, nullptr}, //0xC4
       {"PUSH BC", 16, &CPU::PUSH, IMode::NONE, &BC, IMode::NONE, nullptr}, //0xC5
       {"ADD A, n8", 8, &CPU::ADD, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xC6
       {"RST $00", 16, &CPU::RST, IMode::NONE, (uint16_t*)00, IMode::NONE, nullptr}, //0xC7
-      {"RET Z", 20, &CPU::RET, IMode::NONE, (uint16_t*)Jump::Z, IMode::NONE, nullptr}, //0xC8
+      {"RET Z", 20, &CPU::RET, IMode::Z, nullptr, IMode::NONE, nullptr}, //0xC8
       {"RET", 16, &CPU::RET, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xC9
-      {"JP Z, a16", 16, &CPU::JP, IMode::NONE, (uint16_t*)Jump::Z, IMode::A16, nullptr}, //0xCA
+      {"JP Z, a16", 16, &CPU::JP, IMode::Z, nullptr, IMode::A16, nullptr}, //0xCA
       {"PREFIX", 4, &CPU::PREFIX, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xCB
-      {"CALL Z, a16", 24, &CPU::CALL, IMode::NONE, (uint16_t*)Jump::Z, IMode::A16, nullptr}, //0xCC
+      {"CALL Z, a16", 24, &CPU::CALL, IMode::Z, nullptr, IMode::A16, nullptr}, //0xCC
       {"CALL a16", 24, &CPU::CALL, IMode::A16, nullptr, IMode::NONE, nullptr}, //0xCD
       {"ADC A, n8", 8, &CPU::ADC, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xCE
       {"RST $08", 16, &CPU::RST, IMode::NONE, (uint16_t*)8, IMode::NONE, nullptr}, //0xCF
-      {"RET NC", 20, &CPU::RET, IMode::NONE, (uint16_t*)Jump::NC, IMode::NONE, nullptr}, //0xD0
+      {"RET NC", 20, &CPU::RET, IMode::NC, nullptr, IMode::NONE, nullptr}, //0xD0
       {"POP DE", 12, &CPU::POP, IMode::NONE, &DE, IMode::NONE, nullptr}, //0xD1
-      {"JP NC, a16", 16, &CPU::JP, IMode::NONE, (uint16_t*)Jump::NC, IMode::A16, nullptr}, //0xD2
+      {"JP NC, a16", 16, &CPU::JP, IMode::NC, nullptr, IMode::A16, nullptr}, //0xD2
       {"ILLEGAL_D3", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xD3
-      {"CALL NC, a16", 24, &CPU::CALL, IMode::NONE, (uint16_t*)Jump::NC, IMode::A16, nullptr}, //0xD4
+      {"CALL NC, a16", 24, &CPU::CALL, IMode::NC, nullptr, IMode::A16, nullptr}, //0xD4
       {"PUSH DE", 16, &CPU::PUSH, IMode::NONE, &DE, IMode::NONE, nullptr}, //0xD5
       {"SUB A, n8", 8, &CPU::SUB, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xD6
       {"RST $10", 16, &CPU::RST, IMode::NONE, (uint16_t*)10, IMode::NONE, nullptr}, //0xD7
-      {"RET C", 20, &CPU::RET, IMode::NONE, (uint16_t*)Jump::C, IMode::NONE, nullptr}, //0xD8
+      {"RET C", 20, &CPU::RET, IMode::C, nullptr, IMode::NONE, nullptr}, //0xD8
       {"RETI", 16, &CPU::RETI, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xD9
-      {"JP C, a16", 16, &CPU::JP, IMode::NONE, (uint16_t*)Jump::C, IMode::A16, nullptr}, //0xDA
+      {"JP C, a16", 16, &CPU::JP, IMode::C, nullptr, IMode::A16, nullptr}, //0xDA
       {"ILLEGAL_DB", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xDB
-      {"CALL C, a16", 24, &CPU::CALL, IMode::NONE, (uint16_t*)Jump::C, IMode::A16, nullptr}, //0xDC
+      {"CALL C, a16", 24, &CPU::CALL, IMode::C, nullptr, IMode::A16, nullptr}, //0xDC
       {"ILLEGAL_DD", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xDD
       {"SBC A, n8", 8, &CPU::SBC, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xDE
       {"RST $18", 16, &CPU::RST, IMode::NONE, (uint16_t*)18, IMode::NONE, nullptr}, //0xDF

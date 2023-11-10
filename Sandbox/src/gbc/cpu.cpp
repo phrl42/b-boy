@@ -2223,392 +2223,6 @@ namespace GBC
     return src;
   }
 
-  // Exceptions are in the switch statement. Such as: 0x08 (LD [a16], SP)
-  // Relative Jumps are also there
-
-  // LoaD 8-Bit value from RAM into Register
-  /*uint8_t CPU::CPU::LD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::l = reg;
-    reg = src_value << 8 | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    reg = h << 8 | src_value;
-    }
-    *dest_register = reg;
-    return 1;
-    }
-
-    // LoaD 16-Bit value from 
-    uint8_t CPU::CPU::LD16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    *dest_register = src_value;
-    return 1;
-    }
-
-    // Increment 8-Bit Register
-    uint8_t CPU::CPU::INC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::h = reg >> 8;
-
-    Set_Half_Carry(h, 1, true);
-    h++;
-
-    if(h == 0)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    uint8_t CPU::l = reg;
-    reg = (h << 8) | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-    l++;
-    if(l == 0)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = (h << 8) | l;
-    }
-
-    Set_Bit_N(&AF, N_FLAG, 0);
-    *dest_register = reg;
-    return 1;
-    }
-  
-    // Increment 16-Bit Register
-    uint8_t CPU::CPU::INC16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    *dest_register++;
-    return 1;
-    }
-
-  
-    // Decrement 8-Bit Register
-    uint8_t CPU::CPU::DEC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::h = reg >> 8;
-
-    Set_Half_Carry(h, -1, true);
-
-    h--;
-    if(!h)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    uint8_t CPU::l = reg;
-    reg = (h << 8) | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    Set_Half_Carry(l, -1, true);
-
-    l--;
-    if(!l)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = (h << 8) | l;
-    }
-
-    Set_Bit_N(&AF, N_FLAG, 1);
-
-    *dest_register = reg;
-    return 1;
-    }
-
-    // Decrement 16-Bit Register
-    uint8_t CPU::CPU::DEC16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    *dest_register--;
-    return 1;
-    }
-
-    // ADD 8-Bit value to Register
-    uint8_t CPU::CPU::ADD8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    Set_Carry_Plus(h, src_value, true);
-    Set_Half_Carry(h, src_value, true);
-      
-    h += src_value;
-    if(!h)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = h << 8 | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    Set_Carry_Plus(l, src_value, true);
-    Set_Half_Carry(l, src_value, true);
-    l += src_value;
-
-    if(!l)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = (h << 8) | l;
-    }
-    *dest_register = reg;
-
-    Set_Bit_N(&AF, N_FLAG, 0);
-    return 1;
-    }
-
-    // ADD 16-Bit value to Register
-    uint8_t CPU::CPU::ADD16(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    Set_Half_Carry(*dest_register, src_value, false);
-    Set_Carry_Plus(*dest_register, src_value, false);
-
-    *dest_register += src_value;
- 
-    Set_Bit_N(&AF, N_FLAG, 0);
-    return 1;
-    }
-
-    // SUB 8-Bit value from Register
-    uint8_t CPU::CPU::SUB8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    Set_Half_Carry(h, -1 * src_value, true);
-
-    Set_Carry_Minus(h, src_value);
-    h -= src_value;
-    if(!h)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-      
-    reg = h << 8 | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    Set_Half_Carry(l, -1 * src_value, true);
-      
-    Set_Carry_Minus(l, src_value);
-
-    l -= src_value;
-
-    if(!l)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-
-    reg = (h << 8) | l;
-    }
-    *dest_register = reg;
-
-    Set_Bit_N(&AF, N_FLAG, 1);
-    return 1;
-    }
-
-  
-    // These ones only modify Register 'A' so I could remove the general part
-    // Bitwise AND Register with value
-    uint8_t CPU::CPU::AND8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    h &= src_value;
-    if(!h)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = h << 8 | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    l &= src_value;
-    if(!l)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = (h << 8) | l;
-    }
-    *dest_register = reg;
-
-    Set_Bit_N(&AF, N_FLAG, 0);
-    Set_Bit_N(&AF, H_FLAG, 1);
-    Set_Bit_N(&AF, C_FLAG, 0);
-    return 1;
-    }
-
-    // Bitwise OR on Register with value
-    uint8_t CPU::CPU::OR8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    h |= src_value;
-    if(!h)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = h << 8 | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    l |= src_value;
-    if(!l)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = (h << 8) | l;
-    }
-    *dest_register = reg;
-
-    Set_Bit_N(&AF, N_FLAG, 0);
-    Set_Bit_N(&AF, H_FLAG, 0);
-    Set_Bit_N(&AF, C_FLAG, 0);
-    return 1;
-    }
-
-    // Bitwise XOR on Register with value
-    // keep exception at 0xAF in mind
-    uint8_t CPU::CPU::XOR8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t reg = *dest_register;
-    if(higher_half)
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    h ^= src_value;
-    if(!h)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = h << 8 | l;
-    }
-    else
-    {
-    uint8_t CPU::h = reg >> 8;
-    uint8_t CPU::l = reg;
-
-    l ^= src_value;
-    if(!l)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    reg = (h << 8) | l;
-    }
-    *dest_register = reg;
-
-    Set_Bit_N(&AF, N_FLAG, 0);
-    Set_Bit_N(&AF, H_FLAG, 0);
-    Set_Bit_N(&AF, C_FLAG, 0);
-    return 1;
-    }
-
-  
-    // Custom operation on Register with 8-Bit value
-    // keep exception at 0x9F in mind
-    uint8_t CPU::CPU::SBC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t val = src_value - Get_Bit_N(AF, 4);
-    Set_Half_Carry(*dest_register, -1 * val, true);
-    Set_Carry_Minus(*dest_register, val);
-    
-    *dest_register -= val;
-
-    if(*dest_register == 0)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    
-    Set_Bit_N(&AF, N_FLAG, 1);
-
-    return 1;
-    }
-
-    // Custom operation on Register with 8-Bit value
-    uint8_t CPU::CPU::ADC8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t val = src_value + Get_Bit_N(AF, C_FLAG);
-    
-    Set_Half_Carry(*dest_register, val, true);
-    Set_Carry_Plus(*dest_register, val, true);
-    *dest_register += val;
-
-    if(*dest_register == 0)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-     
-    Set_Bit_N(&AF, N_FLAG, 0);
-
-    return 1;
-    }
-
-    // Custom operation on Register with 8-Bit value
-    // keep exception at 0xBF in mind
-  
-    uint8_t CPU::CPU::CP8(uint16_t *dest_register, uint16_t src_value, bool higher_half)
-    {
-    uint16_t cc = AF >> 8;
-    uint16_t sub = src_value + Get_Bit_N(AF, C_FLAG);
-
-    Set_Half_Carry(cc, -1 * sub, true);
-    Set_Carry_Minus(cc, sub);
-    cc -= src_value;
-    
-    if(!cc)
-    {
-    Set_Bit_N(&AF, Z_FLAG, 1);
-    }
-    Set_Bit_N(&AF, N_FLAG, 1);
-
-    return 1;
-    }
-  */
-
   uint8_t CPU::EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
@@ -2904,55 +2518,292 @@ namespace GBC
     if(w == IMode::HIGH)
     {
       *dest_register &= 0x0F;
-      *dest_register += (val << 8);
+      *dest_register -= (val << 8);
     }
 
     if(w == IMode::LOW)
     {
       *dest_register &= 0xF0;
-      *dest_register += val;
+      *dest_register -= val;
     }
 
     if(w == IMode::ALL)
     {
-      *dest_register += val;
+      *dest_register -= val;
     }
 
   }
 
   uint8_t CPU::AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint16_t val = 0;
+
+    if(r == IMode::HIGH)
+    {
+      val = (*src_value >> 8) << 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      val = (*src_value << 8) >> 8;
+    }
+
+    if(r == IMode::ALL)
+    {
+      val = *src_value;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+    }
+
+    if(r == IMode::N8)
+    {
+      PC += 1;
+      val = bus->Read(PC);
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x0F;
+      *dest_register &= (val << 8);
+    }
+
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xF0;
+      *dest_register &= val;
+    }
+
+    if(w == IMode::ALL)
+    {
+      *dest_register &= val;
+    }
 
   }
+
   uint8_t CPU::OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint16_t val = 0;
+
+    if(r == IMode::HIGH)
+    {
+      val = (*src_value >> 8) << 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      val = (*src_value << 8) >> 8;
+    }
+
+    if(r == IMode::ALL)
+    {
+      val = *src_value;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+    }
+
+    if(r == IMode::N8)
+    {
+      PC += 1;
+      val = bus->Read(PC);
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x0F;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xF0;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::ALL)
+    {
+      *dest_register |= val;
+    }
 
   }
 // keep exception at 0xAF in mind
   uint8_t CPU::XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint16_t val = 0;
+
+    if(r == IMode::HIGH)
+    {
+      val = (*src_value >> 8) << 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      val = (*src_value << 8) >> 8;
+    }
+
+    if(r == IMode::ALL)
+    {
+      val = *src_value;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+    }
+
+    if(r == IMode::N8)
+    {
+      PC += 1;
+      val = bus->Read(PC);
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x0F;
+      *dest_register ^= (val << 8);
+    }
+
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xF0;
+      *dest_register ^= val;
+    }
+
+    if(w == IMode::ALL)
+    {
+      *dest_register ^= val;
+    }
 
   }
 
   uint8_t CPU::POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    *dest_register &= bus->Read(SP);
+    SP++;
+    *dest_register &= (bus->Read(SP) << 8);
+    SP++;
   }
+
   uint8_t CPU::PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    SP--;
+    bus->Write(SP, (*dest_register >> 8));
+    SP--;
+    bus->Write(SP, *dest_register);
   }
 
   uint8_t CPU::JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    PC += 2;
 
+    if(w == IMode::Z)
+    {
+      if(!Get_Bit_N(AF, Z_FLAG)) return 0;
+    }
+    
+    if(w == IMode::NZ)
+    {
+      if(Get_Bit_N(AF, Z_FLAG)) return 0;
+    }
+
+    if(w == IMode::C)
+    {
+      if(!Get_Bit_N(AF, C_FLAG)) return 0;
+    }
+   
+    if(w == IMode::NC)
+    {
+      if(Get_Bit_N(AF, C_FLAG)) return 0;
+    }
+
+    if(w == IMode::ALL)
+    {
+      PC = *dest_register;
+      return 0;
+    }
+
+    if(r == IMode::A16)
+    {
+      PC -= 2;
+      
+      PC += 1;
+      uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC));
+
+      PC = addr;
+    }
+    
+    return 4;
   }
+  
   uint8_t CPU::JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    PC += 1;
+    
+    if(w == IMode::Z)
+    {
+      if(!Get_Bit_N(AF, Z_FLAG)) return 0;
+    }
+    
+    if(w == IMode::C)
+    {
+      if(!Get_Bit_N(AF, C_FLAG)) return 0;
+    }
 
+    if(r == IMode::E8)
+    {
+      PC = bus->Read(PC);
+    }
+
+    return 4;
   }
+
   uint8_t CPU::CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    /*PC += 2;
+
+    if(w == IMode::Z)
+    {
+      if(!Get_Bit_N(AF, Z_FLAG)) return 0;
+    }
+    
+    if(w == IMode::NZ)
+    {
+      if(Get_Bit_N(AF, Z_FLAG)) return 0;
+    }
+
+    if(w == IMode::C)
+    {
+      if(!Get_Bit_N(AF, C_FLAG)) return 0;
+    }
+   
+    if(w == IMode::NC)
+    {
+      if(Get_Bit_N(AF, C_FLAG)) return 0;
+    }
+
+    if(w == IMode::A16)
+    {
+      PC -= 1;
+      uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC));
+
+      PC = addr;
+    }
+
+    if(r == IMode::A16)
+    {
+      PC -= 1;
+      
+      uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC));
+
+      PC = addr;
+    }
+    */    
+    return 12;
 
   }
 
