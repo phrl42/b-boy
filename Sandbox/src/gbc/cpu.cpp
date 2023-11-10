@@ -2853,15 +2853,70 @@ namespace GBC
       val = bus->Read(PC);
     }
 
-    if()
+    if(w == IMode::HIGH)
     {
-
+      *dest_register &= 0x0F;
+      *dest_register += (val << 8);
     }
-    
+
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xF0;
+      *dest_register += val;
+    }
+
+    if(w == IMode::ALL)
+    {
+      *dest_register += val;
+    }
   }
 
   uint8_t CPU::SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint16_t val = 0;
+
+    if(r == IMode::HIGH)
+    {
+      val = (*src_value >> 8) << 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      val = (*src_value << 8) >> 8;
+    }
+
+    if(r == IMode::ALL)
+    {
+      val = *src_value;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+    }
+
+    if(r == IMode::N8)
+    {
+      PC += 1;
+      val = bus->Read(PC);
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x0F;
+      *dest_register += (val << 8);
+    }
+
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xF0;
+      *dest_register += val;
+    }
+
+    if(w == IMode::ALL)
+    {
+      *dest_register += val;
+    }
 
   }
 
