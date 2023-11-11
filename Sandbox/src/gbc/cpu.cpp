@@ -89,6 +89,7 @@ namespace GBC
       Set_Bit_N(&AF, C_FLAG, 1);
     }
 
+    return;
   }
 
   void CPU::Set_Carry_Minus(uint16_t src_register, uint16_t val)
@@ -97,6 +98,8 @@ namespace GBC
     {
       Set_Bit_N(&AF, C_FLAG, 1);
     }
+    
+    return;
   }
   
   uint16_t CPU::Get_Bit_N(uint16_t src, uint8_t n)
@@ -107,7 +110,7 @@ namespace GBC
       return 0;
     }
 
-    src <<= n - 15;
+    src <<= 15 - n;
     src >>= 15;
 
     return src;
@@ -197,8 +200,6 @@ namespace GBC
       bus->Write(addr+1, (val >> 8));
       return 0;
     }
-
-    GBC_LOG(std::hex << val);
 
     if(w == IMode::HIGH)
     {
@@ -299,12 +300,18 @@ namespace GBC
     
     if(w == IMode::HIGH)
     {
+      Set_Half_Carry(*dest_register, 0x0001, true);
       *dest_register += 0x0100;
+      if(*dest_register == 0) Set_Bit_N(&AF, Z_FLAG, 1);
+      Set_Bit_N(&AF, N_FLAG, 0);
     }
 
     if(w == IMode::LOW)
     {
+      Set_Half_Carry(*dest_register, 0x0001, true);
       *dest_register += 0x0001;
+      if(*dest_register == 0) Set_Bit_N(&AF, Z_FLAG, 1);
+      Set_Bit_N(&AF, N_FLAG, 0);
     }
 
     return 0;
@@ -319,12 +326,18 @@ namespace GBC
     
     if(w == IMode::HIGH)
     {
+      Set_Half_Carry(*dest_register, -0x0100, true);
       *dest_register -= 0x0100;
+      if(*dest_register == 0) Set_Bit_N(&AF, Z_FLAG, 1);
+      Set_Bit_N(&AF, N_FLAG, 1);
     }
 
     if(w == IMode::LOW)
     {
+      Set_Half_Carry(*dest_register, -0x0001, true);
       *dest_register -= 0x0001;
+      if(*dest_register == 0) Set_Bit_N(&AF, Z_FLAG, 1);
+      Set_Bit_N(&AF, N_FLAG, 1);
     }
 
     return 0;
@@ -578,6 +591,9 @@ namespace GBC
       *dest_register ^= val;
     }
 
+    uint8_t flag = 0;
+    if(*dest_register == 0) flag = 1;
+    Set_Bit_N(&AF, Z_FLAG, flag);
     return 0;
   }
 
