@@ -129,7 +129,7 @@ namespace GBC
 
     if(r == IMode::HIGH)
     {
-      val = *src_value >> 8;
+      val = (*src_value >> 8) << 8;
     }
 
     if(r == IMode::LOW)
@@ -199,11 +199,10 @@ namespace GBC
     }
 
     GBC_LOG(std::hex << val);
-
     if(w == IMode::HIGH)
     {
       *dest_register &= 0x0F;
-      *dest_register |= val << 8;
+      *dest_register |= val;
     }
 
     if(w == IMode::LOW)
@@ -219,12 +218,12 @@ namespace GBC
 
     if(w == IMode::MEM)
     {
-      bus->Write(*dest_register, val);
+      bus->Write(val, *dest_register);
     }
 
     if(w == IMode::MEMI)
     {
-      bus->Write(*dest_register, val);
+      bus->Write(val, *dest_register);
       *dest_register += 1;
     }
 
@@ -240,6 +239,10 @@ namespace GBC
       uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC));
       PC += 1;
 
+      if(r == IMode::HIGH)
+      {
+	val >>= 8;
+      }
       bus->Write(addr, val);
     }
 
@@ -299,12 +302,12 @@ namespace GBC
     
     if(w == IMode::HIGH)
     {
-      *dest_register += 0x0100;
+      *dest_register += 0x10;
     }
 
     if(w == IMode::LOW)
     {
-      *dest_register += 0x0001;
+      *dest_register += 0x01;
     }
 
     return 0;
@@ -314,17 +317,17 @@ namespace GBC
   {
     if(w == IMode::ALL)
     {
-      *dest_register -= 1;
+      *dest_register += 1;
     }
     
     if(w == IMode::HIGH)
     {
-      *dest_register -= 0x0100;
+      *dest_register -= 0x10;
     }
 
     if(w == IMode::LOW)
     {
-      *dest_register -= 0x0001;
+      *dest_register -= 0x01;
     }
 
     return 0;
@@ -738,14 +741,16 @@ namespace GBC
     if(w == IMode::R8) lowpage = 0x08;
     if(w == IMode::R18) lowpage = 0x18;
     if(w == IMode::R28) lowpage = 0x28;
-
+    
+    
     SP -= 1;
     bus->Write(SP, PC >> 8);
 
     SP -= 1;
     bus->Write(SP, PC);
 
-    PC = bus->Read(0x00) << 8 | bus->Read(lowpage);
+    PC = bus->Read(0) << 8 | bus->Read(lowpage);
+    printf("bum: %x\n", bus->Read(0) << 8);
     PC -= 1;
 
     return 0;

@@ -8,7 +8,7 @@ namespace GBC
   // toggles higher_half, lower_half and 16-bit mode in opfunctions
   enum IMode
     {
-      NONE=0x00, LOW, HIGH, ALL, MEM, MEMI, MEMD, N8, N16, A8, A16, E8, Z, NZ, C, NC
+      NONE=0, LOW, HIGH, ALL, MEM, MEMI, MEMD, N8, N16, A8, A16, E8, Z, NZ, C, NC, R10, R20, R30, R8, R18, R28, R38
     };
 
   enum State
@@ -321,7 +321,7 @@ namespace GBC
       {"CALL Z, a16", 24, &CPU::CALL, IMode::Z, nullptr, IMode::A16, nullptr}, //0xCC
       {"CALL a16", 24, &CPU::CALL, IMode::A16, nullptr, IMode::NONE, nullptr}, //0xCD
       {"ADC A, n8", 8, &CPU::ADC, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xCE
-      {"RST $08", 16, &CPU::RST, (IMode)0x08, nullptr, IMode::NONE, nullptr}, //0xCF
+      {"RST $08", 16, &CPU::RST, IMode::R8, nullptr, IMode::NONE, nullptr}, //0xCF
       {"RET NC", 20, &CPU::RET, IMode::NC, nullptr, IMode::NONE, nullptr}, //0xD0
       {"POP DE", 12, &CPU::POP, IMode::NONE, &DE, IMode::NONE, nullptr}, //0xD1
       {"JP NC, a16", 16, &CPU::JP, IMode::NC, nullptr, IMode::A16, nullptr}, //0xD2
@@ -329,7 +329,7 @@ namespace GBC
       {"CALL NC, a16", 24, &CPU::CALL, IMode::NC, nullptr, IMode::A16, nullptr}, //0xD4
       {"PUSH DE", 16, &CPU::PUSH, IMode::NONE, &DE, IMode::NONE, nullptr}, //0xD5
       {"SUB A, n8", 8, &CPU::SUB, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xD6
-      {"RST $10", 16, &CPU::RST, (IMode)0x10, nullptr, IMode::NONE, nullptr}, //0xD7
+      {"RST $10", 16, &CPU::RST, IMode::R10, nullptr, IMode::NONE, nullptr}, //0xD7
       {"RET C", 20, &CPU::RET, IMode::C, nullptr, IMode::NONE, nullptr}, //0xD8
       {"RETI", 16, &CPU::RETI, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xD9
       {"JP C, a16", 16, &CPU::JP, IMode::C, nullptr, IMode::A16, nullptr}, //0xDA
@@ -337,7 +337,7 @@ namespace GBC
       {"CALL C, a16", 24, &CPU::CALL, IMode::C, nullptr, IMode::A16, nullptr}, //0xDC
       {"ILLEGAL_DD", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xDD
       {"SBC A, n8", 8, &CPU::SBC, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xDE
-      {"RST $18", 16, &CPU::RST, (IMode)0x18, nullptr, IMode::NONE, nullptr}, //0xDF
+      {"RST $18", 16, &CPU::RST, IMode::R18, nullptr, IMode::NONE, nullptr}, //0xDF
       {"LDH a8, A", 12, &CPU::LDH, IMode::A8, nullptr, IMode::HIGH, &AF}, //0xE0
       {"POP HL", 12, &CPU::POP, IMode::NONE, &HL, IMode::NONE, nullptr}, //0xE1
       {"LD C, A", 8, &CPU::LDS, IMode::LOW, &BC, IMode::HIGH, &AF}, //0xE2
@@ -345,7 +345,7 @@ namespace GBC
       {"ILLEGAL_E4", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xE4
       {"PUSH HL", 16, &CPU::PUSH, IMode::NONE, &HL, IMode::NONE, nullptr}, //0xE5
       {"AND A, n8", 8, &CPU::AND, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xE6
-      {"RST $20", 16, &CPU::RST, (IMode)0x20, nullptr, IMode::NONE, nullptr}, //0xE7
+      {"RST $20", 16, &CPU::RST, IMode::R20, nullptr, IMode::NONE, nullptr}, //0xE7
       {"ADD SP, e8", 16, &CPU::ADD, IMode::ALL, &SP, IMode::E8, nullptr}, //0xE8
       {"JP HL", 4, &CPU::JP, IMode::ALL, &HL, IMode::NONE, nullptr}, //0xE9
       {"LD a16, A", 16, &CPU::LD, IMode::A16, nullptr, IMode::HIGH, &AF}, //0xEA
@@ -353,7 +353,7 @@ namespace GBC
       {"ILLEGAL_EC", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xEC
       {"ILLEGAL_ED", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xED
       {"XOR A, n8", 8, &CPU::XOR, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xEE
-      {"RST $28", 16, &CPU::RST, (IMode)0x28, nullptr, IMode::NONE, nullptr}, //0xEF
+      {"RST $28", 16, &CPU::RST, IMode::R28, nullptr, IMode::NONE, nullptr}, //0xEF
       {"LDH A, a8", 12, &CPU::LDH, IMode::HIGH, &AF, IMode::A8, nullptr}, //0xF0
       {"POP AF", 12, &CPU::POP, IMode::NONE, &AF, IMode::NONE, nullptr}, //0xF1
       {"LD A, C", 8, &CPU::LDS, IMode::HIGH, &AF, IMode::LOW, &BC}, //0xF2
@@ -361,7 +361,7 @@ namespace GBC
       {"ILLEGAL_F4", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xF4
       {"PUSH AF", 16, &CPU::PUSH, IMode::NONE, &AF, IMode::NONE, nullptr}, //0xF5
       {"OR A, n8", 8, &CPU::OR, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xF6
-      {"RST $30", 16, &CPU::RST, (IMode)0x30, nullptr, IMode::NONE, nullptr}, //0xF7
+      {"RST $30", 16, &CPU::RST, IMode::R30, nullptr, IMode::NONE, nullptr}, //0xF7
       {"LD HL, SP + e8", 12, &CPU::LD, IMode::ALL, &HL, IMode::E8, &SP}, //0xF8
       {"LD SP, HL", 8, &CPU::LD, IMode::ALL, &SP, IMode::ALL, &HL}, //0xF9
       {"LD A, a16", 16, &CPU::LD, IMode::HIGH, &AF, IMode::A16, nullptr}, //0xFA
@@ -369,7 +369,7 @@ namespace GBC
       {"ILLEGAL_FC", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xFC
       {"ILLEGAL_FD", 4, nullptr, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0xFD
       {"CP A, n8", 8, &CPU::CP, IMode::HIGH, &AF, IMode::N8, nullptr}, //0xFE
-      {"RST $38", 16, &CPU::RST, (IMode)0x38, nullptr, IMode::NONE, nullptr} //0xFF
+      {"RST $38", 16, &CPU::RST, IMode::R38, nullptr, IMode::NONE, nullptr} //0xFF
     };
 
   };

@@ -27,16 +27,13 @@ namespace GBC
 
   uint8_t Bus::Read(uint16_t address)
   {
-    Emulate_Cycle(4, true);
     return space[address];
   }
   
   uint8_t Bus::Write(uint16_t address, uint8_t value)
   {
-    // simple for now
     space[address] = value;
-
-    return 1;
+    return 0;
   }
   
 };

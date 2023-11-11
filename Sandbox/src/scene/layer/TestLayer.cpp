@@ -61,10 +61,10 @@ namespace SANDBOX
 
     Stats::PC = spec.cpu.PC;
     Stats::SP = spec.cpu.SP;
-    //Stats::AF = spec.cpu.AF;
-    //Stats::BC = spec.cpu.BC;
-    //Stats::DE = spec.cpu.DE;
-    //Stats::HL = spec.cpu.HL;
+    Stats::AF = spec.cpu.AF;
+    Stats::BC = spec.cpu.BC;
+    Stats::DE = spec.cpu.DE;
+    Stats::HL = spec.cpu.HL;
     Stats::opval = spec.bus.Read(spec.cpu.PC);
 
     spec.Update();
