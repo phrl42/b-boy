@@ -13,10 +13,8 @@ namespace GBC
 
   void CPU::Validate_Opcode()
   {
-    uint8_t opcode = bus->Read(PC);
     // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
-
-    printf("%x: %s\n", PC, lookup[opcode].mnemonic);
+    uint8_t opcode = bus->Read(PC);
     (this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
 
     PC += 1;

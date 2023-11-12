@@ -33,7 +33,10 @@ project "Banana"
       "%{wks.location}/Banana",
       "%{wks.location}/Banana/src",
       "%{wks.location}/Banana/src/generic",
-      "%{wks.location}/Banana/vendor/GLAD/include"
+      "%{wks.location}/Banana/vendor/GLAD/include",
+
+      "%{wks.location}/Sandbox/",
+      "%{wks.location}/Sandbox/src"
     }
 
     filter "system:windows"

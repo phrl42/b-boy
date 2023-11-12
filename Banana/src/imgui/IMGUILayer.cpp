@@ -17,11 +17,77 @@
 
 namespace Banana
 {
+  std::vector<std::pair<uint16_t, std::string>> instructions;
 
-  IMGUILayer::IMGUILayer(const std::string& name)
-  : name(name)
+  const char* Hex_To_CString(const uint16_t val, const char* prefix)
   {
+    std::string ret;
+    std::stringstream hex;
 
+    hex << std::hex << val;
+    ret = std::string(prefix) + hex.str();
+
+    return ret.c_str();
+  }
+
+  std::string Hex_To_String(uint16_t val, const char* prefix)
+  {
+    std::string ret;
+    std::stringstream hex;
+
+    hex << std::hex << val;
+    
+    ret = std::string(prefix) + hex.str();
+
+    return ret;
+  }
+
+  std::string Hex_To_StringI(int8_t val, const char* prefix)
+  {
+    std::string ret;
+    std::stringstream hex;
+
+    hex << std::hex << val;
+    
+    ret = std::string(prefix) + hex.str();
+
+    return ret;
+  }
+ 
+  void replace_first(
+    std::string& s,
+    std::string const& toReplace,
+    std::string const& replaceWith
+    ) {
+    std::size_t pos = s.find(toReplace);
+    if (pos == std::string::npos) return;
+    s.replace(pos, toReplace.length(), replaceWith);
+  }
+
+  void add_address(uint16_t address, std::string mnemonic)
+  {
+    for(auto pair : instructions)
+    {
+      if(address == pair.first)
+      {
+	return;
+      }
+    }
+
+    replace_first(mnemonic, "e8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
+    replace_first(mnemonic, "n8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
+    replace_first(mnemonic, "a8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
+
+    replace_first(mnemonic, "a16", std::string(Hex_To_String(Stats::spec->bus.Read(address+2) << 8 | Stats::spec->bus.Read(address+1), "$(") + ")"));
+
+    replace_first(mnemonic, "n16", std::string(Hex_To_String(Stats::spec->bus.Read(address+2) << 8 | Stats::spec->bus.Read(address+1) , "$(") + ")"));
+    instructions.push_back(std::pair<uint16_t, std::string>(address, mnemonic));
+  }
+  
+  IMGUILayer::IMGUILayer(const std::string& name)
+    : name(name)
+  {
+    
   }
 
   void IMGUILayer::OnAttach()
@@ -64,17 +130,6 @@ namespace Banana
     ImGui::DestroyContext();
   }
 
-  const char* Hex_To_CString(const uint16_t val, const char* prefix)
-  {
-    std::string ret;
-    std::stringstream hex;
-
-    hex << std::hex << val;
-    ret = std::string(prefix) + hex.str();
-
-    return ret.c_str();
-  }
-
   void IMGUILayer::OnUpdate(float dt)
   {
     static bool show = true;
@@ -88,27 +143,27 @@ namespace Banana
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     ImGuiDockNodeFlags dockflags = ImGuiDockNodeFlags_PassthruCentralNode;//ImGuiDockNodeFlags_None;
     window_flags |= ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoBackground;// | ImGuiWindowFlags_MenuBar;
-		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		ImGuiViewport& viewport = *ImGui::GetMainViewport();
-		ImGui::SetNextWindowPos(viewport.Pos);
-		ImGui::SetNextWindowSize(viewport.Size);
-		ImGui::SetNextWindowViewport(viewport.ID);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("docking", &p_open, window_flags);
-		ImGui::PopStyleVar(3);
-		ImGuiID dockspaceID = ImGui::GetID("dockspace");
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+    ImGuiViewport& viewport = *ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport.Pos);
+    ImGui::SetNextWindowSize(viewport.Size);
+    ImGui::SetNextWindowViewport(viewport.ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGui::Begin("docking", &p_open, window_flags);
+    ImGui::PopStyleVar(3);
+    ImGuiID dockspaceID = ImGui::GetID("dockspace");
 
-		static bool initialized = false;
+    static bool initialized = false;
 
     if (!initialized)
     {
       initialized = true;
-	    ImGui::DockBuilderRemoveNode(dockspaceID);
-	    ImGui::DockBuilderAddNode(dockspaceID, ImGuiDockNodeFlags_DockSpace);
-			ImGui::DockBuilderSetNodeSize(dockspaceID, ImVec2(Application::GetInstance().GetWindow().GetWidth() + 500, Application::GetInstance().GetWindow().GetHeight() + 500));
+      ImGui::DockBuilderRemoveNode(dockspaceID);
+      ImGui::DockBuilderAddNode(dockspaceID, ImGuiDockNodeFlags_DockSpace);
+      ImGui::DockBuilderSetNodeSize(dockspaceID, ImVec2(Application::GetInstance().GetWindow().GetWidth() + 500, Application::GetInstance().GetWindow().GetHeight() + 500));
 
       ImGuiID dock_main_id = dockspaceID;
       ImGuiID dock_up_id = ImGui::DockBuilderSplitNode(dock_main_id, ImGuiDir_Up, 0.05f, nullptr, &dock_main_id);
@@ -119,36 +174,51 @@ namespace Banana
       
       ImGui::DockBuilderFinish(dockspaceID);
 
-		  ImGui::DockBuilderDockWindow("Debug", dock_right_id);
-		  ImGui::DockBuilderDockWindow("Scene", dock_main_id);
-		  ImGui::DockBuilderDockWindow("Info", dock_down_id);
+      ImGui::DockBuilderDockWindow("Tiles", dock_right_id);
+      ImGui::DockBuilderDockWindow("Disassembler", dock_right_id);
+      ImGui::DockBuilderDockWindow("Scene", dock_main_id);
+      ImGui::DockBuilderDockWindow("Registers", dock_down_id);
+      ImGui::DockBuilderDockWindow("Debugger", dock_down_id);
     }
 
     ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockflags);
     ImGui::End();
 
-    ImGui::Begin("Debug", nullptr, 0);
-    std::string msg = "FPS: 60";
-    if(1 / dt < 59)
-    msg = "FPS: " + std::to_string(1 / dt);
+    ImGui::Begin("Tiles", nullptr, 0);
+    ImGui::End();
 
-    ImGui::Text(msg.c_str());
+    ImGui::Begin("Debugger", nullptr, 0);
+    ImGui::End();
 
-    ImGui::Text(Hex_To_CString(Stats::PC, "PC: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::SP, "SP: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::AF, "AF: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::BC, "BC: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::DE, "DE: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::HL, "HL: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::opval, "[PC]: $"));
-    ImGui::Text(opcode_info[Stats::opval]);
-
+    ImGui::Begin("Disassembler", nullptr, 0);
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
+    ImGui::BeginChild("Scrolling");
+    add_address(Stats::spec->cpu.PC, opcode_info[Stats::spec->bus.Read(Stats::spec->cpu.PC)]);
+    auto red = ImVec4(1, 0, 0, 1);
+    auto green = ImVec4(0, 1, 0, 1);
+    for (int32_t n = instructions.size()-1; n >= 0; n--)
+    {
+      auto chose = red;
+      if(instructions[n].first == Stats::spec->cpu.PC) chose = green;
+      ImGui::TextColored(chose, "[%x]: %s", instructions[n].first, instructions[n].second.c_str());
+    }
+    ImGui::EndChild(); 
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC), "[PC]: $"));
     ImGui::End();
     
-    ImGui::Begin("Info", nullptr, 0);
+    ImGui::Begin("Registers", nullptr, 0);
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF, "AF: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.BC, "BC: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.DE, "DE: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.HL, "HL: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.SP, "SP: 0x"));
+
+    std::string msg = "FPS: 60";
+    if(1 / dt < 59)
+      msg = "FPS: " + std::to_string(1 / dt);
+    ImGui::Text(msg.c_str());
     // maybe put rom name here
     // maybe but restart buttons and stuff in here
-    ImGui::Text("Info text");
     ImGui::End();
     
     ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration);
