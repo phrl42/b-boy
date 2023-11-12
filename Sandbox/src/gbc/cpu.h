@@ -96,7 +96,7 @@ namespace GBC
   
     void Set_Half_Carry(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Carry_Plus(uint16_t src_register, uint16_t val, bool bit8);
-    void Set_Carry_Minus(uint16_t src_register, uint16_t val);
+    void Set_Carry_Minus(uint16_t src_register, uint8_t val);
 
     struct Instruction
     {
