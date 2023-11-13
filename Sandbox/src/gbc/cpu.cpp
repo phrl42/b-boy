@@ -704,7 +704,7 @@ namespace GBC
 
   uint8_t CPU::CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    PC += 2;
+    PC += 3;
 
     if(w == IMode::Z)
     {
@@ -728,22 +728,29 @@ namespace GBC
 
     if(w == IMode::A16)
     {
-      PC -= 1;
+      PC -= 2;
       uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC));
-      
-      bus->Write(SP+1, PC >> 8);
-      bus->Write(SP+2, PC); 
+
+      PC += 2;
+      SP--;
+      bus->Write(SP, (PC >> 8));
+      SP--;
+      bus->Write(SP, PC);
       PC = addr;
     }
 
     if(r == IMode::A16)
     {
-      PC -= 1;
+      PC -= 2;
       
       uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC));
+      
+      PC += 2;
 
-      bus->Write(SP+1, PC >> 8);
-      bus->Write(SP+2, PC);
+      SP--;
+      bus->Write(SP, (PC >> 8));
+      SP--;
+      bus->Write(SP, PC);
       PC = addr;
     }
 
@@ -799,6 +806,7 @@ namespace GBC
     }
 
     uint16_t addr = Combine(bus->Read(SP+1), bus->Read(SP));
+    SP += 2;
     PC = addr - 1;
     
     return 12;
