@@ -129,7 +129,6 @@ namespace GBC
   uint8_t CPU::LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint16_t val = 0;
-
     if(r == IMode::HIGH)
     {
       val = *src_value >> 8;
@@ -203,13 +202,13 @@ namespace GBC
 
     if(w == IMode::HIGH)
     {
-      *dest_register &= 0x0F;
+      *dest_register &= 0x00FF;
       *dest_register |= val << 8;
     }
 
     if(w == IMode::LOW)
     {
-      *dest_register &= 0xF0;
+      *dest_register &= 0xFF00;
       *dest_register |= val;
     }
 
@@ -263,8 +262,7 @@ namespace GBC
     else // 0xF2
     {
       uint8_t val = bus->Read((uint8_t)(*src_value));
-
-      *dest_register &= 0x0F;
+      *dest_register &= 0x00FF;
       *dest_register |= (val << 8);
     }
 
@@ -285,7 +283,7 @@ namespace GBC
       PC += 1;
       uint8_t a8 = bus->Read(PC);
       uint8_t val = bus->Read(0xFF00 + a8);
-      *dest_register &= 0x0F;
+      *dest_register &= 0x00FF;
       *dest_register |= val << 8;
     }
     return 0;

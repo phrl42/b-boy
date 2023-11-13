@@ -52,6 +52,14 @@ namespace Banana
     return ret;
   }
 
+  uint8_t Get_Bit_N(uint8_t src, uint8_t n)
+  {
+    src <<= 7 - n;
+    src >>= 7;
+
+    return src;
+  }
+  
   uint16_t String_To_Hex(const std::string& hex)
   {
     std::stringstream str;
@@ -259,19 +267,37 @@ namespace Banana
     ImGui::End();
     
     ImGui::Begin("Registers", nullptr, 0);
+
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF >> 8, "A: "));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF, "F: "));
+    ImGui::Text(Hex_To_CString((uint8_t)Stats::spec->cpu.AF, "F: "));
     ImGui::SameLine();
-    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 7 == 1) ? green : red, "Z");
+    ImGui::TextColored((Get_Bit_N(Stats::spec->cpu.AF, 7) == 1) ? green : red, "Z");
     ImGui::SameLine();
-    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 6 == 1) ? green : red, "N");
+    ImGui::TextColored((Get_Bit_N(Stats::spec->cpu.AF, 6) == 1) ? green : red, "N");
     ImGui::SameLine();
-    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 5 == 1) ? green : red, "H");
+    ImGui::TextColored((Get_Bit_N(Stats::spec->cpu.AF, 5) == 1) ? green : red, "H");
     ImGui::SameLine();
-    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 4 == 1) ? green : red, "C");
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.BC, "BC: "));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.DE, "DE: "));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.HL, "HL: "));
+    ImGui::TextColored((Get_Bit_N(Stats::spec->cpu.AF, 4) == 1) ? green : red, "C");
+
+    ImGui::Text("BC:");
+    ImGui::SameLine();
+    ImGui::Text(Hex_To_CString(((uint8_t)(Stats::spec->cpu.BC >> 8)), ""));
+    ImGui::SameLine();
+    ImGui::Text(Hex_To_CString(((uint8_t)Stats::spec->cpu.BC), ""));
+
+
+    ImGui::Text("DE:");
+    ImGui::SameLine();
+    ImGui::Text(Hex_To_CString(((uint8_t)(Stats::spec->cpu.DE >> 8)), ""));
+    ImGui::SameLine();
+    ImGui::Text(Hex_To_CString(((uint8_t)Stats::spec->cpu.DE), ""));
+	
+    ImGui::Text("HL:");
+    ImGui::SameLine();
+    ImGui::Text(Hex_To_CString(((uint8_t)(Stats::spec->cpu.HL >> 8)), ""));
+    ImGui::SameLine();
+    ImGui::Text(Hex_To_CString(((uint8_t)Stats::spec->cpu.HL), ""));
+	
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.SP, "SP: "));
 
     std::string msg = "FPS: 60";
