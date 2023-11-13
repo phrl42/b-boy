@@ -15,12 +15,15 @@ namespace SANDBOX
   {
     play.AddComponent(new Banana::QuadComponent("assets/textures/play.png"));
     stop.AddComponent(new Banana::QuadComponent("assets/textures/stop.png"));
+    step.AddComponent(new Banana::QuadComponent("assets/textures/step.png"));
 
     Banana::QuadComponent *qcp = (Banana::QuadComponent*)play.GetComponent("QuadComponent");
     Banana::QuadComponent *qcs = (Banana::QuadComponent*)stop.GetComponent("QuadComponent");
+    Banana::QuadComponent *qct = (Banana::QuadComponent*)step.GetComponent("QuadComponent");
 
     Stats::play_id = qcp->GetTextureID();
     Stats::stop_id = qcs->GetTextureID();
+    Stats::step_id = qct->GetTextureID();
 
     spec.Init("assets/roms/Tetris.gb");
     Stats::spec = &spec;

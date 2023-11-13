@@ -211,7 +211,13 @@ namespace Banana
     {
       Stats::spec->cpu.state = GBC::State::HALT;
     }
-  
+
+    static bool step_mode = false;
+    if(step_mode)
+    {
+      Stats::spec->cpu.state = GBC::State::HALT;
+    }
+      
     if(ImGui::ImageButton((void*)Stats::play_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
       breakaddr = adstop;
@@ -221,7 +227,15 @@ namespace Banana
     if(ImGui::ImageButton((void*)Stats::stop_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
       Stats::spec->cpu.state = GBC::State::HALT;
+      //if(step_mode) Stats::spec->cpu.state = GBC::State::RUN;
+      step_mode = false;
     }
+
+    if(ImGui::ImageButton((void*)Stats::step_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
+    {
+      step_mode = !step_mode;
+    }
+   
     ImGui::End();
 
     ImGui::Begin("Disassembler", nullptr, 0);

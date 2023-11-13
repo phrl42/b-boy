@@ -28,6 +28,7 @@ namespace SANDBOX
     Banana::Entity ent[TFT_HEIGHT][TFT_WIDTH];
     Banana::Entity play;
     Banana::Entity stop;
+    Banana::Entity step;
     GBC::Spec spec;
   };
 
