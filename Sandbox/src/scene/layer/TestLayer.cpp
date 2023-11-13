@@ -10,10 +10,18 @@
 namespace SANDBOX
 {
 
-  std::ofstream file;
   TestLayer::TestLayer(const std::string& name)
     : name(name), sound(Banana::Sound("assets/sounds/test.wav", false))
   {
+    play.AddComponent(new Banana::QuadComponent("assets/textures/play.png"));
+    stop.AddComponent(new Banana::QuadComponent("assets/textures/stop.png"));
+
+    Banana::QuadComponent *qcp = (Banana::QuadComponent*)play.GetComponent("QuadComponent");
+    Banana::QuadComponent *qcs = (Banana::QuadComponent*)stop.GetComponent("QuadComponent");
+
+    Stats::play_id = qcp->GetTextureID();
+    Stats::stop_id = qcs->GetTextureID();
+
     spec.Init("assets/roms/Tetris.gb");
     Stats::spec = &spec;
   }

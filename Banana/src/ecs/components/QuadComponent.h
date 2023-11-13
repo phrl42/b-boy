@@ -13,6 +13,11 @@ namespace Banana
     QuadComponent(const std::string &path);
 
     virtual void OnUpdate(float dt, const Transform &transform) override;
+
+    inline uint32_t GetTextureID()
+    {
+      return tex->GetRendererID();
+    }
   private:
   Shr<Texture2D> tex = nullptr;
   };

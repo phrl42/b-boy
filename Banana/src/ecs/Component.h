@@ -11,6 +11,7 @@ namespace Banana
     virtual void OnUpdate(float dt, const Transform &transform) = 0;
 
     const std::string& GetName() const { return name; }
+
   protected:
     std::string name;
   };

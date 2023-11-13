@@ -15,7 +15,8 @@ namespace Banana
     {
       tex = Texture2D::Create(name);
     }
-    QuadComponent();
+
+    this->name = "QuadComponent";
   }
 
   void QuadComponent::OnUpdate(float dt, const Transform &transform)

@@ -1,7 +1,7 @@
 #include "incs.h"
 #include "imgui/IMGUILayer.h"
 
-#include "imgui.h"
+#include "../../vendor/IMGUI/imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "imgui_internal.h"
@@ -18,12 +18,11 @@
 namespace Banana
 {
   std::vector<std::pair<uint16_t, std::string>> instructions;
-
   const char* Hex_To_CString(const uint16_t val, const char* prefix)
   {
     std::string ret;
     std::stringstream hex;
-
+    
     hex << std::hex << val;
     ret = std::string(prefix) + hex.str();
 
@@ -34,7 +33,6 @@ namespace Banana
   {
     std::string ret;
     std::stringstream hex;
-
     hex << std::hex << val;
     
     ret = std::string(prefix) + hex.str();
@@ -188,6 +186,15 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Debugger", nullptr, 0);
+    if(ImGui::ImageButton((void*)Stats::play_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
+    {
+      LOG("Play");
+    }
+    ImGui::SameLine();
+    if(ImGui::ImageButton((void*)Stats::stop_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
+    {
+      LOG("Stop");
+    }
     ImGui::End();
 
     ImGui::Begin("Disassembler", nullptr, 0);
