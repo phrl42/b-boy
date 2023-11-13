@@ -253,7 +253,27 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Disassembler", nullptr, 0);
+
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
+    ImGui::SameLine();
+    switch(Stats::spec->cpu.state)
+    {
+    case GBC::State::HALT:
+    {
+      ImGui::TextColored(red, "[ HALT ]");
+      break;
+    }
+
+    case GBC::State::RUN:
+    {
+      ImGui::TextColored(green, "[ RUN ]");
+      break;
+    }
+
+    default:
+      break;
+    }
+
     ImGui::BeginChild("Scrolling");
     add_address(Stats::spec->cpu.PC, opcode_info[Stats::spec->bus.Read(Stats::spec->cpu.PC)]);
     for (int32_t n = instructions.size()-1; n >= 0; n--)
@@ -263,7 +283,6 @@ namespace Banana
       ImGui::TextColored(chose, "[%x]: %s", instructions[n].first, instructions[n].second.c_str());
     }
     ImGui::EndChild(); 
-    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC), "[PC]: $"));
     ImGui::End();
     
     ImGui::Begin("Registers", nullptr, 0);
