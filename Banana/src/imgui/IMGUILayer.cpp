@@ -51,6 +51,18 @@ namespace Banana
 
     return ret;
   }
+
+  uint16_t String_To_Hex(const std::string& hex)
+  {
+    std::stringstream str;
+    str << hex;
+
+    uint16_t ret = 0;
+
+    str >> std::hex >> ret;
+
+    return ret;
+  }
  
   void replace_first(
     std::string& s,
@@ -127,16 +139,13 @@ namespace Banana
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
   }
-
   void IMGUILayer::OnUpdate(float dt)
   {
     static bool show = true;
     static bool p_open = true;
-
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
     // dockspace stuff
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_None;
     ImGuiDockNodeFlags dockflags = ImGuiDockNodeFlags_PassthruCentralNode;//ImGuiDockNodeFlags_None;
@@ -186,14 +195,32 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Debugger", nullptr, 0);
+
+    static std::string adstop = "0000";
+    static std::string breakaddr = "";
+
+    ImGui::Text(std::string("Break: 0x" + breakaddr).c_str());
+    
+    ImGui::PushItemWidth(100);
+    if(ImGui::InputText(" ", adstop.data(), 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_EnterReturnsTrue))
+    {
+      breakaddr = adstop;
+    }
+
+    if(String_To_Hex(breakaddr) == Stats::spec->cpu.PC)
+    {
+      Stats::spec->cpu.state = GBC::State::HALT;
+    }
+  
     if(ImGui::ImageButton((void*)Stats::play_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
-      LOG("Play");
+      breakaddr = adstop;
+      Stats::spec->cpu.state = GBC::State::RUN;
     }
     ImGui::SameLine();
     if(ImGui::ImageButton((void*)Stats::stop_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
-      LOG("Stop");
+      Stats::spec->cpu.state = GBC::State::HALT;
     }
     ImGui::End();
 
@@ -233,7 +260,6 @@ namespace Banana
     
     ImGui::Image((void*)Application::GetInstance().fb->GetColorAttachmentID(), {winsize.x - 10, winsize.y - 42}, {0, 1}, {1, 0});
     ImGui::End();
-
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
