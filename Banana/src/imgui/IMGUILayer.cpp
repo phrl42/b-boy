@@ -184,8 +184,8 @@ namespace Banana
       ImGui::DockBuilderDockWindow("Tiles", dock_right_id);
       ImGui::DockBuilderDockWindow("Disassembler", dock_right_id);
       ImGui::DockBuilderDockWindow("Scene", dock_main_id);
-      ImGui::DockBuilderDockWindow("Registers", dock_down_id);
       ImGui::DockBuilderDockWindow("Debugger", dock_down_id);
+      ImGui::DockBuilderDockWindow("Registers", dock_down_right_id);
     }
 
     ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockflags);
@@ -230,7 +230,13 @@ namespace Banana
       //if(step_mode) Stats::spec->cpu.state = GBC::State::RUN;
       step_mode = false;
     }
-
+    auto red = ImVec4(1, 0, 0, 1);
+    auto green = ImVec4(0, 1, 0, 1);
+    
+    ImGui::Text("Step Mode:");
+    ImGui::SameLine();
+    if(step_mode) ImGui::TextColored(green, "ON");
+    if(!step_mode) ImGui::TextColored(red, "OFF");
     if(ImGui::ImageButton((void*)Stats::step_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
       step_mode = !step_mode;
@@ -242,8 +248,6 @@ namespace Banana
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
     ImGui::BeginChild("Scrolling");
     add_address(Stats::spec->cpu.PC, opcode_info[Stats::spec->bus.Read(Stats::spec->cpu.PC)]);
-    auto red = ImVec4(1, 0, 0, 1);
-    auto green = ImVec4(0, 1, 0, 1);
     for (int32_t n = instructions.size()-1; n >= 0; n--)
     {
       auto chose = red;
@@ -255,11 +259,20 @@ namespace Banana
     ImGui::End();
     
     ImGui::Begin("Registers", nullptr, 0);
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF, "AF: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.BC, "BC: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.DE, "DE: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.HL, "HL: 0x"));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.SP, "SP: 0x"));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF >> 8, "A: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF, "F: "));
+    ImGui::SameLine();
+    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 7 == 1) ? green : red, "Z");
+    ImGui::SameLine();
+    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 6 == 1) ? green : red, "N");
+    ImGui::SameLine();
+    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 5 == 1) ? green : red, "H");
+    ImGui::SameLine();
+    ImGui::TextColored((((uint8_t)Stats::spec->cpu.AF) >> 4 == 1) ? green : red, "C");
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.BC, "BC: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.DE, "DE: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.HL, "HL: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.SP, "SP: "));
 
     std::string msg = "FPS: 60";
     if(1 / dt < 59)
