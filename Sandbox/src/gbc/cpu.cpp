@@ -116,6 +116,11 @@ namespace GBC
     return src;
   }
 
+  uint8_t CPU::PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+    PC += 1;
+  }
+
   uint8_t CPU::EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
@@ -695,9 +700,8 @@ namespace GBC
     if(r == IMode::E8)
     {
       PC += (int8_t)bus->Read(PC);
+      PC -= 1;
     }
-
-    PC -= 1;
 
     return 4;
   }

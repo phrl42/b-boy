@@ -23,9 +23,22 @@ namespace GBC
     length = file.tellg();
     file.seekg(0, file.beg);
       
-    // put all 32 KiB into ram
+    // put game rom into ram starting at 0x0100
+    // put bootrom before
+    
     char byte = 0;
-    uint16_t index = entry;
+    uint16_t index = 0;
+
+    std::ifstream bootrom("assets/roms/bootrom.gb");
+    while(bootrom.get(byte))
+    {
+      bus.Write(index, byte);
+      index += 1;
+    }
+
+    if(index != entry) GBC_LOG("Loading BootRom failed.");
+
+    index = entry;
     while(file.get(byte))
     {
       bus.Write(index, byte);
@@ -45,7 +58,7 @@ namespace GBC
     {
       for(int x = 0; x < TFT_WIDTH; x++)
       {
-	ppu.display[y][x] = 0;
+	//ppu.display[y][x] = 0;
       }
     }
 
@@ -59,8 +72,9 @@ namespace GBC
     }
 
     cpu.state = State::RUN;
-    cpu.PC = entry; // set Program Counter to entry
     rom = rom_path;
+
+    cpu.PC = 0;
   }
 
   void Spec::Update()

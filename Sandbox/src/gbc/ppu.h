@@ -12,6 +12,10 @@ namespace GBC
   private:
     // PPU Registers are located in RAM
 
+    // Object Attribute Map
+    uint16_t OAM = 0xFE00;
+    // 4 byte space 
+    
     // LCD Control (R/W)
     uint16_t LCDC = 0xFF40;
       // 7 LCD Display Enable

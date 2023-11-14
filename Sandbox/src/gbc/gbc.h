@@ -7,7 +7,7 @@
 
 namespace GBC
 {
-  const uint16_t entry = 0;
+  const uint16_t entry = 0x0100;
  
   struct Spec
   {

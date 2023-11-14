@@ -40,7 +40,7 @@ namespace GBC
     inline uint8_t STOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){ state = State::STOP; return 0; }
 
     // 0xCB devil
-    inline uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){}
+    uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     
     uint8_t EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     uint8_t DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
