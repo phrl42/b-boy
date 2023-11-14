@@ -697,9 +697,10 @@ namespace GBC
       if(Get_Bit_N(AF, C_FLAG)) return 0;
     }
 
-    if(r == IMode::E8)
+    if(r == IMode::E8 || w == IMode::E8)
     {
-      PC += (int8_t)bus->Read(PC);
+      PC -= 1;
+      PC += (int8_t)bus->Read(PC+1);
       PC -= 1;
     }
 
@@ -823,7 +824,16 @@ namespace GBC
 
   uint8_t CPU::CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t A = AF >> 8;
 
+    A = ~A;
+
+    AF &= 0x00FF;
+    AF |= A << 8;
+
+    Set_Bit_N(&AF, N_FLAG, 1);
+    Set_Bit_N(&AF, H_FLAG, 1);
+    return 0;
   }
   uint8_t CPU::CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
