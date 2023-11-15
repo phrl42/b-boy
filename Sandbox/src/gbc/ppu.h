@@ -8,13 +8,12 @@ namespace GBC
 
   struct PixelRow
   {
-    uint16_t bpp[8];
+    uint8_t bpp[8];
   };
   
   struct Tile
   {
     // saved with 2bpp
-    uint8_t h;
     PixelRow row[8];
   };
   
@@ -28,7 +27,7 @@ namespace GBC
     void Render();
     void UpdateTiles();
     
-    Tile tiles[384 * 2] = {0};
+    Tile tile[384 * 2] = {0};
   private:
     Bus *bus;
     // PPU Registers are located in RAM
