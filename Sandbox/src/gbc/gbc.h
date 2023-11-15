@@ -12,7 +12,7 @@ namespace GBC
   struct Spec
   {
     inline Spec()
-      :cpu(CPU(&bus))
+    :cpu(CPU(&bus)), ppu(PPU(&bus))
     {
 
     }
