@@ -34,7 +34,7 @@ namespace GBC
     {
       uint16_t lower_row = bus->Read(pos);
       uint16_t higher_row = bus->Read(pos+1);
-
+      
       for(uint8_t i = 0; i <= 7; i++)
       {
 	uint8_t res_bit = 0;
@@ -52,6 +52,7 @@ namespace GBC
       {
 	row_index = 0;
 	tile_index++;
+	continue;
       }
       row_index++;
     }
