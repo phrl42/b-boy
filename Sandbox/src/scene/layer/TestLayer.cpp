@@ -4,6 +4,7 @@
 
 #include "ecs/components/QuadComponent.h"
 #include "ecs/components/TextComponent.h"
+#include "ecs/components/TileComponent.h"
 
 #include "imgui_debug.h"
 
@@ -43,6 +44,11 @@ namespace SANDBOX
 	ent[y][x].AddComponent(new Banana::QuadComponent());
       }
     }
+
+    for(uint16_t i = 0; i < 385; i++)
+    {
+      tiles[i].AddComponent(new Banana::TileComponent());
+    }
   }
 
   void TestLayer::OnDetach()
@@ -70,7 +76,7 @@ namespace SANDBOX
 	//ent[y][x].Render(dt);
       }
     }
-
+ 
     spec.Update();
 
   }

@@ -82,6 +82,7 @@ namespace GBC
     if(cpu.state == State::RUN)
     {
       cpu.Validate_Opcode();
+      ppu.Render();
     }
   }
   

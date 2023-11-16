@@ -26,6 +26,7 @@ namespace SANDBOX
     std::string name;
     Banana::Sound sound;
     Banana::Entity ent[TFT_HEIGHT][TFT_WIDTH];
+    Banana::Entity tiles[384];
     Banana::Entity play;
     Banana::Entity stop;
     Banana::Entity step;
