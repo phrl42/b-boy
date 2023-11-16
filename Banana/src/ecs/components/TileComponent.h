@@ -9,13 +9,14 @@ namespace Banana
   {
   public:
     TileComponent();
-    TileComponent(Tile tile);
+    TileComponent(GBC::Tile *tile);
 
-    void UpdateTile(Tile tile);
+    void UpdateTile(GBC::Tile *tile);
     virtual ~TileComponent() = default;
     virtual void OnUpdate(float dt, const Transform &transform) override;
 
   private:
-    QuadComponent pixels[16];
+    QuadComponent pixels[64];
+    Tile *tile;
   };
 };
