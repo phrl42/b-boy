@@ -235,7 +235,7 @@ namespace GBC
 
     if(w == IMode::MEMD)
     {
-      bus->Write(val, *dest_register);
+      bus->Write(*dest_register, val);
       *dest_register -= 1;
     }
 
@@ -261,12 +261,12 @@ namespace GBC
       uint8_t val = *src_value >> 8;
       uint8_t addr = *dest_register;
       
-      bus->Write(addr, val);
+      bus->Write(0xFF00 + addr, val);
       
     } 
     else // 0xF2
     {
-      uint8_t val = bus->Read((uint8_t)(*src_value));
+      uint8_t val = bus->Read(0xFF00 + (uint8_t)(*src_value));
       *dest_register &= 0x00FF;
       *dest_register |= (val << 8);
     }
@@ -701,7 +701,7 @@ namespace GBC
     {
       PC -= 1;
       PC += (int8_t)bus->Read(PC+1);
-      PC -= 1;
+      PC += 1;
     }
 
     return 4;

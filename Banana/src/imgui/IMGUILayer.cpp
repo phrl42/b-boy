@@ -253,7 +253,7 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Disassembler", nullptr, 0);
-
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC), "$"));
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
     ImGui::SameLine();
     switch(Stats::spec->cpu.state)

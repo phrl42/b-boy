@@ -148,7 +148,7 @@ namespace GBC
       {"RRA", 4, &CPU::RRA, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x1F
       {"JR NZ, e8", 12, &CPU::JR, IMode::NZ, nullptr, IMode::E8, nullptr}, //0x20
       {"LD HL, n16", 12, &CPU::LD, IMode::ALL, &HL, IMode::N16, nullptr}, //0x21
-      {"LD HL, A", 8, &CPU::LD, IMode::MEM, &HL, IMode::HIGH, &AF}, //0x22
+      {"LD HL+, A", 8, &CPU::LD, IMode::MEMI, &HL, IMode::HIGH, &AF}, //0x22
       {"INC HL", 8, &CPU::INC, IMode::ALL, &HL, IMode::NONE, 0}, //0x23
       {"INC H", 4, &CPU::INC, IMode::HIGH, &HL, IMode::NONE, 0}, //0x24
       {"DEC H", 4, &CPU::DEC, IMode::HIGH, &HL, IMode::NONE, 0}, //0x25
@@ -156,7 +156,7 @@ namespace GBC
       {"DAA", 4, &CPU::DAA, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x27
       {"JR Z, e8", 12, &CPU::JR, IMode::Z, nullptr, IMode::E8, nullptr}, //0x28
       {"ADD HL, HL", 8, &CPU::ADD, IMode::ALL, &HL, IMode::ALL, &HL}, //0x29
-      {"LD A, HL", 8, &CPU::LD, IMode::HIGH, &AF, IMode::MEM, &HL}, //0x2A
+      {"LD A, HL+", 8, &CPU::LD, IMode::HIGH, &AF, IMode::MEMI, &HL}, //0x2A
       {"DEC HL", 8, &CPU::DEC, IMode::ALL, &HL, IMode::NONE, 0}, //0x2B
       {"INC L", 4, &CPU::INC, IMode::LOW, &HL, IMode::NONE, 0}, //0x2C
       {"DEC L", 4, &CPU::DEC, IMode::LOW, &HL, IMode::NONE, 0}, //0x2D
@@ -164,7 +164,7 @@ namespace GBC
       {"CPL", 4, &CPU::CPL, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x2F
       {"JR NC, e8", 12, &CPU::JR, IMode::NC, nullptr, IMode::E8, nullptr}, //0x30
       {"LD SP, n16", 12, &CPU::LD, IMode::ALL, &SP, IMode::N16, nullptr}, //0x31
-      {"LD HL, A", 8, &CPU::LD, IMode::MEM, &HL, IMode::HIGH, &AF}, //0x32
+      {"LD HL-, A", 8, &CPU::LD, IMode::MEMD, &HL, IMode::HIGH, &AF}, //0x32
       {"INC SP", 8, &CPU::INC, IMode::ALL, &SP, IMode::NONE, 0}, //0x33
       {"INC HL", 12, &CPU::INC, IMode::MEM, &HL, IMode::NONE, 0}, //0x34
       {"DEC HL", 12, &CPU::DEC, IMode::MEM, &HL, IMode::NONE, 0}, //0x35
@@ -172,7 +172,7 @@ namespace GBC
       {"SCF", 4, &CPU::SCF, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x37
       {"JR C, e8", 12, &CPU::JR, IMode::C, nullptr, IMode::E8, nullptr}, //0x38
       {"ADD HL, SP", 8, &CPU::ADD, IMode::ALL, &HL, IMode::ALL, &SP}, //0x39
-      {"LD A, HL", 8, &CPU::LD, IMode::HIGH, &AF, IMode::MEM, &HL}, //0x3A
+      {"LD A, HL-", 8, &CPU::LD, IMode::HIGH, &AF, IMode::MEMD, &HL}, //0x3A
       {"DEC SP", 8, &CPU::DEC, IMode::ALL, &SP, IMode::NONE, 0}, //0x3B
       {"INC A", 4, &CPU::INC, IMode::HIGH, &AF, IMode::NONE, 0}, //0x3C
       {"DEC A", 4, &CPU::DEC, IMode::HIGH, &AF, IMode::NONE, 0}, //0x3D

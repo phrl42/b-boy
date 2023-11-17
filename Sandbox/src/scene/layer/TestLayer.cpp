@@ -48,7 +48,12 @@ namespace SANDBOX
     for(uint16_t i = 0; i < 385; i++)
     {
       tiles[i].AddComponent(new Banana::TileComponent());
-    }
+
+      Banana::TileComponent *comp = (Banana::TileComponent*)tiles[i].GetComponent("TileComponent");
+      comp->UpdateTile(&spec.ppu.tile[i]);
+
+      tiles[i].transform.proj = Banana::Projection::NONE;
+   }
   }
 
   void TestLayer::OnDetach()
@@ -69,6 +74,7 @@ namespace SANDBOX
     {
       for(size_t x = 0; x < TFT_WIDTH; x++)
       {
+	
 	//ent[y][x].transform.proj = Banana::Projection::NONE;
 	//ent[y][x].transform.pos = {(x * one_width) - 1, (((y * one_height) * -1) + 1) - one_height, 0};
 	//ent[y][x].transform.size = {one_width, one_height, 0};
@@ -76,7 +82,16 @@ namespace SANDBOX
 	//ent[y][x].Render(dt);
       }
     }
- 
+
+    for(uint16_t i = 0; i < 385; i++)
+    {
+
+      tiles[i].transform.pos = {1 * i, 1, 0};
+      tiles[i].transform.size = {1, 1, 0};
+
+      tiles[i].Render(dt);
+    }
+    
     spec.Update();
 
   }
