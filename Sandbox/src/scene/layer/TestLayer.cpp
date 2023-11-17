@@ -45,14 +45,11 @@ namespace SANDBOX
       }
     }
 
-    for(uint16_t i = 0; i < 385; i++)
+    for(uint16_t i = 0; i < TILES; i++)
     {
-      tiles[i].AddComponent(new Banana::TileComponent());
+      tiles[i].AddComponent(new Banana::TileComponent(&spec.ppu.tile[i]));
 
-      Banana::TileComponent *comp = (Banana::TileComponent*)tiles[i].GetComponent("TileComponent");
-      comp->UpdateTile(&spec.ppu.tile[i]);
-
-      tiles[i].transform.proj = Banana::Projection::NONE;
+      tiles[i].transform.proj = Banana::Projection::PERSPECTIVE;
    }
   }
 
@@ -83,13 +80,20 @@ namespace SANDBOX
       }
     }
 
-    for(uint16_t i = 0; i < 385; i++)
+    uint8_t x = 0;
+    uint8_t y = 7;
+    for(uint16_t i = 0; i < TILES; i++)
     {
-
-      tiles[i].transform.pos = {1 * i, 1, 0};
+      if(i % 8 == 0 && i != 0)
+      {
+	y -= 1;
+	x = 0;
+      }
+      tiles[i].transform.pos = {x, y, 0};
       tiles[i].transform.size = {1, 1, 0};
-
       tiles[i].Render(dt);
+
+      x += 1;
     }
     
     spec.Update();

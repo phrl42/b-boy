@@ -44,7 +44,6 @@ namespace GBC
 
 	// reverse order is required by gpu
 	res_bit = higher_bit << 1 | lower_bit;
-
 	tile[tile_index].row[row_index].bpp[i] = res_bit;
       }
 
