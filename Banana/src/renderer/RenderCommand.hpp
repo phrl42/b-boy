@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "renderer/RendererAPI.h"
 
 // the rendercommand only dispatches

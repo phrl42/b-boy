@@ -17,7 +17,9 @@ namespace Banana
     virtual void OnUpdate(float dt, const Transform &transform) override;
 
   private:
-    QuadComponent pixels[64];
+    QuadComponent tile_tex;
     GBC::Tile *tile;
+
+    TextureSpecification spec;
   };
 };

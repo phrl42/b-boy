@@ -41,6 +41,7 @@ namespace Banana
     spec.height = prop.width;
 
     fb = Banana::Framebuffer::Create(spec);
+    fb_tiles = Banana::Framebuffer::Create(spec);
 
     debug_layer = new Banana::IMGUILayer("IMGUILAYER");
     

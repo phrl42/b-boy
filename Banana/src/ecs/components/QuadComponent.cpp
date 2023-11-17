@@ -19,6 +19,16 @@ namespace Banana
     this->name = "QuadComponent";
   }
 
+  QuadComponent::QuadComponent(const TextureSpecification &spec)
+  {
+    tex = Texture2D::Create(spec);
+  }
+  
+  void QuadComponent::UpdateTexture(const TextureSpecification &spec)
+  {
+    tex->UpdateTexture(spec);
+  }
+
   void QuadComponent::OnUpdate(float dt, const Transform &transform)
   {
     if(tex != nullptr)

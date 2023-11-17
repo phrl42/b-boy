@@ -11,9 +11,11 @@ namespace Banana
     virtual ~QuadComponent() = default;
     QuadComponent();
     QuadComponent(const std::string &path);
+    QuadComponent(const TextureSpecification &spec);
 
     virtual void OnUpdate(float dt, const Transform &transform) override;
 
+    void UpdateTexture(const TextureSpecification &spec);
     inline uint32_t GetTextureID()
     {
       return tex->GetRendererID();

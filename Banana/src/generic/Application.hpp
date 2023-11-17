@@ -41,6 +41,8 @@ namespace Banana
     bool minimized = false;
   public:
     Banana::Shr<Banana::Framebuffer> fb;
+    Banana::Shr<Banana::Framebuffer> fb_tiles;
+    
     // this stays as long as I do not have a better idea
     Banana::SoundHelper* soundhelper;
   };

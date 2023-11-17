@@ -5,7 +5,7 @@
 #include "generic/Sound.h"
 #include "gbc/gbc.h"
 
-#define TILES 32
+#define TILES 64
 
 namespace SANDBOX
 {

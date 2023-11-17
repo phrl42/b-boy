@@ -5,12 +5,14 @@ namespace Banana
   TileComponent::TileComponent()
   {
     this->name = "TileComponent";
+
+    // init spec and give quadcomponent spec
   }
 
   TileComponent::TileComponent(GBC::Tile *tile)
   {
     this->tile = tile;
-    this->name = "TileComponent";
+    TileComponent();
   }
 
   void TileComponent::UpdateTile(GBC::Tile *tile)
@@ -36,9 +38,14 @@ namespace Banana
 	x = 0;
       }
 
-      pixels[i].OnUpdate(dt, {{transform.pos.x + (x * one_width), transform.pos.y + (y * one_height), transform.pos.z}, {one_width, one_height, transform.size.z}, palette[tile->row[7 - y].bpp[x]], transform.rotation, transform.proj});
+      // modify spec pixeldata
+      //pixels[i].OnUpdate(dt, {{transform.pos.x + (x * one_width), transform.pos.y + (y * one_height), transform.pos.z}, {one_width, one_height, transform.size.z}, palette[tile->row[7 - y].bpp[x]], transform.rotation, transform.proj});
       x += 1;
     }
+
+    // give quadcomponent new spec with modified pixel data
+
+    // enjoy
   }
  
 };

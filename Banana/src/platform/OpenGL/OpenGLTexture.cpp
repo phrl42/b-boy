@@ -103,6 +103,16 @@ namespace Banana
     glDeleteTextures(1, &id);
   }
 
+  // change to pointer save in Banana upstream
+  void OpenGLTexture2D::UpdateTexture(const TextureSpecification &spec)
+  {
+    GLenum dataFormat = ImageFormatToGLDataFormat(spec.format);
+
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTextureSubImage2D(id, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, spec.data);
+    Unbind();
+  }
+  
   void OpenGLTexture2D::Bind(uint32_t slot) const
   {
     glBindTextureUnit(slot, id);
