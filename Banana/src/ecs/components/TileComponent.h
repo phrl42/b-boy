@@ -10,7 +10,6 @@ namespace Banana
   public:
     TileComponent(GBC::Tile (&tile)[], uint32_t n);
     
-    void UpdateTile(GBC::Tile (&tile)[]);
     void UpdateTileData();
 
     virtual ~TileComponent() = default;

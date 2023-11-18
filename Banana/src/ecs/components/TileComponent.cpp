@@ -35,7 +35,6 @@ namespace Banana
  
   void TileComponent::UpdateTileData()
   {
-
     Pixel palette[4] = {{224, 248, 208}, {136, 192, 112}, {52, 104, 86}, {8, 24, 32}};
 
     for(uint32_t t = 0; t < n; t++)
@@ -59,10 +58,6 @@ namespace Banana
     quad.UpdateTexture(); 
   }
 
-  void TileComponent::UpdateTile(GBC::Tile (&tile)[])
-  {
-  }
- 
   void TileComponent::OnUpdate(float dt, const Transform &transform)
   {
     UpdateTileData();
