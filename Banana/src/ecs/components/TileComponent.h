@@ -8,9 +8,9 @@ namespace Banana
   class TileComponent : public Component
   {
   public:
-    TileComponent(GBC::Tile *tile);
-
-    void UpdateTile(GBC::Tile *tile);
+    TileComponent(GBC::Tile (&tile)[], uint32_t n);
+    
+    void UpdateTile(GBC::Tile (&tile)[]);
     void UpdateTileData();
 
     virtual ~TileComponent() = default;
@@ -27,10 +27,15 @@ namespace Banana
       //uint8_t a;
     };
 
-    Pixel pixels[8*8];
-    QuadComponent quad;
-    GBC::Tile *tile;
+    Pixel pixels[166 * 144] = {0};
 
+    QuadComponent quad;
+
+    //std::vector<GBC::Tile*> tiles;
+
+    GBC::Tile (&tile)[];
+    uint32_t n;
+    
     TextureSpecification spec;
   };
 };

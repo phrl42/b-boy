@@ -200,7 +200,7 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Tiles", nullptr, 0);
-    ImGui::Image((void*)Stats::tiles_id, ImVec2(256, 256), ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::Image((void*)Stats::tiles_id, ImVec2(500, 500), ImVec2(1, 0), ImVec2(0, 1));
     ImGui::End();
 
     ImGui::Begin("Debugger", nullptr, 0);

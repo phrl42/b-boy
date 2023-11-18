@@ -5,8 +5,6 @@
 #include "generic/Sound.h"
 #include "gbc/gbc.h"
 
-#define TILES 1
-
 namespace SANDBOX
 {
   class TestLayer : public Banana::Layer
@@ -30,7 +28,7 @@ namespace SANDBOX
 
     Banana::Entity ent[TFT_HEIGHT][TFT_WIDTH];
 
-    Banana::Entity tiles[TILES];
+    Banana::Entity tilemap;
 
     Banana::Entity play;
     Banana::Entity stop;

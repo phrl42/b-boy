@@ -28,7 +28,14 @@ namespace SANDBOX
 
     spec.Init("assets/roms/Tetris.gb");
     Stats::spec = &spec;
-  }
+
+    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 255));
+
+    tilemap.transform.proj = Banana::Projection::PERSPECTIVE;
+
+    Banana::TileComponent *tc = (Banana::TileComponent*)tilemap.GetComponent("TileComponent");
+    Stats::tiles_id = tc->GetTextureID();
+   }
 
   TestLayer::~TestLayer()
   {
@@ -44,17 +51,7 @@ namespace SANDBOX
 	ent[y][x].AddComponent(new Banana::QuadComponent());
       }
     }
-
-    for(uint16_t i = 0; i < TILES; i++)
-    {
-      tiles[i].AddComponent(new Banana::TileComponent(&spec.ppu.tile[i]));
-
-      tiles[i].transform.proj = Banana::Projection::PERSPECTIVE;
-   }
-
-    Banana::TileComponent *tc = (Banana::TileComponent*)tiles[0].GetComponent("TileComponent");
-    Stats::tiles_id = tc->GetTextureID();
-  }
+ }
 
   void TestLayer::OnDetach()
   {
@@ -84,7 +81,7 @@ namespace SANDBOX
       }
     }
 
-    Banana::TileComponent *tc = (Banana::TileComponent*)tiles[0].GetComponent("TileComponent");
+    Banana::TileComponent *tc = (Banana::TileComponent*)tilemap.GetComponent("TileComponent");
     tc->UpdateTileData();
 
     spec.Update();
