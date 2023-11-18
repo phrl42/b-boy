@@ -8,12 +8,13 @@ namespace Banana
   public:
     OpenGLTexture2D(const std::string& path);
     OpenGLTexture2D(const TextureSpecification& spec);
+    OpenGLTexture2D(TextureSpecification *spec);
     virtual ~OpenGLTexture2D() override;
 
     virtual uint32_t GetWidth() const override { return width; }
     virtual uint32_t GetHeight() const override { return height; }
 
-    virtual void UpdateTexture(const TextureSpecification &spec) override;
+    virtual void UpdateTexture() override;
     
     virtual void Bind(uint32_t slot = 0) const override;
     virtual void Unbind() const override;
@@ -21,6 +22,7 @@ namespace Banana
     virtual bool operator==(const Texture& other) const override { return this->id == other.GetRendererID(); }
 
   private:
+    TextureSpecification *spec;
     std::string path;
 
     uint32_t width = 0;

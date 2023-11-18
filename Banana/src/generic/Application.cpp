@@ -120,7 +120,7 @@ namespace Banana
 
       // todo: come up with a better framebuffer implementation ( probably in the scenes )
       fb->Bind();
-      RenderCommand::SetClearColor(glm::vec4(0, 0, 0, 0));
+      RenderCommand::SetClearColor(glm::vec4(1, -0.02, 0.5, 0));
 
       if(!minimized)
       { 

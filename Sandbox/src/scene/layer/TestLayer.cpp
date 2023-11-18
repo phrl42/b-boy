@@ -51,10 +51,14 @@ namespace SANDBOX
 
       tiles[i].transform.proj = Banana::Projection::PERSPECTIVE;
    }
+
+    Banana::TileComponent *tc = (Banana::TileComponent*)tiles[0].GetComponent("TileComponent");
+    Stats::tiles_id = tc->GetTextureID();
   }
 
   void TestLayer::OnDetach()
   {
+
   }
 
 
@@ -80,23 +84,9 @@ namespace SANDBOX
       }
     }
 
-    uint8_t x = 0;
-    uint8_t y = 7;
-    for(uint16_t i = 0; i < TILES; i++)
-    {
-      if(i % 8 == 0 && i != 0)
-      {
-	y -= 1;
-	x = 0;
-      }
-      tiles[i].transform.pos = {x, y, 0};
-      tiles[i].transform.size = {1, 1, 0};
-      tiles[i].Render(dt);
+    Banana::TileComponent *tc = (Banana::TileComponent*)tiles[0].GetComponent("TileComponent");
+    tc->UpdateTileData();
 
-      x += 1;
-    }
-    
     spec.Update();
-
   }
 };

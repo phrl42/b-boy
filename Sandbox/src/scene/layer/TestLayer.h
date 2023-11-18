@@ -5,7 +5,7 @@
 #include "generic/Sound.h"
 #include "gbc/gbc.h"
 
-#define TILES 64
+#define TILES 1
 
 namespace SANDBOX
 {
@@ -27,11 +27,15 @@ namespace SANDBOX
   private:
     std::string name;
     Banana::Sound sound;
+
     Banana::Entity ent[TFT_HEIGHT][TFT_WIDTH];
+
     Banana::Entity tiles[TILES];
+
     Banana::Entity play;
     Banana::Entity stop;
     Banana::Entity step;
+
     GBC::Spec spec;
   };
 
