@@ -835,6 +835,7 @@ namespace GBC
     Set_Bit_N(&AF, H_FLAG, 1);
     return 0;
   }
+
   uint8_t CPU::CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
@@ -984,4 +985,39 @@ namespace GBC
 
     return 0;
   }
+  uint8_t CPU::RES(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::SET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::IBIT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::SWAP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::SLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::SRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::RR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::RL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::RRC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+
+  }
+  uint8_t CPU::SRL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  uint8_t CPU::RLC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
+  {
+  }
+  
 };

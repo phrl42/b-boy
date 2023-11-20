@@ -90,6 +90,19 @@ namespace GBC
     // keep exception at 0xBF in mind
     uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
+    // 0xcb prefixed instructions
+    uint8_t RES(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t SET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t IBIT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t SWAP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t SLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t SRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t RR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t RL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t RRC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t SRL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+    uint8_t RLC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
+
   private:
     void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
     uint16_t Get_Bit_N(uint16_t src, uint8_t n);
@@ -372,6 +385,266 @@ namespace GBC
       {"RST $38", 16, &CPU::RST, IMode::R38, nullptr, IMode::NONE, nullptr} //0xFF
     };
 
+    Instruction lookup_cb[256] =
+    {
+      {"RLC B", 8, &CPU::RLC, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x00
+      {"RLC C", 8, &CPU::RLC, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x01
+      {"RLC D", 8, &CPU::RLC, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x02
+      {"RLC E", 8, &CPU::RLC, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x03
+      {"RLC H", 8, &CPU::RLC, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x04
+      {"RLC L", 8, &CPU::RLC, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x05
+      {"RLC HL", 16, &CPU::RLC, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x06
+      {"RLC A", 8, &CPU::RLC, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x07
+      {"RRC B", 8, &CPU::RRC, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x08
+      {"RRC C", 8, &CPU::RRC, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x09
+      {"RRC D", 8, &CPU::RRC, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x0A
+      {"RRC E", 8, &CPU::RRC, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x0B
+      {"RRC H", 8, &CPU::RRC, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x0C
+      {"RRC L", 8, &CPU::RRC, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x0D
+      {"RRC HL", 16, &CPU::RRC, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x0E
+      {"RRC A", 8, &CPU::RRC, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x0F
+      {"RL B", 8, &CPU::RL, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x10
+      {"RL C", 8, &CPU::RL, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x11
+      {"RL D", 8, &CPU::RL, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x12
+      {"RL E", 8, &CPU::RL, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x13
+      {"RL H", 8, &CPU::RL, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x14
+      {"RL L", 8, &CPU::RL, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x15
+      {"RL HL", 16, &CPU::RL, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x16
+      {"RL A", 8, &CPU::RL, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x17
+      {"RR B", 8, &CPU::RR, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x18
+      {"RR C", 8, &CPU::RR, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x19
+      {"RR D", 8, &CPU::RR, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x1A
+      {"RR E", 8, &CPU::RR, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x1B
+      {"RR H", 8, &CPU::RR, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x1C
+      {"RR L", 8, &CPU::RR, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x1D
+      {"RR HL", 16, &CPU::RR, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x1E
+      {"RR A", 8, &CPU::RR, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x1F
+      {"SLA B", 8, &CPU::SLA, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x20
+      {"SLA C", 8, &CPU::SLA, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x21
+      {"SLA D", 8, &CPU::SLA, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x22
+      {"SLA E", 8, &CPU::SLA, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x23
+      {"SLA H", 8, &CPU::SLA, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x24
+      {"SLA L", 8, &CPU::SLA, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x25
+      {"SLA HL", 16, &CPU::SLA, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x26
+      {"SLA A", 8, &CPU::SLA, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x27
+      {"SRA B", 8, &CPU::SRA, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x28
+      {"SRA C", 8, &CPU::SRA, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x29
+      {"SRA D", 8, &CPU::SRA, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x2A
+      {"SRA E", 8, &CPU::SRA, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x2B
+      {"SRA H", 8, &CPU::SRA, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x2C
+      {"SRA L", 8, &CPU::SRA, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x2D
+      {"SRA HL", 16, &CPU::SRA, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x2E
+      {"SRA A", 8, &CPU::SRA, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x2F
+      {"SWAP B", 8, &CPU::SWAP, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x30
+      {"SWAP C", 8, &CPU::SWAP, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x31
+      {"SWAP D", 8, &CPU::SWAP, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x32
+      {"SWAP E", 8, &CPU::SWAP, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x33
+      {"SWAP H", 8, &CPU::SWAP, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x34
+      {"SWAP L", 8, &CPU::SWAP, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x35
+      {"SWAP HL", 16, &CPU::SWAP, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x36
+      {"SWAP A", 8, &CPU::SWAP, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x37
+      {"SRL B", 8, &CPU::SRL, IMode::HIGH, &BC, IMode::NONE, nullptr}, //0x38
+      {"SRL C", 8, &CPU::SRL, IMode::LOW, &BC, IMode::NONE, nullptr}, //0x39
+      {"SRL D", 8, &CPU::SRL, IMode::HIGH, &DE, IMode::NONE, nullptr}, //0x3A
+      {"SRL E", 8, &CPU::SRL, IMode::LOW, &DE, IMode::NONE, nullptr}, //0x3B
+      {"SRL H", 8, &CPU::SRL, IMode::HIGH, &HL, IMode::NONE, nullptr}, //0x3C
+      {"SRL L", 8, &CPU::SRL, IMode::LOW, &HL, IMode::NONE, nullptr}, //0x3D
+      {"SRL HL", 16, &CPU::SRL, IMode::MEM, &HL, IMode::NONE, nullptr}, //0x3E
+      {"SRL A", 8, &CPU::SRL, IMode::HIGH, &AF, IMode::NONE, nullptr}, //0x3F
+      {"BIT 0, B", 8, &CPU::IBIT, (IMode)0, nullptr, IMode::HIGH, &BC}, //0x40
+      {"BIT 0, C", 8, &CPU::IBIT, (IMode)0, nullptr, IMode::LOW, &BC}, //0x41
+      {"BIT 0, D", 8, &CPU::IBIT, (IMode)0, nullptr, IMode::HIGH, &DE}, //0x42
+      {"BIT 0, E", 8, &CPU::IBIT, (IMode)0, nullptr, IMode::LOW, &DE}, //0x43
+      {"BIT 0, H", 8, &CPU::IBIT, (IMode)0, nullptr, IMode::HIGH, &HL}, //0x44
+      {"BIT 0, L", 8, &CPU::IBIT, (IMode)0, nullptr, IMode::LOW, &HL}, //0x45
+      {"BIT 0, HL", 12, &CPU::IBIT, (IMode)0, nullptr, IMode::MEM, &HL}, //0x46
+      {"BIT 0, A", 8, &CPU::IBIT, (IMode)0, nullptr, IMode::HIGH, &AF}, //0x47
+      {"BIT 1, B", 8, &CPU::IBIT, (IMode)1, nullptr, IMode::HIGH, &BC}, //0x48
+      {"BIT 1, C", 8, &CPU::IBIT, (IMode)1, nullptr, IMode::LOW, &BC}, //0x49
+      {"BIT 1, D", 8, &CPU::IBIT, (IMode)1, nullptr, IMode::HIGH, &DE}, //0x4A
+      {"BIT 1, E", 8, &CPU::IBIT, (IMode)1, nullptr, IMode::LOW, &DE}, //0x4B
+      {"BIT 1, H", 8, &CPU::IBIT, (IMode)1, nullptr, IMode::HIGH, &HL}, //0x4C
+      {"BIT 1, L", 8, &CPU::IBIT, (IMode)1, nullptr, IMode::LOW, &HL}, //0x4D
+      {"BIT 1, HL", 12, &CPU::IBIT, (IMode)1, nullptr, IMode::MEM, &HL}, //0x4E
+      {"BIT 1, A", 8, &CPU::IBIT, (IMode)1, nullptr, IMode::HIGH, &AF}, //0x4F
+      {"BIT 2, B", 8, &CPU::IBIT, (IMode)2, nullptr, IMode::HIGH, &BC}, //0x50
+      {"BIT 2, C", 8, &CPU::IBIT, (IMode)2, nullptr, IMode::LOW, &BC}, //0x51
+      {"BIT 2, D", 8, &CPU::IBIT, (IMode)2, nullptr, IMode::HIGH, &DE}, //0x52
+      {"BIT 2, E", 8, &CPU::IBIT, (IMode)2, nullptr, IMode::LOW, &DE}, //0x53
+      {"BIT 2, H", 8, &CPU::IBIT, (IMode)2, nullptr, IMode::HIGH, &HL}, //0x54
+      {"BIT 2, L", 8, &CPU::IBIT, (IMode)2, nullptr, IMode::LOW, &HL}, //0x55
+      {"BIT 2, HL", 12, &CPU::IBIT, (IMode)2, nullptr, IMode::MEM, &HL}, //0x56
+      {"BIT 2, A", 8, &CPU::IBIT, (IMode)2, nullptr, IMode::HIGH, &AF}, //0x57
+      {"BIT 3, B", 8, &CPU::IBIT, (IMode)3, nullptr, IMode::HIGH, &BC}, //0x58
+      {"BIT 3, C", 8, &CPU::IBIT, (IMode)3, nullptr, IMode::LOW, &BC}, //0x59
+      {"BIT 3, D", 8, &CPU::IBIT, (IMode)3, nullptr, IMode::HIGH, &DE}, //0x5A
+      {"BIT 3, E", 8, &CPU::IBIT, (IMode)3, nullptr, IMode::LOW, &DE}, //0x5B
+      {"BIT 3, H", 8, &CPU::IBIT, (IMode)3, nullptr, IMode::HIGH, &HL}, //0x5C
+      {"BIT 3, L", 8, &CPU::IBIT, (IMode)3, nullptr, IMode::LOW, &HL}, //0x5D
+      {"BIT 3, HL", 12, &CPU::IBIT, (IMode)3, nullptr, IMode::MEM, &HL}, //0x5E
+      {"BIT 3, A", 8, &CPU::IBIT, (IMode)3, nullptr, IMode::HIGH, &AF}, //0x5F
+      {"BIT 4, B", 8, &CPU::IBIT, (IMode)4, nullptr, IMode::HIGH, &BC}, //0x60
+      {"BIT 4, C", 8, &CPU::IBIT, (IMode)4, nullptr, IMode::LOW, &BC}, //0x61
+      {"BIT 4, D", 8, &CPU::IBIT, (IMode)4, nullptr, IMode::HIGH, &DE}, //0x62
+      {"BIT 4, E", 8, &CPU::IBIT, (IMode)4, nullptr, IMode::LOW, &DE}, //0x63
+      {"BIT 4, H", 8, &CPU::IBIT, (IMode)4, nullptr, IMode::HIGH, &HL}, //0x64
+      {"BIT 4, L", 8, &CPU::IBIT, (IMode)4, nullptr, IMode::LOW, &HL}, //0x65
+      {"BIT 4, HL", 12, &CPU::IBIT, (IMode)4, nullptr, IMode::MEM, &HL}, //0x66
+      {"BIT 4, A", 8, &CPU::IBIT, (IMode)4, nullptr, IMode::HIGH, &AF}, //0x67
+      {"BIT 5, B", 8, &CPU::IBIT, (IMode)5, nullptr, IMode::HIGH, &BC}, //0x68
+      {"BIT 5, C", 8, &CPU::IBIT, (IMode)5, nullptr, IMode::LOW, &BC}, //0x69
+      {"BIT 5, D", 8, &CPU::IBIT, (IMode)5, nullptr, IMode::HIGH, &DE}, //0x6A
+      {"BIT 5, E", 8, &CPU::IBIT, (IMode)5, nullptr, IMode::LOW, &DE}, //0x6B
+      {"BIT 5, H", 8, &CPU::IBIT, (IMode)5, nullptr, IMode::HIGH, &HL}, //0x6C
+      {"BIT 5, L", 8, &CPU::IBIT, (IMode)5, nullptr, IMode::LOW, &HL}, //0x6D
+      {"BIT 5, HL", 12, &CPU::IBIT, (IMode)5, nullptr, IMode::MEM, &HL}, //0x6E
+      {"BIT 5, A", 8, &CPU::IBIT, (IMode)5, nullptr, IMode::HIGH, &AF}, //0x6F
+      {"BIT 6, B", 8, &CPU::IBIT, (IMode)6, nullptr, IMode::HIGH, &BC}, //0x70
+      {"BIT 6, C", 8, &CPU::IBIT, (IMode)6, nullptr, IMode::LOW, &BC}, //0x71
+      {"BIT 6, D", 8, &CPU::IBIT, (IMode)6, nullptr, IMode::HIGH, &DE}, //0x72
+      {"BIT 6, E", 8, &CPU::IBIT, (IMode)6, nullptr, IMode::LOW, &DE}, //0x73
+      {"BIT 6, H", 8, &CPU::IBIT, (IMode)6, nullptr, IMode::HIGH, &HL}, //0x74
+      {"BIT 6, L", 8, &CPU::IBIT, (IMode)6, nullptr, IMode::LOW, &HL}, //0x75
+      {"BIT 6, HL", 12, &CPU::IBIT, (IMode)6, nullptr, IMode::MEM, &HL}, //0x76
+      {"BIT 6, A", 8, &CPU::IBIT, (IMode)6, nullptr, IMode::HIGH, &AF}, //0x77
+      {"BIT 7, B", 8, &CPU::IBIT, (IMode)7, nullptr, IMode::HIGH, &BC}, //0x78
+      {"BIT 7, C", 8, &CPU::IBIT, (IMode)7, nullptr, IMode::LOW, &BC}, //0x79
+      {"BIT 7, D", 8, &CPU::IBIT, (IMode)7, nullptr, IMode::HIGH, &DE}, //0x7A
+      {"BIT 7, E", 8, &CPU::IBIT, (IMode)7, nullptr, IMode::LOW, &DE}, //0x7B
+      {"BIT 7, H", 8, &CPU::IBIT, (IMode)7, nullptr, IMode::HIGH, &HL}, //0x7C
+      {"BIT 7, L", 8, &CPU::IBIT, (IMode)7, nullptr, IMode::LOW, &HL}, //0x7D
+      {"BIT 7, HL", 12, &CPU::IBIT, (IMode)7, nullptr, IMode::MEM, &HL}, //0x7E
+      {"BIT 7, A", 8, &CPU::IBIT, (IMode)7, nullptr, IMode::HIGH, &AF}, //0x7F
+      {"RES 0, B", 8, &CPU::RES, (IMode)0, nullptr, IMode::HIGH, &BC}, //0x80
+      {"RES 0, C", 8, &CPU::RES, (IMode)0, nullptr, IMode::LOW, &BC}, //0x81
+      {"RES 0, D", 8, &CPU::RES, (IMode)0, nullptr, IMode::HIGH, &DE}, //0x82
+      {"RES 0, E", 8, &CPU::RES, (IMode)0, nullptr, IMode::LOW, &DE}, //0x83
+      {"RES 0, H", 8, &CPU::RES, (IMode)0, nullptr, IMode::HIGH, &HL}, //0x84
+      {"RES 0, L", 8, &CPU::RES, (IMode)0, nullptr, IMode::LOW, &HL}, //0x85
+      {"RES 0, HL", 16, &CPU::RES, (IMode)0, nullptr, IMode::MEM, &HL}, //0x86
+      {"RES 0, A", 8, &CPU::RES, (IMode)0, nullptr, IMode::HIGH, &AF}, //0x87
+      {"RES 1, B", 8, &CPU::RES, (IMode)1, nullptr, IMode::HIGH, &BC}, //0x88
+      {"RES 1, C", 8, &CPU::RES, (IMode)1, nullptr, IMode::LOW, &BC}, //0x89
+      {"RES 1, D", 8, &CPU::RES, (IMode)1, nullptr, IMode::HIGH, &DE}, //0x8A
+      {"RES 1, E", 8, &CPU::RES, (IMode)1, nullptr, IMode::LOW, &DE}, //0x8B
+      {"RES 1, H", 8, &CPU::RES, (IMode)1, nullptr, IMode::HIGH, &HL}, //0x8C
+      {"RES 1, L", 8, &CPU::RES, (IMode)1, nullptr, IMode::LOW, &HL}, //0x8D
+      {"RES 1, HL", 16, &CPU::RES, (IMode)1, nullptr, IMode::MEM, &HL}, //0x8E
+      {"RES 1, A", 8, &CPU::RES, (IMode)1, nullptr, IMode::HIGH, &AF}, //0x8F
+      {"RES 2, B", 8, &CPU::RES, (IMode)2, nullptr, IMode::HIGH, &BC}, //0x90
+      {"RES 2, C", 8, &CPU::RES, (IMode)2, nullptr, IMode::LOW, &BC}, //0x91
+      {"RES 2, D", 8, &CPU::RES, (IMode)2, nullptr, IMode::HIGH, &DE}, //0x92
+      {"RES 2, E", 8, &CPU::RES, (IMode)2, nullptr, IMode::LOW, &DE}, //0x93
+      {"RES 2, H", 8, &CPU::RES, (IMode)2, nullptr, IMode::HIGH, &HL}, //0x94
+      {"RES 2, L", 8, &CPU::RES, (IMode)2, nullptr, IMode::LOW, &HL}, //0x95
+      {"RES 2, HL", 16, &CPU::RES, (IMode)2, nullptr, IMode::MEM, &HL}, //0x96
+      {"RES 2, A", 8, &CPU::RES, (IMode)2, nullptr, IMode::HIGH, &AF}, //0x97
+      {"RES 3, B", 8, &CPU::RES, (IMode)3, nullptr, IMode::HIGH, &BC}, //0x98
+      {"RES 3, C", 8, &CPU::RES, (IMode)3, nullptr, IMode::LOW, &BC}, //0x99
+      {"RES 3, D", 8, &CPU::RES, (IMode)3, nullptr, IMode::HIGH, &DE}, //0x9A
+      {"RES 3, E", 8, &CPU::RES, (IMode)3, nullptr, IMode::LOW, &DE}, //0x9B
+      {"RES 3, H", 8, &CPU::RES, (IMode)3, nullptr, IMode::HIGH, &HL}, //0x9C
+      {"RES 3, L", 8, &CPU::RES, (IMode)3, nullptr, IMode::LOW, &HL}, //0x9D
+      {"RES 3, HL", 16, &CPU::RES, (IMode)3, nullptr, IMode::MEM, &HL}, //0x9E
+      {"RES 3, A", 8, &CPU::RES, (IMode)3, nullptr, IMode::HIGH, &AF}, //0x9F
+      {"RES 4, B", 8, &CPU::RES, (IMode)4, nullptr, IMode::HIGH, &BC}, //0xA0
+      {"RES 4, C", 8, &CPU::RES, (IMode)4, nullptr, IMode::LOW, &BC}, //0xA1
+      {"RES 4, D", 8, &CPU::RES, (IMode)4, nullptr, IMode::HIGH, &DE}, //0xA2
+      {"RES 4, E", 8, &CPU::RES, (IMode)4, nullptr, IMode::LOW, &DE}, //0xA3
+      {"RES 4, H", 8, &CPU::RES, (IMode)4, nullptr, IMode::HIGH, &HL}, //0xA4
+      {"RES 4, L", 8, &CPU::RES, (IMode)4, nullptr, IMode::LOW, &HL}, //0xA5
+      {"RES 4, HL", 16, &CPU::RES, (IMode)4, nullptr, IMode::MEM, &HL}, //0xA6
+      {"RES 4, A", 8, &CPU::RES, (IMode)4, nullptr, IMode::HIGH, &AF}, //0xA7
+      {"RES 5, B", 8, &CPU::RES, (IMode)5, nullptr, IMode::HIGH, &BC}, //0xA8
+      {"RES 5, C", 8, &CPU::RES, (IMode)5, nullptr, IMode::LOW, &BC}, //0xA9
+      {"RES 5, D", 8, &CPU::RES, (IMode)5, nullptr, IMode::HIGH, &DE}, //0xAA
+      {"RES 5, E", 8, &CPU::RES, (IMode)5, nullptr, IMode::LOW, &DE}, //0xAB
+      {"RES 5, H", 8, &CPU::RES, (IMode)5, nullptr, IMode::HIGH, &HL}, //0xAC
+      {"RES 5, L", 8, &CPU::RES, (IMode)5, nullptr, IMode::LOW, &HL}, //0xAD
+      {"RES 5, HL", 16, &CPU::RES, (IMode)5, nullptr, IMode::MEM, &HL}, //0xAE
+      {"RES 5, A", 8, &CPU::RES, (IMode)5, nullptr, IMode::HIGH, &AF}, //0xAF
+      {"RES 6, B", 8, &CPU::RES, (IMode)6, nullptr, IMode::HIGH, &BC}, //0xB0
+      {"RES 6, C", 8, &CPU::RES, (IMode)6, nullptr, IMode::LOW, &BC}, //0xB1
+      {"RES 6, D", 8, &CPU::RES, (IMode)6, nullptr, IMode::HIGH, &DE}, //0xB2
+      {"RES 6, E", 8, &CPU::RES, (IMode)6, nullptr, IMode::LOW, &DE}, //0xB3
+      {"RES 6, H", 8, &CPU::RES, (IMode)6, nullptr, IMode::HIGH, &HL}, //0xB4
+      {"RES 6, L", 8, &CPU::RES, (IMode)6, nullptr, IMode::LOW, &HL}, //0xB5
+      {"RES 6, HL", 16, &CPU::RES, (IMode)6, nullptr, IMode::MEM, &HL}, //0xB6
+      {"RES 6, A", 8, &CPU::RES, (IMode)6, nullptr, IMode::HIGH, &AF}, //0xB7
+      {"RES 7, B", 8, &CPU::RES, (IMode)7, nullptr, IMode::HIGH, &BC}, //0xB8
+      {"RES 7, C", 8, &CPU::RES, (IMode)7, nullptr, IMode::LOW, &BC}, //0xB9
+      {"RES 7, D", 8, &CPU::RES, (IMode)7, nullptr, IMode::HIGH, &DE}, //0xBA
+      {"RES 7, E", 8, &CPU::RES, (IMode)7, nullptr, IMode::LOW, &DE}, //0xBB
+      {"RES 7, H", 8, &CPU::RES, (IMode)7, nullptr, IMode::HIGH, &HL}, //0xBC
+      {"RES 7, L", 8, &CPU::RES, (IMode)7, nullptr, IMode::LOW, &HL}, //0xBD
+      {"RES 7, HL", 16, &CPU::RES, (IMode)7, nullptr, IMode::MEM, &HL}, //0xBE
+      {"RES 7, A", 8, &CPU::RES, (IMode)7, nullptr, IMode::HIGH, &AF}, //0xBF
+      {"SET 0, B", 8, &CPU::SET, (IMode)0, nullptr, IMode::HIGH, &BC}, //0xC0
+      {"SET 0, C", 8, &CPU::SET, (IMode)0, nullptr, IMode::LOW, &BC}, //0xC1
+      {"SET 0, D", 8, &CPU::SET, (IMode)0, nullptr, IMode::HIGH, &DE}, //0xC2
+      {"SET 0, E", 8, &CPU::SET, (IMode)0, nullptr, IMode::LOW, &DE}, //0xC3
+      {"SET 0, H", 8, &CPU::SET, (IMode)0, nullptr, IMode::HIGH, &HL}, //0xC4
+      {"SET 0, L", 8, &CPU::SET, (IMode)0, nullptr, IMode::LOW, &HL}, //0xC5
+      {"SET 0, HL", 16, &CPU::SET, (IMode)0, nullptr, IMode::MEM, &HL}, //0xC6
+      {"SET 0, A", 8, &CPU::SET, (IMode)0, nullptr, IMode::HIGH, &AF}, //0xC7
+      {"SET 1, B", 8, &CPU::SET, (IMode)1, nullptr, IMode::HIGH, &BC}, //0xC8
+      {"SET 1, C", 8, &CPU::SET, (IMode)1, nullptr, IMode::LOW, &BC}, //0xC9
+      {"SET 1, D", 8, &CPU::SET, (IMode)1, nullptr, IMode::HIGH, &DE}, //0xCA
+      {"SET 1, E", 8, &CPU::SET, (IMode)1, nullptr, IMode::LOW, &DE}, //0xCB
+      {"SET 1, H", 8, &CPU::SET, (IMode)1, nullptr, IMode::HIGH, &HL}, //0xCC
+      {"SET 1, L", 8, &CPU::SET, (IMode)1, nullptr, IMode::LOW, &HL}, //0xCD
+      {"SET 1, HL", 16, &CPU::SET, (IMode)1, nullptr, IMode::MEM, &HL}, //0xCE
+      {"SET 1, A", 8, &CPU::SET, (IMode)1, nullptr, IMode::HIGH, &AF}, //0xCF
+      {"SET 2, B", 8, &CPU::SET, (IMode)2, nullptr, IMode::HIGH, &BC}, //0xD0
+      {"SET 2, C", 8, &CPU::SET, (IMode)2, nullptr, IMode::LOW, &BC}, //0xD1
+      {"SET 2, D", 8, &CPU::SET, (IMode)2, nullptr, IMode::HIGH, &DE}, //0xD2
+      {"SET 2, E", 8, &CPU::SET, (IMode)2, nullptr, IMode::LOW, &DE}, //0xD3
+      {"SET 2, H", 8, &CPU::SET, (IMode)2, nullptr, IMode::HIGH, &HL}, //0xD4
+      {"SET 2, L", 8, &CPU::SET, (IMode)2, nullptr, IMode::LOW, &HL}, //0xD5
+      {"SET 2, HL", 16, &CPU::SET, (IMode)2, nullptr, IMode::MEM, &HL}, //0xD6
+      {"SET 2, A", 8, &CPU::SET, (IMode)2, nullptr, IMode::HIGH, &AF}, //0xD7
+      {"SET 3, B", 8, &CPU::SET, (IMode)3, nullptr, IMode::HIGH, &BC}, //0xD8
+      {"SET 3, C", 8, &CPU::SET, (IMode)3, nullptr, IMode::LOW, &BC}, //0xD9
+      {"SET 3, D", 8, &CPU::SET, (IMode)3, nullptr, IMode::HIGH, &DE}, //0xDA
+      {"SET 3, E", 8, &CPU::SET, (IMode)3, nullptr, IMode::LOW, &DE}, //0xDB
+      {"SET 3, H", 8, &CPU::SET, (IMode)3, nullptr, IMode::HIGH, &HL}, //0xDC
+      {"SET 3, L", 8, &CPU::SET, (IMode)3, nullptr, IMode::LOW, &HL}, //0xDD
+      {"SET 3, HL", 16, &CPU::SET, (IMode)3, nullptr, IMode::MEM, &HL}, //0xDE
+      {"SET 3, A", 8, &CPU::SET, (IMode)3, nullptr, IMode::HIGH, &AF}, //0xDF
+      {"SET 4, B", 8, &CPU::SET, (IMode)4, nullptr, IMode::HIGH, &BC}, //0xE0
+      {"SET 4, C", 8, &CPU::SET, (IMode)4, nullptr, IMode::LOW, &BC}, //0xE1
+      {"SET 4, D", 8, &CPU::SET, (IMode)4, nullptr, IMode::HIGH, &DE}, //0xE2
+      {"SET 4, E", 8, &CPU::SET, (IMode)4, nullptr, IMode::LOW, &DE}, //0xE3
+      {"SET 4, H", 8, &CPU::SET, (IMode)4, nullptr, IMode::HIGH, &HL}, //0xE4
+      {"SET 4, L", 8, &CPU::SET, (IMode)4, nullptr, IMode::LOW, &HL}, //0xE5
+      {"SET 4, HL", 16, &CPU::SET, (IMode)4, nullptr, IMode::MEM, &HL}, //0xE6
+      {"SET 4, A", 8, &CPU::SET, (IMode)4, nullptr, IMode::HIGH, &AF}, //0xE7
+      {"SET 5, B", 8, &CPU::SET, (IMode)5, nullptr, IMode::HIGH, &BC}, //0xE8
+      {"SET 5, C", 8, &CPU::SET, (IMode)5, nullptr, IMode::LOW, &BC}, //0xE9
+      {"SET 5, D", 8, &CPU::SET, (IMode)5, nullptr, IMode::HIGH, &DE}, //0xEA
+      {"SET 5, E", 8, &CPU::SET, (IMode)5, nullptr, IMode::LOW, &DE}, //0xEB
+      {"SET 5, H", 8, &CPU::SET, (IMode)5, nullptr, IMode::HIGH, &HL}, //0xEC
+      {"SET 5, L", 8, &CPU::SET, (IMode)5, nullptr, IMode::LOW, &HL}, //0xED
+      {"SET 5, HL", 16, &CPU::SET, (IMode)5, nullptr, IMode::MEM, &HL}, //0xEE
+      {"SET 5, A", 8, &CPU::SET, (IMode)5, nullptr, IMode::HIGH, &AF}, //0xEF
+      {"SET 6, B", 8, &CPU::SET, (IMode)6, nullptr, IMode::HIGH, &BC}, //0xF0
+      {"SET 6, C", 8, &CPU::SET, (IMode)6, nullptr, IMode::LOW, &BC}, //0xF1
+      {"SET 6, D", 8, &CPU::SET, (IMode)6, nullptr, IMode::HIGH, &DE}, //0xF2
+      {"SET 6, E", 8, &CPU::SET, (IMode)6, nullptr, IMode::LOW, &DE}, //0xF3
+      {"SET 6, H", 8, &CPU::SET, (IMode)6, nullptr, IMode::HIGH, &HL}, //0xF4
+      {"SET 6, L", 8, &CPU::SET, (IMode)6, nullptr, IMode::LOW, &HL}, //0xF5
+      {"SET 6, HL", 16, &CPU::SET, (IMode)6, nullptr, IMode::MEM, &HL}, //0xF6
+      {"SET 6, A", 8, &CPU::SET, (IMode)6, nullptr, IMode::HIGH, &AF}, //0xF7
+      {"SET 7, B", 8, &CPU::SET, (IMode)7, nullptr, IMode::HIGH, &BC}, //0xF8
+      {"SET 7, C", 8, &CPU::SET, (IMode)7, nullptr, IMode::LOW, &BC}, //0xF9
+      {"SET 7, D", 8, &CPU::SET, (IMode)7, nullptr, IMode::HIGH, &DE}, //0xFA
+      {"SET 7, E", 8, &CPU::SET, (IMode)7, nullptr, IMode::LOW, &DE}, //0xFB
+      {"SET 7, H", 8, &CPU::SET, (IMode)7, nullptr, IMode::HIGH, &HL}, //0xFC
+      {"SET 7, L", 8, &CPU::SET, (IMode)7, nullptr, IMode::LOW, &HL}, //0xFD
+      {"SET 7, HL", 16, &CPU::SET, (IMode)7, nullptr, IMode::MEM, &HL}, //0xFE
+      {"SET 7, A", 8, &CPU::SET, (IMode)7, nullptr, IMode::HIGH, &AF}, //0xFF
+    };
+    
   };
 
 
