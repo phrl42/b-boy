@@ -2,13 +2,13 @@
 
 namespace Banana
 {
-  TileComponent::TileComponent(GBC::Tile (&tile)[], uint32_t n)
+  TileComponent::TileComponent(GBC::Tile (&tile)[], uint32_t n, uint32_t width, uint32_t height)
     :tile(tile)
   {
     this->name = "TileComponent";
     this->n = n;
     
-    uint32_t max = n;
+    /*uint32_t max = n;
 
     if(n > 8) max = 8;
     this->spec.width = 8 * max;
@@ -19,7 +19,12 @@ namespace Banana
       n += 8 - (n % 8);
     }
     this->spec.height = 8 * (n / 8);
+    */
+    this->spec.width = 8 * width;
+    this->spec.height = 8 * height;
     
+    std::cout << spec.width << std::endl;
+    std::cout << spec.height << std::endl;
     this->spec.size = spec.width * spec.height * 3;
     this->spec.format = ImageFormat::RGB8;
 

@@ -8,7 +8,7 @@ namespace Banana
   class TileComponent : public Component
   {
   public:
-    TileComponent(GBC::Tile (&tile)[], uint32_t n);
+    TileComponent(GBC::Tile (&tile)[], uint32_t n, uint32_t width, uint32_t height);
     
     void UpdateTileData();
 
