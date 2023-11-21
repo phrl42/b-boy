@@ -8,7 +8,7 @@ namespace Banana
   class TileComponent : public Component
   {
   public:
-    TileComponent(GBC::Tile (&tile)[], uint32_t n);
+    TileComponent(GBC::Tile *tile, uint32_t n);
     
     void UpdateTileData();
 
@@ -30,7 +30,7 @@ namespace Banana
 
     QuadComponent quad;
 
-    GBC::Tile (&tile)[];
+    GBC::Tile *tile;
     uint32_t n;
     
     TextureSpecification spec;

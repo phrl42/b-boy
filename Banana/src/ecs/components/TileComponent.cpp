@@ -2,7 +2,7 @@
 
 namespace Banana
 {
-  TileComponent::TileComponent(GBC::Tile (&tile)[], uint32_t n)
+  TileComponent::TileComponent(GBC::Tile *tile, uint32_t n)
     :tile(tile)
   {
     this->name = "TileComponent";
@@ -20,8 +20,6 @@ namespace Banana
     }
     this->spec.height = 8 * (n / 8);
 
-    std::cout << spec.width << std::endl;
-    std::cout << spec.height << std::endl;
     this->spec.size = spec.width * spec.height * 4;
     this->spec.format = ImageFormat::RGBA8;
 
@@ -29,6 +27,7 @@ namespace Banana
     {
       pixels.push_back({0, 0, 0, 255});
     }
+    this->spec.data = (void*)pixels.data();
     
     this->quad = QuadComponent(&spec);
 
@@ -44,6 +43,7 @@ namespace Banana
   {
     Pixel palette[4] = {{224, 248, 208, 255}, {136, 192, 112, 255}, {52, 104, 86, 255}, {8, 24, 32, 255}};
 
+    GBC::Tile *beg = tile;
     for(uint32_t t = 0; t < n; t++)
     {
       uint8_t x = 0;
@@ -56,10 +56,12 @@ namespace Banana
 	  y -= 1;
 	  x = 0;
 	}
-	pixels[(((7 - y) * 8) + x) + ((t) * 64)] = palette[tile[t].row[7 - y].bpp[x]]; 
+	pixels[(((7 - y) * 8) + x) + ((t) * 64)] = palette[tile->row[7 - y].bpp[x]];
 	x += 1;
       }
+      tile++;
     }
+    tile = beg;
     spec.data = (void*)pixels.data();
 
     quad.UpdateTexture(); 
