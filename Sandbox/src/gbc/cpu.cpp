@@ -848,6 +848,7 @@ namespace GBC
   {
 
   }
+
   uint8_t CPU::SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
@@ -857,17 +858,29 @@ namespace GBC
   {
 
   }
+
   uint8_t CPU::RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
+  
   uint8_t CPU::RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
 
   }
+
   uint8_t CPU::RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = AF >> 8;
 
+    uint8_t top = Get_Bit_N(val, 7);
+
+    AF &= 0x00FF;
+    AF |= val << 8;
+    
+    Set_Bit_N(&AF, C_FLAG, top);
+
+    return 4;
   }
     
 // keep exception at 0x9F in mind
@@ -999,6 +1012,29 @@ namespace GBC
 
   uint8_t CPU::IBIT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+    uint8_t n = 0;
+    if(r == IMode::LOW)
+    {
+      val = *src_value;
+    }
+
+    if(r == IMode::HIGH)
+    {
+      val = *src_value >> 8;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+      n = 4;
+    }
+
+    uint8_t setv = Get_Bit_N(val, (uint8_t)w);
+    
+    Set_Bit_N(&AF, Z_FLAG, setv);
+
+    return 8 + n;
   }
 
   uint8_t CPU::SWAP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1019,6 +1055,49 @@ namespace GBC
 
   uint8_t CPU::RL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+    uint8_t n = 1;
+
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+    }
+
+    uint8_t top = Get_Bit_N(val, 7);
+
+    val <<= 1;
+    
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+      n = 2;
+    }
+
+    Set_Bit_N(&AF, C_FLAG, top);
+
+    return 8 * n;
   }
 
   uint8_t CPU::RRC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
