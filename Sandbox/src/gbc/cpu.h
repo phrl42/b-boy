@@ -104,6 +104,7 @@ namespace GBC
     uint8_t RLC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
   private:
+    void Set_Bit_N(uint8_t *reg, uint8_t n, uint8_t val);
     void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
     uint16_t Get_Bit_N(uint16_t src, uint8_t n);
   

@@ -29,9 +29,41 @@ namespace GBC
       GBC_LOG("Cannot set bit. Val > 1");
       return;
     }
-    if(n > 16)
+    if(n > 15)
     {
-      GBC_LOG("Could not set bit. n > 16");
+      GBC_LOG("Could not set bit. n > 15");
+      return;
+    }
+
+    uint16_t n_val = *reg;
+    n_val <<= 15 - n;
+    n_val >>= 15;
+
+    if(val == n_val)
+    {
+      return;
+    }
+    n_val = val;
+    uint16_t s_reg = n_val;
+    s_reg <<= n;
+    s_reg |= *reg;
+
+    *reg = s_reg;
+
+    return;
+  }
+
+  void CPU::Set_Bit_N(uint8_t *reg, uint8_t n, uint8_t val)
+  {
+    // todo: assert
+    if(val > 1)
+    {
+      GBC_LOG("Cannot set bit. Val > 1");
+      return;
+    }
+    if(n > 7)
+    {
+      GBC_LOG("Could not set bit. n > 7");
       return;
     }
 
@@ -866,20 +898,44 @@ namespace GBC
   
   uint8_t CPU::RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = AF >> 8;
 
+    uint8_t top = Get_Bit_N(val, 7);
+
+    val <<= 1;
+    
+    Set_Bit_N(&val, 0, top);
+    
+    AF &= 0x00FF;
+    AF |= val << 8;
+
+    Set_Bit_N(&AF, C_FLAG, top);
+    
+    Set_Bit_N(&AF, Z_FLAG, 0);
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+
+    return 4;
   }
 
   uint8_t CPU::RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = AF >> 8;
-
     uint8_t top = Get_Bit_N(val, 7);
+    uint8_t old_c = Get_Bit_N(AF, C_FLAG);
 
+    val <<= 1;
+
+    Set_Bit_N(&val, 0, old_c);
+    
     AF &= 0x00FF;
     AF |= val << 8;
     
     Set_Bit_N(&AF, C_FLAG, top);
 
+    Set_Bit_N(&AF, Z_FLAG, 0);
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
     return 4;
   }
     
@@ -1032,8 +1088,9 @@ namespace GBC
 
     uint8_t setv = Get_Bit_N(val, (uint8_t)w);
     
-    Set_Bit_N(&AF, Z_FLAG, setv);
-
+    Set_Bit_N(&AF, Z_FLAG, (bool)(setv == 0));
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 1);
     return 8 + n;
   }
 
@@ -1074,8 +1131,11 @@ namespace GBC
     }
 
     uint8_t top = Get_Bit_N(val, 7);
-
+    uint8_t old_c = Get_Bit_N(AF, C_FLAG);
+    
     val <<= 1;
+
+    Set_Bit_N(&val, 0, old_c);
     
     if(w == IMode::LOW)
     {
@@ -1095,8 +1155,11 @@ namespace GBC
       n = 2;
     }
 
+    Set_Bit_N(&AF, Z_FLAG, (bool)(top == 0));
     Set_Bit_N(&AF, C_FLAG, top);
 
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
     return 8 * n;
   }
 
