@@ -119,6 +119,9 @@ namespace GBC
   uint8_t CPU::PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     PC += 1;
+    uint8_t opcode = bus->Read(PC);
+
+    (this->*lookup_cb[opcode].opfun)(lookup_cb[opcode].dest, lookup_cb[opcode].w, lookup_cb[opcode].src, lookup_cb[opcode].r);
   }
 
   uint8_t CPU::EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -985,39 +988,51 @@ namespace GBC
 
     return 0;
   }
+
   uint8_t CPU::RES(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::SET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::IBIT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::SWAP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::SLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::SRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::RR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::RL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::RRC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    return 0;
   }
+
   uint8_t CPU::SRL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
   }
+
   uint8_t CPU::RLC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    return 0;
   }
   
 };

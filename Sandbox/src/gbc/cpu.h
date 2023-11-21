@@ -124,7 +124,7 @@ namespace GBC
       IMode r;
       uint16_t *src;
     };
-
+  public:
     Instruction lookup[256] =
     {
       {"NOP", 4, &CPU::NOP, IMode::NONE, nullptr, IMode::NONE, nullptr}, //0x00

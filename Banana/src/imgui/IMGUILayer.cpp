@@ -92,6 +92,7 @@ namespace Banana
       }
     }
 
+    replace_first(mnemonic, "PREFIX", Stats::spec->cpu.lookup_cb[Stats::spec->bus.Read(Stats::spec->cpu.PC+1)].mnemonic);
     replace_first(mnemonic, "e8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
     replace_first(mnemonic, "n8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
     replace_first(mnemonic, "a8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
