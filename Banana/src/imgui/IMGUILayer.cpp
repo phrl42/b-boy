@@ -326,9 +326,7 @@ namespace Banana
 	
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.SP, "SP: "));
 
-    std::string msg = "FPS: 60";
-    if(1 / dt < 59)
-      msg = "FPS: " + std::to_string(1 / dt);
+    std::string msg = "FPS: " + std::to_string(1 / dt);
     ImGui::Text(msg.c_str());
     // maybe put rom name here
     // maybe but restart buttons and stuff in here

@@ -43,11 +43,13 @@ namespace GBC
     {
       return;
     }
+    
     n_val = val;
-    uint16_t s_reg = n_val;
-    s_reg <<= n;
-    s_reg |= *reg;
-
+    n_val <<= n;
+    
+    uint16_t s_reg = *reg;
+    s_reg &= ~((uint16_t)std::pow(2, n));
+    s_reg |= n_val;
     *reg = s_reg;
 
     return;
@@ -366,6 +368,7 @@ namespace GBC
     {
       Set_Half_Carry(*dest_register >> 8, -0x0100, true);
       *dest_register -= 0x0100;
+      
       Set_Bit_N(&AF, Z_FLAG, (bool)((uint8_t)(*dest_register >> 8) == 0));
       Set_Bit_N(&AF, N_FLAG, 1);
     }
