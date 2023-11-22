@@ -4,7 +4,9 @@
 #include "../../vendor/IMGUI/imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+
 #include "imgui_internal.h"
+#include "imgui_memory_editor.h"
 
 #include "Application.hpp"
 #include "event/Input.hpp"
@@ -189,10 +191,11 @@ namespace Banana
       ImGuiID dock_down_right_id = ImGui::DockBuilderSplitNode(dock_down_id, ImGuiDir_Right, 0.6f, nullptr, &dock_down_id);
       
       ImGui::DockBuilderFinish(dockspaceID);
-
+	 
+      ImGui::DockBuilderDockWindow("Scene", dock_main_id);
       ImGui::DockBuilderDockWindow("Tiles", dock_right_id);
       ImGui::DockBuilderDockWindow("Disassembler", dock_right_id);
-      ImGui::DockBuilderDockWindow("Scene", dock_main_id);
+      ImGui::DockBuilderDockWindow("MEM", dock_main_id);
       ImGui::DockBuilderDockWindow("Debugger", dock_down_id);
       ImGui::DockBuilderDockWindow("Registers", dock_down_right_id);
     }
@@ -286,7 +289,9 @@ namespace Banana
     }
     ImGui::EndChild(); 
     ImGui::End();
-    
+
+    static MemoryEditor mem_edit;
+    mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
     ImGui::Begin("Registers", nullptr, 0);
 
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF >> 8, "A: "));

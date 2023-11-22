@@ -25,7 +25,7 @@ namespace GBC
     // needed for accurate timing
     double begin;
     double end;
-  private:
+//  private:
     uint8_t space[GBC_RAM_SIZE] = {0}; // Emulate original gbc ram size
   };
   
