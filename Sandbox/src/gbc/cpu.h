@@ -28,7 +28,8 @@ namespace GBC
 
     uint16_t SP = 0; // Stack Pointer
     uint16_t PC = 0; // Program Counter
- 
+
+    bool IME = false; // Interrupt Flag
     State state;
 
     Bus *bus;

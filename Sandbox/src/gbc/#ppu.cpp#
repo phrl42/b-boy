@@ -19,6 +19,7 @@ namespace GBC
   void PPU::Render()
   {
     UpdateTiles();
+    
   }
 
   void PPU::UpdateTiles()

@@ -155,17 +155,21 @@ namespace GBC
     PC += 1;
     uint8_t opcode = bus->Read(PC);
 
-    (this->*lookup_cb[opcode].opfun)(lookup_cb[opcode].dest, lookup_cb[opcode].w, lookup_cb[opcode].src, lookup_cb[opcode].r);
+    return (this->*lookup_cb[opcode].opfun)(lookup_cb[opcode].dest, lookup_cb[opcode].w, lookup_cb[opcode].src, lookup_cb[opcode].r);
   }
 
   uint8_t CPU::EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    IME = true;
 
+    return 4;
   }
 
   uint8_t CPU::DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    IME = false;
+    
+    return 4;
   }
 
   uint8_t CPU::LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -858,7 +862,13 @@ namespace GBC
 
   uint8_t CPU::RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    IME = true;
 
+    uint16_t addr = Combine(bus->Read(SP+1), bus->Read(SP));
+    SP += 2;
+    PC = addr - 1;
+     
+    return 16;
   }
 
   uint8_t CPU::CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -877,7 +887,11 @@ namespace GBC
 
   uint8_t CPU::CCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
 
+    Set_Bit_N(&AF, C_FLAG, (bool)~Get_Bit_N(AF, C_FLAG));
+    return 4;
   }
 
   uint8_t CPU::DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
