@@ -39,9 +39,6 @@ namespace GBC
     inline uint8_t NOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){ return 0; }
     inline uint8_t HALT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){ state = State::HALT; return 0; }
     inline uint8_t STOP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r){ state = State::STOP; return 0; }
-
-    // 0xCB devil
-    uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     
     uint8_t EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     uint8_t DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
@@ -58,7 +55,6 @@ namespace GBC
 
     uint8_t AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     uint8_t OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
-    // keep exception at 0xAF in mind
     uint8_t XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
     uint8_t POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
@@ -83,14 +79,13 @@ namespace GBC
     uint8_t RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     uint8_t RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     
-    // keep exception at 0x9F in mind
     uint8_t SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
     uint8_t ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
-    // keep exception at 0xBF in mind
     uint8_t CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
+    uint8_t PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     // 0xcb prefixed instructions
     uint8_t RES(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
     uint8_t SET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
@@ -648,6 +643,5 @@ namespace GBC
     };
     
   };
-
 
 };

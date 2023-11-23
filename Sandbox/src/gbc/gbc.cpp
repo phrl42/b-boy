@@ -71,12 +71,31 @@ namespace GBC
       GBC_LOG("Loaded ROM '" + std::string(rom_path) + "'");
     }
 
-    cpu.state = State::RUN;
+    cpu.state = State::HALT;
     rom = rom_path;
 
-    cpu.PC = 0;
+    cpu.PC = 0x100;
   }
 
+  void Spec::Serial_Update()
+  {
+    if(bus.Read(0xFF02) == 0x81)
+    {
+      char c = bus.Read(0xFF01);
+      serial[serial_size++] = c;
+
+      bus.Write(0xFF02, 0);
+    }
+  }
+
+  void Spec::Serial_Print()
+  {
+    if(serial[0])
+    {
+      printf("[SERIAL]: %s\n", serial);
+    }
+  }
+  
   void Spec::Update()
   {
     if(cpu.state == State::RUN)
@@ -84,6 +103,23 @@ namespace GBC
       cpu.Validate_Opcode();
       ppu.Render();
     }
+
+    if(cpu.state == State::HALT)
+    {
+      if(bus.Read(IF))
+      {
+	cpu.state = State::RUN;
+      }
+    }
+    
+    if(cpu.IME)
+    {
+      interrupt.Handle();
+      cpu.IME = false;
+    }
+
+    Serial_Update();
+    Serial_Print();
   }
   
 };

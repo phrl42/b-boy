@@ -1,6 +1,6 @@
 #pragma once
 #include "Sandbox.h"
-
+#include "bitwise.h"
 // 64 KiB address space
 #define GBC_RAM_SIZE 32768 * 2
 // 16 KiB for ROM Bank 00

@@ -27,4 +27,4 @@ namespace GBC
     return opcode;
   }
 
-};
+};  

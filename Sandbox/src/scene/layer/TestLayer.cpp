@@ -26,7 +26,7 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/Tetris.gb");
+    spec.Init("assets/roms/cpu_instrs.gb");
     Stats::spec = &spec;
 
     tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 256));

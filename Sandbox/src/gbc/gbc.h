@@ -4,6 +4,7 @@
 #include "gbc/ppu.h"
 #include "gbc/bus.h"
 #include "gbc/cpu.h"
+#include "gbc/interrupt.h"
 
 namespace GBC
 {
@@ -12,7 +13,7 @@ namespace GBC
   struct Spec
   {
     inline Spec()
-    :cpu(CPU(&bus)), ppu(PPU(&bus))
+    :cpu(CPU(&bus)), ppu(PPU(&bus)), interrupt(Interrupt(&bus, &cpu))
     {
 
     }
@@ -21,6 +22,7 @@ namespace GBC
     CPU cpu;
     PPU ppu;
 
+    Interrupt interrupt;
     const char* rom;
 
     void Init(const char* rom_path);
@@ -28,6 +30,12 @@ namespace GBC
 
   private:
     bool Load_Rom(const char* rom_path);
+
+    char serial[1024] = {0};
+    int serial_size = 0;
+    
+    void Serial_Update();
+    void Serial_Print();
   };
  
 };

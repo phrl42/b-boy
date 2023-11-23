@@ -1,5 +1,6 @@
 #include "gbc/cpu.h"
 #include "gbc/bitwise.h"
+#include "gbc/interrupt.h"
 
 #include "Application.hpp"
 
