@@ -138,9 +138,9 @@ namespace GBC
   
   uint16_t CPU::Get_Bit_N(uint16_t src, uint8_t n)
   {
-    if(n > 16)
+    if(n > 15)
     {
-      GBC_LOG("Could not get bit. n > 16");
+      GBC_LOG("Could not get bit. n > 15");
       return 0;
     }
 
@@ -651,9 +651,10 @@ namespace GBC
 
   uint8_t CPU::POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    *dest_register &= bus->Read(SP);
+    *dest_register &= 0x00000000;
+    *dest_register |= bus->Read(SP);
     SP++;
-    *dest_register &= (bus->Read(SP) << 8);
+    *dest_register |= (bus->Read(SP) << 8);
     SP++;
 
     return 0;
@@ -926,10 +927,9 @@ namespace GBC
     uint8_t val = AF >> 8;
     uint8_t top = Get_Bit_N(val, 7);
     uint8_t old_c = Get_Bit_N(AF, C_FLAG);
-
+    
     val <<= 1;
-
-    Set_Bit_N(&val, 0, old_c);
+    val |= old_c;
     
     AF &= 0x00FF;
     AF |= val << 8;
@@ -1033,17 +1033,17 @@ namespace GBC
 
     if(r == IMode::HIGH)
     {
-      val = *src_value >> 8;
+      val = *src_value;
     }
 
     if(r == IMode::LOW)
     {
-      val = *src_value;
+      val = *src_value << 8;
     }
 
     if(r == IMode::MEM)
     {
-      val = bus->Read(*src_value);
+      val = bus->Read(*src_value) << 8;
     }
 
     if(r == IMode::N8)
@@ -1051,12 +1051,13 @@ namespace GBC
       PC += 1;
       val = bus->Read(PC);
     }
-
-    uint16_t result = *dest_register - val;
+    uint8_t dest_val = *dest_register >> 8;
+    
+    uint16_t result = dest_val - val;
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(result == 0));
-    Set_Half_Carry(*dest_register >> 8, -1 * val, true);
-    Set_Carry_Minus(*dest_register >> 8, val);
+    Set_Half_Carry(dest_val, -1 * val, true);
+    Set_Carry_Minus(dest_val, val);
 
     return 0;
   }
@@ -1137,8 +1138,7 @@ namespace GBC
     uint8_t old_c = Get_Bit_N(AF, C_FLAG);
     
     val <<= 1;
-
-    Set_Bit_N(&val, 0, old_c);
+    val |= old_c;
     
     if(w == IMode::LOW)
     {
