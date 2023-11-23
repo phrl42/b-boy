@@ -896,22 +896,84 @@ namespace GBC
 
   uint8_t CPU::DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t flag_h = Get_Bit_N(AF, H_FLAG);
+    uint8_t flag_c = Get_Bit_N(AF, C_FLAG);
+    uint8_t flag_n = Get_Bit_N(AF, N_FLAG);
 
+    uint8_t A = AF >> 8;
+
+    uint8_t val = 0;
+    uint8_t fc = 0;
+    
+    if(flag_h || (!flag_n && (A & 0xF) > 9))
+    {
+      val = 6;
+    }
+
+    if(flag_c || (!flag_n && A > 0x99))
+    {
+      val |= 0x60;
+      fc = 1;
+    }
+
+    A += flag_n ? -val : val;
+
+    AF |= A << 8;
+    
+    Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
+    Set_Bit_N(&AF, H_FLAG, 0);
+    Set_Bit_N(&AF, C_FLAG, fc);
+    return 4;
   }
 
   uint8_t CPU::SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    Set_Bit_N(&AF, C_FLAG, 1);
+    return 4;
   }
 
   uint8_t CPU::RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = AF >> 8;
 
+    uint8_t bottom = Get_Bit_N(val, 0);
+
+    val >>= 1;
+    
+    Set_Bit_N(&val, 7, bottom);
+    
+    AF &= 0x00FF;
+    AF |= val << 8;
+
+    Set_Bit_N(&AF, C_FLAG, bottom);
+    
+    Set_Bit_N(&AF, Z_FLAG, 0);
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+
+    return 4;
   }
 
   uint8_t CPU::RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = AF >> 8;
+    uint8_t bottom = Get_Bit_N(val, 0);
+    uint8_t old_c = Get_Bit_N(AF, C_FLAG);
+    
+    val >>= 1;
+    Set_Bit_N(&val, 7, (bool)old_c);
+    
+    AF &= 0x00FF;
+    AF |= val << 8;
+    
+    Set_Bit_N(&AF, C_FLAG, bottom);
 
+    Set_Bit_N(&AF, Z_FLAG, 0);
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    return 4;
   }
   
   uint8_t CPU::RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -943,7 +1005,7 @@ namespace GBC
     uint8_t old_c = Get_Bit_N(AF, C_FLAG);
     
     val <<= 1;
-    val |= old_c;
+    Set_Bit_N(&val, 0, (bool)old_c);
     
     AF &= 0x00FF;
     AF |= val << 8;
@@ -956,7 +1018,6 @@ namespace GBC
     return 4;
   }
     
-// keep exception at 0x9F in mind
   uint8_t CPU::SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
@@ -1039,7 +1100,6 @@ namespace GBC
     return 0;
   }
 
-// keep exception at 0xBF in mind
   uint8_t CPU::CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint16_t val = 0;
@@ -1078,10 +1138,82 @@ namespace GBC
 
   uint8_t CPU::RES(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+
+    if(r == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+
+      Set_Bit_N(&val, (uint8_t)w, 0);
+
+      bus->Write(*src_value, val);
+      return 16;
+    }
+
+    Set_Bit_N(&val, (uint8_t)w, 0);
+
+    
+    if(r == IMode::HIGH)
+    {
+      *dest_register &= val << 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      *dest_register &= val;
+    }
+    
+    return 8;
   }
 
   uint8_t CPU::SET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+
+    if(r == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(r == IMode::MEM)
+    {
+      val = bus->Read(*src_value);
+
+      Set_Bit_N(&val, (uint8_t)w, 0);
+
+      bus->Write(*src_value, val);
+      return 16;
+    }
+
+    Set_Bit_N(&val, (uint8_t)w, 1);
+
+    
+    if(r == IMode::HIGH)
+    {
+      *dest_register &= val << 8;
+    }
+
+    if(r == IMode::LOW)
+    {
+      *dest_register &= val;
+    }
+    
+    return 8;
   }
 
   uint8_t CPU::IBIT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1114,18 +1246,205 @@ namespace GBC
 
   uint8_t CPU::SWAP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+    uint8_t n = 1;
+    
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+      n = 2;
+    }
+
+
+    uint8_t low = val >> 4;
+    low &= 0x0F;
+
+    uint8_t high = val;
+    high &= 0xF0;
+
+    val &= 0x00;
+    val = high | low;
+
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= val << 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+    }
+
+    return 8 * n;
   }
 
   uint8_t CPU::SLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+    uint8_t n = 1;
+
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+    }
+
+    uint8_t top = Get_Bit_N(val, 7);
+    val <<= 1;
+    
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+      n = 2;
+    }
+
+    Set_Bit_N(&AF, Z_FLAG, (bool)(top == 0));
+    Set_Bit_N(&AF, C_FLAG, top);
+
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    return 8 * n;
   }
 
   uint8_t CPU::SRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+    uint8_t n = 1;
+
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+    }
+
+    uint8_t bottom = Get_Bit_N(val, 0);
+    uint8_t top = Get_Bit_N(val, 7);
+    val >>= 1;
+    Set_Bit_N(&AF, 7, top);
+    
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+      n = 2;
+    }
+
+    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, C_FLAG, bottom);
+
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    return 8 * n;
   }
 
   uint8_t CPU::RR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+    uint8_t n = 1;
+
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+    }
+
+    uint8_t bottom = Get_Bit_N(val, 0);
+    uint8_t old_c = Get_Bit_N(AF, C_FLAG);
+    
+    val >>= 1;
+    Set_Bit_N(&val, 7, (bool)old_c);
+    
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+      n = 2;
+    }
+
+    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, C_FLAG, bottom);
+
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    return 8 * n;
   }
 
   uint8_t CPU::RL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1152,7 +1471,7 @@ namespace GBC
     uint8_t old_c = Get_Bit_N(AF, C_FLAG);
     
     val <<= 1;
-    val |= old_c;
+    Set_Bit_N(&val, 0, (bool)old_c);
     
     if(w == IMode::LOW)
     {
@@ -1182,16 +1501,152 @@ namespace GBC
 
   uint8_t CPU::RRC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    return 0;
+    uint8_t val = 0;
+    uint8_t n = 1;
+
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+    }
+
+    uint8_t bottom = Get_Bit_N(val, 0);
+    val >>= 1;
+    Set_Bit_N(&val, 7, (bool)bottom);
+    
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+      n = 2;
+    }
+
+    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, C_FLAG, bottom);
+
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    return 8 * n;
   }
 
   uint8_t CPU::SRL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    uint8_t val = 0;
+    uint8_t n = 1;
+
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+    }
+
+    uint8_t bottom = Get_Bit_N(val, 0);
+    
+    val >>= 1;
+    
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+      n = 2;
+    }
+
+    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, C_FLAG, bottom);
+
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    return 8 * n;
   }
 
   uint8_t CPU::RLC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    return 0;
+    uint8_t val = 0;
+    uint8_t n = 1;
+
+    if(w == IMode::LOW)
+    {
+      val = *dest_register;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      val = *dest_register >> 8;
+    }
+
+    if(w == IMode::MEM)
+    {
+      val = bus->Read(*dest_register);
+    }
+
+    uint8_t top = Get_Bit_N(val, 7);
+    val <<= 1;
+    Set_Bit_N(&val, 0, top);
+    
+    if(w == IMode::LOW)
+    {
+      *dest_register &= 0xFF00;
+      *dest_register |= val;
+    }
+
+    if(w == IMode::HIGH)
+    {
+      *dest_register &= 0x00FF;
+      *dest_register |= (val << 8);
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, val);
+      n = 2;
+    }
+
+    Set_Bit_N(&AF, Z_FLAG, (bool)(top == 0));
+    Set_Bit_N(&AF, C_FLAG, top);
+
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    return 8 * n;
   }
   
 };
