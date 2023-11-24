@@ -38,7 +38,8 @@ namespace GBC
 
     if(index != entry) GBC_LOG("Loading BootRom failed.");
 
-    index = entry;
+    index = 0;
+    //index = entry;
     while(file.get(byte))
     {
       bus.Write(index, byte);
@@ -74,7 +75,7 @@ namespace GBC
     cpu.state = State::HALT;
     rom = rom_path;
 
-    cpu.PC = 0x100;
+    cpu.PC = 0;
   }
 
   void Spec::Serial_Update()

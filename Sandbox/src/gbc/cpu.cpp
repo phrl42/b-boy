@@ -344,17 +344,30 @@ namespace GBC
     
     if(w == IMode::HIGH)
     {
-      Set_Half_Carry(*dest_register >> 8, 0x0001, true);
-      *dest_register += 0x0100;
-      Set_Bit_N(&AF, Z_FLAG, (bool)((uint8_t)(*dest_register >> 8) == 0));
+      uint8_t H = *dest_register >> 8;
+      Set_Half_Carry(H, 1, true);
+
+      H += 1;
+
+      *dest_register &= 0x00FF;
+      *dest_register |=  H << 8;
+      
+      Set_Bit_N(&AF, Z_FLAG, (bool)(H == 0));
       Set_Bit_N(&AF, N_FLAG, 0);
     }
 
     if(w == IMode::LOW)
     {
-      Set_Half_Carry(*dest_register, 0x0001, true);
-      *dest_register += 0x0001;
-      Set_Bit_N(&AF, Z_FLAG, (bool)(((uint8_t)*dest_register) == 0));
+      uint8_t L = *dest_register;
+      
+      Set_Half_Carry(L, 1, true);
+
+      L +=1;
+
+      *dest_register &= 0xFF00;
+      *dest_register |= L;
+      
+      Set_Bit_N(&AF, Z_FLAG, (bool)(L == 0));
       Set_Bit_N(&AF, N_FLAG, 0);
     }
 
