@@ -86,7 +86,6 @@ namespace GBC
     else if(address <= 0xFFFF)
     {
       // Interrupt reading
-      GBC_LOG("IO");
     }
 
     space[address] = value;

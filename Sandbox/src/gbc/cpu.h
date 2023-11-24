@@ -19,15 +19,15 @@ namespace GBC
   struct CPU
   {
     inline CPU(Bus *b) { this->bus = b; }
-    uint16_t AF = 0; // Accumulator and Flags
+    uint16_t AF = 0x0100; // Accumulator and Flags
 
     // switchable registers
-    uint16_t BC = 0;
-    uint16_t DE = 0;
-    uint16_t HL = 0;
+    uint16_t BC = 0xFF13;
+    uint16_t DE = 0x00C1;
+    uint16_t HL = 0x8403;
 
-    uint16_t SP = 0; // Stack Pointer
-    uint16_t PC = 0; // Program Counter
+    uint16_t SP = 0xFFFE; // Stack Pointer
+    uint16_t PC = 0x0; // Program Counter
 
     bool IME = false; // Interrupt Flag
     State state;
@@ -108,6 +108,9 @@ namespace GBC
     void Set_Carry_Plus(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Carry_Minus(uint16_t src_register, uint8_t val);
 
+    void Set_Carry_Signed(uint16_t src_register, int8_t val);
+    void Set_Half_Carry_Signed(uint16_t src_register, int8_t val);
+    
     struct Instruction
     {
       const char* mnemonic;
