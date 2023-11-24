@@ -114,7 +114,6 @@ namespace GBC
     if(cpu.IME)
     {
       interrupt.Handle();
-      cpu.IME = false;
     }
 
     Serial_Update();

@@ -74,7 +74,7 @@ namespace GBC
     }
     else if(address <= 0xFE9F)
     {
-      // OAM reading
+      // OAM writing
       GBC_LOG("OAM WRITING NOT IMPLEMENTED");
     }
     else if(address <= 0xFEFF)
@@ -85,7 +85,8 @@ namespace GBC
     }
     else if(address <= 0xFFFF)
     {
-      // Interrupt reading
+      // Interrupt writing
+      GBC_LOG("Interrupt writing");
     }
 
     space[address] = value;

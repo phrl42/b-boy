@@ -25,6 +25,7 @@ namespace GBC
 
   bool Interrupt::Check_Type(INTERRUPT isr, uint16_t address)
   {
+    printf("Checking for Interrupt: %d\n", (int)isr);
     if(Get_Bit_N(bus->Read(IF), isr) && Get_Bit_N(bus->Read(IE), isr))
     {
       Handle_Type(isr, address);
@@ -42,6 +43,7 @@ namespace GBC
   {
     if(Check_Type(INTERRUPT::VBLANK, 0x40))
     {
+
     }
     else if(Check_Type(INTERRUPT::LCD, 0x48))
     {
