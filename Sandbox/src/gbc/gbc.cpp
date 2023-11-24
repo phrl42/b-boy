@@ -29,14 +29,14 @@ namespace GBC
     char byte = 0;
     uint16_t index = 0;
 
-    std::ifstream bootrom("assets/roms/bootrom.gb");
-    while(bootrom.get(byte))
-    {
-      bus.Write(index, byte);
-      index += 1;
-    }
+    //std::ifstream bootrom("assets/roms/bootrom.gb");
+    //while(bootrom.get(byte))
+    //{
+    //bus.Write(index, byte);
+    //index += 1;
+    //}
 
-    if(index != entry) GBC_LOG("Loading BootRom failed.");
+    //if(index != entry) GBC_LOG("Loading BootRom failed.");
 
     index = 0x0;
     //index = entry;
