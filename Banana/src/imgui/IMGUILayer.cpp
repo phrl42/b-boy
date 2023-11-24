@@ -209,7 +209,7 @@ namespace Banana
 
     ImGui::Begin("Debugger", nullptr, 0);
 
-    static std::string adstop = "";
+    static std::string adstop = "0000";
     static std::string breakaddr = "";
 
     ImGui::Text(std::string("Break: 0x" + breakaddr).c_str());

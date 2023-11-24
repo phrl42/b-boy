@@ -17,7 +17,6 @@ namespace GBC
     // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
     uint8_t opcode = bus->Read(PC);
     (this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
-
     PC += 1;
   }
 
@@ -371,18 +370,28 @@ namespace GBC
     
     if(w == IMode::HIGH)
     {
-      Set_Half_Carry(*dest_register >> 8, -0x0100, true);
-      *dest_register -= 0x0100;
+      uint8_t H = *dest_register >> 8;
       
-      Set_Bit_N(&AF, Z_FLAG, (bool)((uint8_t)(*dest_register >> 8) == 0));
+      Set_Half_Carry(H, -1, true);
+
+      H -= 1;
+      *dest_register &= 0x00FF;
+      *dest_register |= H << 8;
+      
+      Set_Bit_N(&AF, Z_FLAG, (bool)(H == 0));
       Set_Bit_N(&AF, N_FLAG, 1);
     }
 
     if(w == IMode::LOW)
     {
-      Set_Half_Carry(*dest_register, -0x0001, true);
-      *dest_register -= 0x0001;
-      Set_Bit_N(&AF, Z_FLAG, (bool)(((uint8_t)*dest_register) == 0));
+      uint8_t L = *dest_register;
+      
+      Set_Half_Carry(L, -1, true);
+      L -= 1;
+      *dest_register &= 0xFF00;
+      *dest_register |= L;
+      
+      Set_Bit_N(&AF, Z_FLAG, (bool)(L == 0));
       Set_Bit_N(&AF, N_FLAG, 1);
     }
 
@@ -759,7 +768,6 @@ namespace GBC
     {
       if(!Get_Bit_N(AF, Z_FLAG)) return 0;
     }
-    
     if(w == IMode::NZ)
     {
       if(Get_Bit_N(AF, Z_FLAG)) return 0;
@@ -1089,15 +1097,19 @@ namespace GBC
     }
 
     val += cflag;
+
+    uint8_t A = *dest_register >> 8;
     
-    if(w == IMode::HIGH)
-    {
-      Set_Half_Carry(*dest_register >> 8, val, true);
-      Set_Carry_Plus(*dest_register >> 8, val, true);
-      *dest_register += val << 8;
-    }
+    Set_Half_Carry(A, val, true);
+    Set_Carry_Plus(A, val, true);
+
+    A += val;
+
+    *dest_register &= 0x00FF;
+    *dest_register |= A << 8;
+
     
-    Set_Bit_N(&AF, Z_FLAG, (bool)(*dest_register == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
     return 0;
   }
 
