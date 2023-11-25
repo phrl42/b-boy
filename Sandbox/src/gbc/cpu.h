@@ -105,6 +105,9 @@ namespace GBC
     uint16_t Get_Bit_N(uint16_t src, uint8_t n);
   
     void Set_Half_Carry(uint16_t src_register, uint16_t val, bool bit8);
+    void Set_Half_Carry_DEC(uint8_t src_register);
+    void Set_Half_Carry_Minus(uint16_t src_register, int val);
+    
     void Set_Carry_Plus(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Carry_Minus(uint16_t src_register, uint8_t val);
 

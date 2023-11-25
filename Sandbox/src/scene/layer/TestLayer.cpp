@@ -26,7 +26,7 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/01-special.gb");
+    spec.Init("assets/roms/06-ld.gb");
     Stats::spec = &spec;
 
     tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 256));
@@ -84,6 +84,43 @@ namespace SANDBOX
     Banana::TileComponent *tc = (Banana::TileComponent*)tilemap.GetComponent("TileComponent");
     tc->UpdateTileData();
 
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
+    spec.Update();
     spec.Update();
   }
 };

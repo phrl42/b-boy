@@ -152,20 +152,6 @@ namespace Banana
   }
   void IMGUILayer::OnUpdate(float dt)
   {
-    uint8_t A = Stats::spec->cpu.AF >> 8;
-    uint8_t F = Stats::spec->cpu.AF;
-
-    uint8_t B = Stats::spec->cpu.BC >> 8;
-    uint8_t C = Stats::spec->cpu.BC;
-
-    uint8_t D = Stats::spec->cpu.DE >> 8;
-    uint8_t E = Stats::spec->cpu.DE;
-
-    uint8_t H = Stats::spec->cpu.HL>> 8;
-    uint8_t L = Stats::spec->cpu.HL;
-
-    printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X\n", A, F, B, C, D, E, H, L, Stats::spec->cpu.SP, Stats::spec->cpu.PC);
-
     static bool show = true;
     static bool p_open = true;
     ImGui_ImplOpenGL3_NewFrame();

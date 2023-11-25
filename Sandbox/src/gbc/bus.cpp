@@ -49,7 +49,7 @@ namespace GBC
       // Interrupt reading
       if(address == 0xFF44)
       {
-	return 0;
+	return 0x90;
       }
     }
 

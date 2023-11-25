@@ -90,7 +90,24 @@ namespace GBC
 
     return;
   }
+  
+  void CPU::Set_Half_Carry_DEC(uint8_t src_register)
+  {
+    uint16_t erase_val = 0x0F;
+    uint16_t check_val = 0x0F;
+    src_register -= 1;
+    Set_Bit_N(&AF, H_FLAG, (src_register & 0x0F) == 0x0F);
+    return;
+  }
 
+  void CPU::Set_Half_Carry_Minus(uint16_t src_register, int val)
+  {
+    bool h = ((int)(src_register & 0xF) - (val & 0xF)) < 0;
+
+    Set_Bit_N(&AF, H_FLAG, h);
+    return;
+  }
+  
   void CPU::Set_Half_Carry(uint16_t src_register, uint16_t val, bool bit8)
   {
     uint16_t erase_val = 0x0F;
@@ -434,7 +451,7 @@ namespace GBC
     {
       uint8_t H = *dest_register >> 8;
       
-      Set_Half_Carry(H, -1, true);
+      Set_Half_Carry_DEC(H);
 
       H -= 1;
       *dest_register &= 0x00FF;
@@ -447,7 +464,7 @@ namespace GBC
     if(w == IMode::LOW)
     {
       uint8_t L = *dest_register;
-      Set_Half_Carry(L, -1, true);
+      Set_Half_Carry_DEC(L);
       L -= 1;
       *dest_register &= 0xFF00;
       *dest_register |= L;
@@ -560,7 +577,7 @@ namespace GBC
     if(w == IMode::HIGH)
     {
       uint8_t A = *dest_register >> 8;
-      Set_Half_Carry(A, -1 * val, false);
+      Set_Half_Carry_Minus(A, val);
       Set_Carry_Minus(A, val);
       
       A -= val;
@@ -568,6 +585,7 @@ namespace GBC
       *dest_register |= A << 8;
       
       Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
+      Set_Bit_N(&AF, N_FLAG, 1);
     }
 
     return 0;
@@ -731,7 +749,22 @@ namespace GBC
 
   uint8_t CPU::POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    *dest_register &= 0x00000000;
+    // most delicious instruction
+    if(bus->Read(PC) == 0xF1)
+    {
+      uint16_t reg_ram = 0;
+
+      reg_ram |= (bus->Read(SP) & 0xF0);
+      SP++;
+      reg_ram |= bus->Read(SP) << 8;
+      SP++;
+
+      AF = reg_ram;
+
+      return 0;
+    }
+    
+    *dest_register &= 0x0000;
     *dest_register |= bus->Read(SP);
     SP++;
     *dest_register |= (bus->Read(SP) << 8);
@@ -828,7 +861,7 @@ namespace GBC
 
   uint8_t CPU::CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    PC += 3;
+    PC += 2;
 
     if(w == IMode::Z)
     {
@@ -849,6 +882,7 @@ namespace GBC
       if(Get_Bit_N(AF, C_FLAG)) return 0;
     }
 
+    PC += 1;
     if(w == IMode::A16)
     {
       PC -= 2;
@@ -1215,7 +1249,7 @@ namespace GBC
     uint16_t result = dest_val - val;
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(result == 0));
-    Set_Half_Carry(dest_val, -1 * val, true);
+    Set_Half_Carry_Minus(dest_val, val);
     Set_Carry_Minus(dest_val, val);
 
     return 0;
