@@ -47,6 +47,10 @@ namespace GBC
     else if(address <= 0xFFFF)
     {
       // Interrupt reading
+      if(address == 0xFF44)
+      {
+	return 0;
+      }
     }
 
     return space[address];

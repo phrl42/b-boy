@@ -65,6 +65,7 @@ namespace GBC
 
     // LCDC Y Coordinate
     const uint16_t LY = 0xFF44;
+
     // LY Compare
     const uint16_t LYC = 0xFF45;
 

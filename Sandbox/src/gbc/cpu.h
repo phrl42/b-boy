@@ -19,7 +19,7 @@ namespace GBC
   struct CPU
   {
     inline CPU(Bus *b) { this->bus = b; }
-    uint16_t AF = 0x0180; // Accumulator and Flags
+    uint16_t AF = 0x01B0; // Accumulator and Flags
 
     // switchable registers
     uint16_t BC = 0x0013;
@@ -27,7 +27,7 @@ namespace GBC
     uint16_t HL = 0x014D;
 
     uint16_t SP = 0xFFFE; // Stack Pointer
-    uint16_t PC = 0; // Program Counter
+    uint16_t PC = 0x0100; // Program Counter
 
     bool IME = false; // Interrupt Flag
     State state;
