@@ -29,11 +29,11 @@ namespace GBC
     uint16_t AF = 0x01B0; // Accumulator and Flags
 
     // switchable registers
-    uint16_t BC = 0;
-    uint16_t DE = 0;
-    uint16_t HL = 0;
+    uint16_t BC = DEFAULT_BC;
+    uint16_t DE = DEFAULT_DE;
+    uint16_t HL = DEFAULT_HL;
 
-    uint16_t SP = 0; // Stack Pointer
+    uint16_t SP = DEFAULT_SP; // Stack Pointer
     uint16_t PC = 0x0100; // Program Counter
 
     bool IME = false; // Interrupt Flag

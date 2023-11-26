@@ -1382,7 +1382,7 @@ namespace GBC
       n = 2;
     }
 
-    Set_Bit_N(&AF, Z_FLAG, (bool)(top == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
     Set_Bit_N(&AF, C_FLAG, top);
 
     Set_Bit_N(&AF, N_FLAG, 0);
@@ -1433,7 +1433,7 @@ namespace GBC
       n = 2;
     }
 
-    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
     Set_Bit_N(&AF, C_FLAG, bottom);
 
     Set_Bit_N(&AF, N_FLAG, 0);
@@ -1485,7 +1485,7 @@ namespace GBC
       n = 2;
     }
 
-    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
     Set_Bit_N(&AF, C_FLAG, bottom);
 
     Set_Bit_N(&AF, N_FLAG, 0);
@@ -1537,7 +1537,7 @@ namespace GBC
       n = 2;
     }
 
-    Set_Bit_N(&AF, Z_FLAG, (bool)(top == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
     Set_Bit_N(&AF, C_FLAG, top);
 
     Set_Bit_N(&AF, N_FLAG, 0);
@@ -1587,7 +1587,7 @@ namespace GBC
       n = 2;
     }
 
-    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
     Set_Bit_N(&AF, C_FLAG, bottom);
 
     Set_Bit_N(&AF, N_FLAG, 0);
@@ -1637,7 +1637,7 @@ namespace GBC
       n = 2;
     }
 
-    Set_Bit_N(&AF, Z_FLAG, (bool)(bottom == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
     Set_Bit_N(&AF, C_FLAG, bottom);
 
     Set_Bit_N(&AF, N_FLAG, 0);
@@ -1687,7 +1687,7 @@ namespace GBC
       n = 2;
     }
 
-    Set_Bit_N(&AF, Z_FLAG, (bool)(top == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
     Set_Bit_N(&AF, C_FLAG, top);
 
     Set_Bit_N(&AF, N_FLAG, 0);

@@ -119,6 +119,20 @@ namespace GBC
   {
     while(!kill)
     {
+      uint8_t A = cpu.AF >> 8;
+      uint8_t F = cpu.AF;
+
+      uint8_t B = cpu.BC >> 8;
+      uint8_t C = cpu.BC;
+
+      uint8_t D = cpu.DE >> 8;
+      uint8_t E = cpu.DE;
+
+      uint8_t H = cpu.HL>> 8;
+      uint8_t L = cpu.HL;
+
+      printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X\n", A, F, B, C, D, E, H, L, cpu.SP, cpu.PC);
+
       if(cpu.state == State::RUN)
       {
 	add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));

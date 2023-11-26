@@ -66,7 +66,7 @@ namespace GBC
   {
     if(serial[0])
     {
-      printf("[GameBoy] [SERIAL]: %s\n", serial);
+      //printf("[GameBoy] [SERIAL]: %s\n", serial);
     }
   }
 };

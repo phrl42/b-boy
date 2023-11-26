@@ -77,6 +77,8 @@ namespace GBC
       {
 	return timer->Read(address);
       }
+
+      return space[address];
       
     }
 
