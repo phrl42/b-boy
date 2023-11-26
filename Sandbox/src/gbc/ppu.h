@@ -5,6 +5,14 @@
 // PPU Registers are located in RAM
 // Tile Data Location
 #define A_TileData 0x8000
+#define A_TileDataEND 0x97FF
+
+// 2 32x32 tile maps
+#define A_TileMap1 0x9800
+#define A_TileMap1END 0x9BFF
+
+#define A_TileMap2 0x9C00
+#define A_TileMap2END 0x9FFF
 
 // Object Attribute Map
 #define A_OAM 0xFE00
@@ -78,13 +86,18 @@ namespace GBC
 
     PPU();
 
-    void Read(uint16_t address);
+    uint8_t Read(uint16_t address);
     void Write(uint16_t address, uint8_t value);
     
     void Render();
     void UpdateTiles();
     
     Tile tile[384 * 2] = {0};
+   
   private:
-  };
+    uint8_t tile_data[A_TileDataEND - A_TileData] = {0};
+
+    uint8_t map1[32*32] = {0};
+    uint8_t map2[32*32] = {0};
+   };
 };

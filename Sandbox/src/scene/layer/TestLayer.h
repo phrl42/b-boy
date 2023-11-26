@@ -5,6 +5,8 @@
 #include "generic/Sound.h"
 #include "gbc/gbc.h"
 
+#include <thread>
+
 namespace SANDBOX
 {
   class TestLayer : public Banana::Layer
@@ -35,6 +37,8 @@ namespace SANDBOX
     Banana::Entity step;
 
     GBC::Spec spec;
+
+    std::thread emu;
   };
 
 };

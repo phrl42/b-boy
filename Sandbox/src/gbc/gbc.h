@@ -14,7 +14,7 @@ namespace GBC
   struct Spec
   {
     inline Spec()
-    :ppu(PPU()), timer(Timer()), interrupt(Interrupt()), bus(Bus(&ppu, &timer, &interrupt)), cpu(CPU(&bus))
+    :interrupt(Interrupt()), ppu(PPU()), timer(Timer(&interrupt)), bus(Bus(&ppu, &timer, &interrupt)), cpu(CPU(&bus))
     {
 
     }
@@ -32,6 +32,8 @@ namespace GBC
     void Init(const char* rom_path);
     void Update();
 
+    // used to terminate thread
+    bool kill = false;
   private:
     bool Load_Rom(const char* rom_path);
 

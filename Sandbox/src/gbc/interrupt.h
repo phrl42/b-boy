@@ -10,17 +10,19 @@ namespace GBC
   
   enum INTERRUPT 
   {
-    VBLANK, LCD, TIMER, SERIAL, JOYPAD
+    VBLANK=0, LCD, TIMER, SERIAL, JOYPAD
   };
   
   struct Interrupt
   {
     Interrupt();
 
-    void Read(uint16_t address);
-    uint8_t Write(uint16_t address, uint8_t value);
+    uint8_t Read(uint16_t address);
+    void Write(uint16_t address, uint8_t value);
 
     void Handle(CPU *cpu);
+
+    void Request(INTERRUPT isr);
   private:
     uint8_t IE = 0x00;
     uint8_t IF = 0x00;

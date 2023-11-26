@@ -25,7 +25,7 @@ namespace GBC
     Bus(PPU *ppu, Timer *timer, Interrupt *interrupt);
 
     uint8_t Read(uint16_t address);
-    uint8_t Write(uint16_t address, uint8_t value);
+    void Write(uint16_t address, uint8_t value);
 
     void Emulate_Cycle(uint8_t n, bool normal);
 

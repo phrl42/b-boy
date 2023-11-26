@@ -26,7 +26,7 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/Tetris.gb");
+    spec.Init("assets/roms/01-special.gb");
     Stats::spec = &spec;
 
     tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 256));
@@ -39,7 +39,8 @@ namespace SANDBOX
 
   TestLayer::~TestLayer()
   {
-
+    spec.kill = true;
+    emu.join();
   }
 
   void TestLayer::OnAttach()
@@ -51,7 +52,8 @@ namespace SANDBOX
 	ent[y][x].AddComponent(new Banana::QuadComponent());
       }
     }
- }
+
+  }
 
   void TestLayer::OnDetach()
   {
@@ -66,6 +68,12 @@ namespace SANDBOX
 
   void TestLayer::OnUpdate(float dt)
   {
+    static bool first = true;
+    if(first)
+    {
+      first = false;
+      emu = std::thread(&GBC::Spec::Update, &spec);
+    }
     float one_width = 2.0f / TFT_WIDTH;
     float one_height = 2.0f / TFT_HEIGHT;
     for(size_t y = 0; y < TFT_HEIGHT; y++)
@@ -84,6 +92,5 @@ namespace SANDBOX
     Banana::TileComponent *tc = (Banana::TileComponent*)tilemap.GetComponent("TileComponent");
     tc->UpdateTileData();
 
-    spec.Update();
   }
 };

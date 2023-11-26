@@ -21,14 +21,134 @@ namespace GBC
 
   }
   
-  void PPU::Read(uint16_t address)
+  uint8_t PPU::Read(uint16_t address)
   {
+    if(address <= A_TileDataEND && address >= A_TileData)
+    {
+      return tile_data[address - A_TileData];
+    }
+    
+    if(address <= A_TileMap1END && address >= A_TileMap1)
+    {
+      return map1[address - A_TileMap1];
+    }
 
+    if(address <= A_TileMap2END && address >= A_TileMap2)
+    {
+      return map2[address - A_TileMap2]; 
+    }
+    
+    switch(address)
+    {
+    case A_OAM:
+      break;
+
+    case A_LCDC:
+      break;
+
+    case A_STAT:
+      break;
+
+    case A_SCX:
+      break;
+
+    case A_SCY:
+      break;
+
+    case A_LY:
+      return 0x90;
+      break;
+
+    case A_LYC:
+      break;
+
+    case A_DMA:
+      break;
+
+    case A_BGP:
+      break;
+
+    case A_OBP0:
+      break;
+
+    case A_OBP1:
+      break;
+
+    case A_WX:
+      break;
+
+    case A_WY:
+      break;
+
+    default:
+      GBC_LOG("[PPU]: WRONG READ");
+    }
   }
   
   void PPU::Write(uint16_t address, uint8_t value)
   {
+    if(address <= A_TileDataEND && address >= A_TileData)
+    {
+      tile_data[address - A_TileData] = value;
+      return;
+    }
 
+    if(address <= A_TileMap1END && address >= A_TileMap1)
+    {
+      map1[address - A_TileMap1] = value;
+      return;
+    }
+
+    if(address <= A_TileMap2END && address >= A_TileMap2)
+    {
+      map2[address - A_TileMap2] = value;
+      return;
+    }
+
+    switch(address)
+    {
+    case A_OAM:
+      break;
+
+    case A_LCDC:
+      break;
+
+    case A_STAT:
+      break;
+
+    case A_SCX:
+      break;
+
+    case A_SCY:
+      break;
+
+    case A_LY:
+      break;
+
+    case A_LYC:
+      break;
+
+    case A_DMA:
+      break;
+
+    case A_BGP:
+      break;
+
+    case A_OBP0:
+      break;
+
+    case A_OBP1:
+      break;
+
+    case A_WX:
+      break;
+
+    case A_WY:
+      break;
+
+    default:
+      GBC_LOG("[PPU]: WRONG WRITE");
+    }
   }
  
   void PPU::Render()
@@ -38,16 +158,14 @@ namespace GBC
 
   void PPU::UpdateTiles()
   {
-    const uint16_t LIMIT = 0x97FF;
-
     // 1 tile = 16 byte
 
     int row_index = 0;
     int tile_index = 0;
-    for(uint16_t pos = A_TileData; pos < LIMIT; pos += 2)
+    for(uint16_t pos = 0; pos < A_TileDataEND - A_TileData; pos += 2)
     {
-      uint16_t lower_row = 0;//bus->Read(pos);
-      uint16_t higher_row = 0;//bus->Read(pos+1);
+      uint16_t lower_row = tile_data[pos];
+      uint16_t higher_row = tile_data[pos+1];
       
       for(uint8_t i = 0; i <= 7; i++)
       {

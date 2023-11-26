@@ -94,27 +94,30 @@ namespace GBC
   
   void Spec::Update()
   {
-    if(cpu.state == State::RUN)
+    while(!kill)
     {
-      cpu.Validate_Opcode();
-      ppu.Render();
-    }
-
-    if(cpu.state == State::HALT)
-    {
-      if(bus.Read(A_IF))
+      if(cpu.state == State::RUN)
       {
-	cpu.state = State::RUN;
+	cpu.Validate_Opcode();
+	ppu.Render();
       }
-    }
-    
-    if(cpu.IME)
-    {
-      interrupt.Handle(&cpu);
-    }
 
-    Serial_Update();
-    Serial_Print();
+      if(cpu.state == State::HALT)
+      {
+	if(bus.Read(A_IF))
+	{
+	  cpu.state = State::RUN;
+	}
+      }
+    
+      if(cpu.IME)
+      {
+	interrupt.Handle(&cpu);
+      }
+
+      Serial_Update();
+      Serial_Print();
+    }
   }
   
 };

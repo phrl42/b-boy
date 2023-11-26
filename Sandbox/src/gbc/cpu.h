@@ -1,6 +1,5 @@
 #pragma once
 #include "Sandbox.h"
-
 #include "gbc/bus.h"
 
 #define DEFAULT_AF 0x01B0
@@ -35,9 +34,10 @@ namespace GBC
     uint16_t HL = 0;
 
     uint16_t SP = 0; // Stack Pointer
-    uint16_t PC = 0; // Program Counter
+    uint16_t PC = 0x0100; // Program Counter
 
     bool IME = false; // Interrupt Flag
+    bool eIME = false; // info whether IME should be activated in the next step
     State state;
 
     Bus *bus;
@@ -108,10 +108,6 @@ namespace GBC
     uint8_t RLC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r);
 
   private:
-    void Set_Bit_N(uint8_t *reg, uint8_t n, uint8_t val);
-    void Set_Bit_N(uint16_t *reg, uint8_t n, uint8_t val);
-    uint16_t Get_Bit_N(uint16_t src, uint8_t n);
-  
     void Set_Half_Carry(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Half_Carry_DEC(uint8_t src_register);
     void Set_Half_Carry_Minus(uint16_t src_register, int val);

@@ -3,33 +3,49 @@
 
 namespace GBC
 {
-  static uint16_t Get_Bit_N(uint16_t src, uint8_t n)
-  {
-    if(n > 15)
-    {
-      GBC_LOG("Could not get bit. n > 15");
-      return 0;
-    }
-
-    src <<= 15 - n;
-    src >>= 15;
-
-    return src;
-  }
-
   Interrupt::Interrupt()
   {
 
   }
 
-  void Read(uint16_t address)
+  void Interrupt::Request(INTERRUPT isr)
   {
-
+    Set_Bit_N(&IF, isr, 1);
   }
 
-  uint8_t Write(uint16_t address, uint8_t value)
+  uint8_t Interrupt::Read(uint16_t address)
   {
+    switch(address)
+    {
+    case A_IF:
+      return IF;
+      break;
 
+    case A_IE:
+      return IE;
+      break;
+
+    default:
+      GBC_LOG("[INTERRUPT]: WRONG READ");
+    }
+    return 0;
+  }
+
+  void Interrupt::Write(uint16_t address, uint8_t value)
+  {
+    switch(address)
+    {
+    case A_IF:
+      IF = value;
+      break;
+
+    case A_IE:
+      IE = value;
+      break;
+
+    default:
+      GBC_LOG("[INTERRUPT]: WRONG READ");
+    }
   }
   
   void Interrupt::Handle_Type(INTERRUPT isr, uint16_t address)
@@ -46,7 +62,7 @@ namespace GBC
     {
       Handle_Type(isr, address);
 
-      //bus->Write(address, 0x0000);
+      Set_Bit_N(&IF, isr, 0);
       cpu->IME = false;
       return true;
     }
@@ -78,10 +94,6 @@ namespace GBC
     else if(Check_Type(INTERRUPT::JOYPAD, 0x60))
     {
 
-    }
-    else
-    {
-      GBC_LOG("Unkown Interrupt");
     }
   }
 };
