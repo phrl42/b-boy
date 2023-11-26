@@ -73,25 +73,6 @@ namespace GBC
     rom = rom_path;
   }
 
-  void Spec::Serial_Update()
-  {
-    if(bus.Read(0xFF02) == 0x81)
-    {
-      char c = bus.Read(0xFF01);
-      serial[serial_size++] = c;
-
-      bus.Write(0xFF02, 0);
-    }
-  }
-
-  void Spec::Serial_Print()
-  {
-    if(serial[0])
-    {
-      printf("[SERIAL]: %s\n", serial);
-    }
-  }
-  
   void Spec::Update()
   {
     while(!kill)
@@ -115,8 +96,8 @@ namespace GBC
 	interrupt.Handle(&cpu);
       }
 
-      Serial_Update();
-      Serial_Print();
+      io.Serial_Update();
+      io.Serial_Print();
     }
   }
   
