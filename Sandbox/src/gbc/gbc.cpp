@@ -8,6 +8,48 @@
 
 namespace GBC 
 {
+  static void replace_first(
+    std::string& s,
+    std::string const& toReplace,
+    std::string const& replaceWith
+    ) {
+    std::size_t pos = s.find(toReplace);
+    if (pos == std::string::npos) return;
+    s.replace(pos, toReplace.length(), replaceWith);
+  }
+
+  static std::string Hex_To_String(uint16_t val, const char* prefix)
+  {
+    std::string ret;
+    std::stringstream hex;
+    hex << std::hex << val;
+    
+    ret = std::string(prefix) + hex.str();
+
+    return ret;
+  }
+
+  void Spec::add_address(uint16_t address, std::string mnemonic)
+  {
+    for(auto pair : instructions)
+    {
+      if(address == pair.first)
+      {
+	return;
+      }
+    }
+
+    replace_first(mnemonic, "PREFIX", cpu.lookup_cb[bus.Read(cpu.PC+1)].mnemonic);
+    replace_first(mnemonic, "e8", std::string(Hex_To_String(bus.Read(address+1), "$(") + ")"));
+    replace_first(mnemonic, "n8", std::string(Hex_To_String(bus.Read(address+1), "$(") + ")"));
+    replace_first(mnemonic, "a8", std::string(Hex_To_String(bus.Read(address+1), "$(") + ")"));
+
+    replace_first(mnemonic, "a16", std::string(Hex_To_String(bus.Read(address+2) << 8 | bus.Read(address+1), "$(") + ")"));
+
+    replace_first(mnemonic, "n16", std::string(Hex_To_String(bus.Read(address+2) << 8 | bus.Read(address+1) , "$(") + ")"));
+    instructions.push_back(std::pair<uint16_t, std::string>(address, mnemonic));
+  }
+  
   bool Spec::Load_Rom(const char* rom_path)
   {
     std::ifstream file(rom_path);
@@ -79,6 +121,7 @@ namespace GBC
     {
       if(cpu.state == State::RUN)
       {
+	add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
 	cpu.Validate_Opcode();
 	ppu.Render();
       }

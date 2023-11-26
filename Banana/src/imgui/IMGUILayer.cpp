@@ -19,7 +19,6 @@
 
 namespace Banana
 {
-  std::vector<std::pair<uint16_t, std::string>> instructions;
   const char* Hex_To_CString(const uint16_t val, const char* prefix)
   {
     std::string ret;
@@ -84,27 +83,6 @@ namespace Banana
     s.replace(pos, toReplace.length(), replaceWith);
   }
 
-  void add_address(uint16_t address, std::string mnemonic)
-  {
-    for(auto pair : instructions)
-    {
-      if(address == pair.first)
-      {
-	return;
-      }
-    }
-
-    replace_first(mnemonic, "PREFIX", Stats::spec->cpu.lookup_cb[Stats::spec->bus.Read(Stats::spec->cpu.PC+1)].mnemonic);
-    replace_first(mnemonic, "e8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
-    replace_first(mnemonic, "n8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
-    replace_first(mnemonic, "a8", std::string(Hex_To_String(Stats::spec->bus.Read(address+1), "$(") + ")"));
-
-    replace_first(mnemonic, "a16", std::string(Hex_To_String(Stats::spec->bus.Read(address+2) << 8 | Stats::spec->bus.Read(address+1), "$(") + ")"));
-
-    replace_first(mnemonic, "n16", std::string(Hex_To_String(Stats::spec->bus.Read(address+2) << 8 | Stats::spec->bus.Read(address+1) , "$(") + ")"));
-    instructions.push_back(std::pair<uint16_t, std::string>(address, mnemonic));
-  }
-  
   IMGUILayer::IMGUILayer(const std::string& name)
     : name(name)
   {
@@ -280,12 +258,11 @@ namespace Banana
     }
 
     ImGui::BeginChild("Scrolling");
-    add_address(Stats::spec->cpu.PC, opcode_info[Stats::spec->bus.Read(Stats::spec->cpu.PC)]);
-    for (int32_t n = instructions.size()-1; n >= 0; n--)
+    for (int32_t n = Stats::spec->instructions.size()-1; n >= 0; n--)
     {
       auto chose = red;
-      if(instructions[n].first == Stats::spec->cpu.PC) chose = green;
-      ImGui::TextColored(chose, "[%x]: %s", instructions[n].first, instructions[n].second.c_str());
+      if(Stats::spec->instructions[n].first == Stats::spec->cpu.PC) chose = green;
+      ImGui::TextColored(chose, "[%x]: %s", Stats::spec->instructions[n].first, Stats::spec->instructions[n].second.c_str());
     }
     ImGui::EndChild(); 
     ImGui::End();

@@ -1,5 +1,6 @@
 #pragma once
 #include "Sandbox.h"
+#include <vector>
 
 #include "gbc/ppu.h"
 #include "gbc/bus.h"
@@ -36,6 +37,12 @@ namespace GBC
 
     // used to terminate thread
     bool kill = false;
+
+    // used for imgui debug
+    std::vector<std::pair<uint16_t, std::string>> instructions;
+
+    void add_address(uint16_t address, std::string mnemonic);
+
   private:
     bool Load_Rom(const char* rom_path);
 
