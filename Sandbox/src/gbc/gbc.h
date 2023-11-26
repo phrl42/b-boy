@@ -5,6 +5,7 @@
 #include "gbc/bus.h"
 #include "gbc/cpu.h"
 #include "gbc/interrupt.h"
+#include "gbc/timer.h"
 
 namespace GBC
 {
@@ -13,16 +14,19 @@ namespace GBC
   struct Spec
   {
     inline Spec()
-    :cpu(CPU(&bus)), ppu(PPU(&bus)), interrupt(Interrupt(&bus, &cpu))
+    :ppu(PPU()), timer(Timer()), interrupt(Interrupt()), bus(Bus(&ppu, &timer, &interrupt)), cpu(CPU(&bus))
     {
 
     }
     
-    Bus bus;
-    CPU cpu;
     PPU ppu;
-
+    Timer timer;
     Interrupt interrupt;
+
+    Bus bus;
+
+    CPU cpu;
+
     const char* rom;
 
     void Init(const char* rom_path);

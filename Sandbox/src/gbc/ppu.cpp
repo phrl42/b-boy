@@ -16,9 +16,24 @@ namespace GBC
     return src;
   }
 
+  PPU::PPU()
+  {
+
+  }
+  
+  void PPU::Read(uint16_t address)
+  {
+
+  }
+  
+  void PPU::Write(uint16_t address, uint8_t value)
+  {
+
+  }
+ 
   void PPU::Render()
   {
-    //UpdateTiles();
+    UpdateTiles();
   }
 
   void PPU::UpdateTiles()
@@ -29,10 +44,10 @@ namespace GBC
 
     int row_index = 0;
     int tile_index = 0;
-    for(uint16_t pos = TileData; pos < LIMIT; pos += 2)
+    for(uint16_t pos = A_TileData; pos < LIMIT; pos += 2)
     {
-      uint16_t lower_row = bus->Read(pos);
-      uint16_t higher_row = bus->Read(pos+1);
+      uint16_t lower_row = 0;//bus->Read(pos);
+      uint16_t higher_row = 0;//bus->Read(pos+1);
       
       for(uint8_t i = 0; i <= 7; i++)
       {

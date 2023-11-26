@@ -290,8 +290,6 @@ namespace Banana
     ImGui::EndChild(); 
     ImGui::End();
 
-    static MemoryEditor mem_edit;
-    mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
     ImGui::Begin("Registers", nullptr, 0);
 
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF >> 8, "A: "));

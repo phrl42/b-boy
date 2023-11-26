@@ -12,6 +12,12 @@
 namespace GBC
 {
 
+  CPU::CPU(Bus *bus)
+    :bus(bus)
+  {
+
+  }
+  
   void CPU::Validate_Opcode()
   {
     // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)

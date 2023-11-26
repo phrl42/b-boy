@@ -1,13 +1,13 @@
 #pragma once
-#include "gbc/bus.h"
-#include "gbc/cpu.h"
 #include "gbc/bitwise.h"
 
-#define IE 0xFFFF
-#define IF 0xFF0F
+#define A_IE 0xFFFF
+#define A_IF 0xFF0F
 
 namespace GBC
 {
+  struct CPU;
+  
   enum INTERRUPT 
   {
     VBLANK, LCD, TIMER, SERIAL, JOYPAD
@@ -15,16 +15,16 @@ namespace GBC
   
   struct Interrupt
   {
-    inline Interrupt(Bus *bus, CPU *cpu)
-    :bus(bus), cpu(cpu)
-    {
+    Interrupt();
 
-    }
+    void Read(uint16_t address);
+    uint8_t Write(uint16_t address, uint8_t value);
 
-    void Handle();
-    
+    void Handle(CPU *cpu);
   private:
-    Bus *bus;
+    uint8_t IE = 0x00;
+    uint8_t IF = 0x00;
+    
     CPU *cpu;
     
     bool Check_Type(INTERRUPT isr, uint16_t address);

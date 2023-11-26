@@ -23,29 +23,26 @@ namespace GBC
     length = file.tellg();
     file.seekg(0, file.beg);
       
-    // put game rom into ram starting at 0x0100
-    // put bootrom before
-    
     char byte = 0;
     uint16_t index = 0;
 
-    //std::ifstream bootrom("assets/roms/bootrom.gb");
-    //while(bootrom.get(byte))
-    //{
-    //bus.Write(index, byte);
-    //index += 1;
-    //}
-
-    //if(index != entry) GBC_LOG("Loading BootRom failed.");
-
-    index = 0x0;
-    //index = entry;
     while(file.get(byte))
     {
       bus.Write(index, byte);
       index += 1;
     }
-    GBC_LOG("Loaded " + std::to_string(index - entry) + " bytes");
+
+    GBC_LOG("Loaded " + std::to_string(index) + " bytes");
+
+    index = 0;
+    std::ifstream bootrom("assets/roms/bootrom.gb");
+    while(bootrom.get(byte))
+    {
+      bus.Write(index, byte);
+      index += 1;
+    }
+
+    if(index != entry) GBC_LOG("Loading BootRom failed.");
 
     file.close();
     return true;
@@ -99,26 +96,13 @@ namespace GBC
   {
     if(cpu.state == State::RUN)
     {
-      uint8_t A = cpu.AF >> 8;
-      uint8_t F = cpu.AF;
-
-      uint8_t B = cpu.BC >> 8;
-      uint8_t C = cpu.BC;
-
-      uint8_t D = cpu.DE >> 8;
-      uint8_t E = cpu.DE;
-
-      uint8_t H = cpu.HL>> 8;
-      uint8_t L = cpu.HL;
-
-      //printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X\n", A, F, B, C, D, E, H, L, cpu.SP, cpu.PC);
       cpu.Validate_Opcode();
       ppu.Render();
     }
 
     if(cpu.state == State::HALT)
     {
-      if(bus.Read(IF))
+      if(bus.Read(A_IF))
       {
 	cpu.state = State::RUN;
       }
@@ -126,7 +110,7 @@ namespace GBC
     
     if(cpu.IME)
     {
-      interrupt.Handle();
+      interrupt.Handle(&cpu);
     }
 
     Serial_Update();

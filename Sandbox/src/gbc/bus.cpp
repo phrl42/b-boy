@@ -13,6 +13,13 @@ namespace GBC
     }
   }
 
+  Bus::Bus(PPU *ppu, Timer *timer, Interrupt *interrupt)
+  {
+    this->ppu = ppu;
+    this->timer = timer;
+    this->interrupt = interrupt;
+  }
+
   uint8_t Bus::Read(uint16_t address)
   {
     if(address <= 0x7FFF)
@@ -46,7 +53,7 @@ namespace GBC
     }
     else if(address <= 0xFFFF)
     {
-      // Interrupt reading
+      // IO / HRAM / Interrupt / Timer
       if(address == 0xFF44)
       {
 	return 0x90;
@@ -89,8 +96,8 @@ namespace GBC
     }
     else if(address <= 0xFFFF)
     {
-      // Interrupt writing
-      GBC_LOG("Interrupt writing");
+      // IO / HRAM / Interrupt / Timer
+
     }
 
     space[address] = value;

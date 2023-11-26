@@ -1,6 +1,11 @@
 #pragma once
 #include "Sandbox.h"
 #include "bitwise.h"
+
+#include "gbc/ppu.h"
+#include "gbc/timer.h"
+#include "gbc/interrupt.h"
+
 // 64 KiB address space
 #define GBC_RAM_SIZE 32768 * 2
 // 16 KiB for ROM Bank 00
@@ -17,17 +22,19 @@ namespace GBC
 {
   struct Bus
   {
+    Bus(PPU *ppu, Timer *timer, Interrupt *interrupt);
+
     uint8_t Read(uint16_t address);
     uint8_t Write(uint16_t address, uint8_t value);
 
     void Emulate_Cycle(uint8_t n, bool normal);
 
-    // needed for accurate timing
-    double begin;
-    double end;
+  private:
+    PPU *ppu;
+    Timer *timer;
+    Interrupt *interrupt;
 
-    // private:
-    uint8_t space[GBC_RAM_SIZE] = {0}; // Emulate original gbc ram size
+    uint8_t space[GBC_RAM_SIZE] = {0};
   };
   
 };

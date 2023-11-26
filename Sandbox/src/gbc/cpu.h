@@ -1,10 +1,18 @@
 #pragma once
 #include "Sandbox.h"
+
 #include "gbc/bus.h"
+
+#define DEFAULT_AF 0x01B0
+#define DEFAULT_BC 0x0013
+#define DEFAULT_DE 0x00D8
+#define DEFAULT_HL 0x014D
+#define DEFAULT_SP 0xFFFE
+#define DEFAULT_PC 0x0100
 
 namespace GBC
 {
-
+  
   // toggles higher_half, lower_half and 16-bit mode in opfunctions
   enum IMode
     {
@@ -18,16 +26,16 @@ namespace GBC
    
   struct CPU
   {
-    inline CPU(Bus *b) { this->bus = b; }
+    CPU(Bus *bus);
     uint16_t AF = 0x01B0; // Accumulator and Flags
 
     // switchable registers
-    uint16_t BC = 0x0013;
-    uint16_t DE = 0x00D8;
-    uint16_t HL = 0x014D;
+    uint16_t BC = 0;
+    uint16_t DE = 0;
+    uint16_t HL = 0;
 
-    uint16_t SP = 0xFFFE; // Stack Pointer
-    uint16_t PC = 0x0100; // Program Counter
+    uint16_t SP = 0; // Stack Pointer
+    uint16_t PC = 0; // Program Counter
 
     bool IME = false; // Interrupt Flag
     State state;
