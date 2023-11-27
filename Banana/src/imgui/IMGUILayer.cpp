@@ -196,6 +196,7 @@ namespace Banana
     if(ImGui::InputText(" ", adstop.data(), 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_EnterReturnsTrue))
     {
       breakaddr = adstop;
+      Stats::spec->breakaddr = String_To_Hex(breakaddr);
     }
 
     if(String_To_Hex(breakaddr) == Stats::spec->cpu.PC)
@@ -213,6 +214,7 @@ namespace Banana
     {
       breakaddr = adstop;
       Stats::spec->cpu.state = GBC::State::RUN;
+      Stats::spec->breakfree = true;
     }
     ImGui::SameLine();
     if(ImGui::ImageButton((void*)Stats::stop_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))

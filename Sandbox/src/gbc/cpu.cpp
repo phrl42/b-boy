@@ -1146,22 +1146,22 @@ namespace GBC
 
   uint8_t CPU::CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    uint16_t val = 0;
+    uint8_t val = 0;
     Set_Bit_N(&AF, N_FLAG, 1);
 
     if(r == IMode::HIGH)
     {
-      val = *src_value;
+      val = *src_value >> 8;
     }
 
     if(r == IMode::LOW)
     {
-      val = *src_value << 8;
+      val = *src_value;
     }
 
     if(r == IMode::MEM)
     {
-      val = bus->Read(*src_value) << 8;
+      val = bus->Read(*src_value);
     }
 
     if(r == IMode::N8)

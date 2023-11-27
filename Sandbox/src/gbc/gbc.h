@@ -37,10 +37,13 @@ namespace GBC
 
     // used to terminate thread
     bool kill = false;
-
+    
     // used for imgui debug
     std::vector<std::pair<uint16_t, std::string>> instructions;
 
+    int breakaddr = 0;
+    bool breakfree = false;
+    
     void add_address(uint16_t address, std::string mnemonic);
 
   private:
