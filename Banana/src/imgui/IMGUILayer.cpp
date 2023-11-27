@@ -196,7 +196,7 @@ namespace Banana
     if(ImGui::InputText(" ", adstop.data(), 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_EnterReturnsTrue))
     {
       breakaddr = adstop;
-      Stats::spec->breakaddr = String_To_Hex(breakaddr);
+      Stats::spec->breakaddr = String_To_Hex(adstop);
     }
 
     if(String_To_Hex(breakaddr) == Stats::spec->cpu.PC)

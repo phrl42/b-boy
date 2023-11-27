@@ -119,17 +119,7 @@ namespace GBC
   {
     while(!kill)
     {
-      bool run = true;
-      if(breakaddr == cpu.PC)
-      {
-	run = false;
-      }
-      else
-      {
-	breakaddr = false;
-      }
-
-      if(cpu.state == State::RUN && run)
+      if(cpu.state == State::RUN)
       {
 	add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
 	cpu.Validate_Opcode();
