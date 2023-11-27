@@ -35,7 +35,7 @@ namespace GBC
     Timer *timer;
     Interrupt *interrupt;
     IO *io;
-    
+  public: 
     uint8_t space[GBC_RAM_SIZE] = {0};
   };
   

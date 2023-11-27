@@ -182,7 +182,7 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Tiles", nullptr, 0);
-    ImGui::Image((void*)Stats::tiles_id, ImVec2(500, 500), ImVec2(1, 0), ImVec2(0, 1));
+    ImGui::Image((void*)Stats::tiles_id, ImVec2(500, 500), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 
     ImGui::Begin("Debugger", nullptr, 0);
@@ -266,6 +266,9 @@ namespace Banana
     }
     ImGui::EndChild(); 
     ImGui::End();
+    
+    static MemoryEditor mem_edit;
+    mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
 
     ImGui::Begin("Registers", nullptr, 0);
 

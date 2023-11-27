@@ -34,8 +34,6 @@ namespace GBC
 
   void CPU::Set_Half_Carry_DEC(uint8_t src_register)
   {
-    uint16_t erase_val = 0x0F;
-    uint16_t check_val = 0x0F;
     src_register -= 1;
     Set_Bit_N(&AF, H_FLAG, (src_register & 0x0F) == 0x0F);
     return;
