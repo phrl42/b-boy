@@ -48,7 +48,7 @@ namespace GBC
     // used for imgui debug
     std::vector<std::pair<uint16_t, std::string>> instructions;
 
-    int breakaddr = 0;
+    int breakaddr = 0x100;
     bool breakfree = false;
     
     void add_address(uint16_t address, std::string mnemonic);
