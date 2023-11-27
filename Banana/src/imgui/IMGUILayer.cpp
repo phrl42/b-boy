@@ -217,6 +217,7 @@ namespace Banana
       {
 	Stats::spec->dstate = GBC::Debug::STEP;
       }
+
     }
     
     ImGui::SameLine();

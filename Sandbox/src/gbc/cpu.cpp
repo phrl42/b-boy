@@ -333,7 +333,12 @@ namespace GBC
     {
       *dest_register += 1;
     }
-    
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, bus->Read(*dest_register)+1);
+    }
+   
     if(w == IMode::HIGH)
     {
       uint8_t H = *dest_register >> 8;
@@ -369,7 +374,12 @@ namespace GBC
   {
     if(w == IMode::ALL)
     {
-      *dest_register -= 1;
+      *dest_register -= 0x01;
+    }
+
+    if(w == IMode::MEM)
+    {
+      bus->Write(*dest_register, bus->Read(*dest_register)-1);
     }
     
     if(w == IMode::HIGH)
@@ -952,6 +962,7 @@ namespace GBC
 
     A += flag_n ? -val : val;
 
+    AF &= 0x00FF;
     AF |= A << 8;
     
     Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
@@ -1169,6 +1180,7 @@ namespace GBC
       PC += 1;
       val = bus->Read(PC);
     }
+    
     uint8_t dest_val = *dest_register >> 8;
     
     uint16_t result = dest_val - val;
