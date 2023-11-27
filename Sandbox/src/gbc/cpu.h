@@ -22,7 +22,7 @@ namespace GBC
     {
       STOP, RUN, HALT
     };
-   
+  
   struct CPU
   {
     CPU(Bus *bus);
@@ -38,6 +38,7 @@ namespace GBC
 
     bool IME = false; // Interrupt Flag
     bool eIME = false; // info whether IME should be activated in the next step
+
     State state;
 
     Bus *bus;

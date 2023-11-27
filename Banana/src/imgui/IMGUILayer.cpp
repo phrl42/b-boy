@@ -201,26 +201,28 @@ namespace Banana
 
     if(String_To_Hex(breakaddr) == Stats::spec->cpu.PC)
     {
-      Stats::spec->cpu.state = GBC::State::HALT;
+      Stats::spec->dstate = GBC::Debug::STOP;
     }
 
     static bool step_mode = false;
-    if(step_mode)
-    {
-      Stats::spec->cpu.state = GBC::State::HALT;
-    }
-      
+     
     if(ImGui::ImageButton((void*)Stats::play_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
       breakaddr = adstop;
-      Stats::spec->cpu.state = GBC::State::RUN;
-      Stats::spec->breakfree = true;
+      if(!step_mode)
+      {
+	Stats::spec->dstate = GBC::Debug::RUN;
+      }
+      else
+      {
+	Stats::spec->dstate = GBC::Debug::STEP;
+      }
     }
+    
     ImGui::SameLine();
     if(ImGui::ImageButton((void*)Stats::stop_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
-      Stats::spec->cpu.state = GBC::State::HALT;
-      //if(step_mode) Stats::spec->cpu.state = GBC::State::RUN;
+      Stats::spec->dstate = GBC::Debug::STOP;
       step_mode = false;
     }
     auto red = ImVec4(1, 0, 0, 1);
@@ -233,30 +235,29 @@ namespace Banana
     if(ImGui::ImageButton((void*)Stats::step_id, ImVec2(50, 50), ImVec2(0, 1), ImVec2(1, 0)))
     {
       step_mode = !step_mode;
+      
+      Stats::spec->dstate = step_mode ? GBC::Debug::STEP : GBC::Debug::STOP;
     }
-   
+    
     ImGui::End();
 
     ImGui::Begin("Disassembler", nullptr, 0);
     ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC), "$"));
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
     ImGui::SameLine();
-    switch(Stats::spec->cpu.state)
+    switch(Stats::spec->dstate)
     {
-    case GBC::State::HALT:
+    case GBC::Debug::STOP:
     {
-      ImGui::TextColored(red, "[ HALT ]");
-      break;
-    }
-
-    case GBC::State::RUN:
-    {
-      ImGui::TextColored(green, "[ RUN ]");
+      ImGui::TextColored(red, "[ STOP ]");
       break;
     }
 
     default:
+    {
+      ImGui::TextColored(green, "[ RUN ]");
       break;
+    }
     }
 
     ImGui::BeginChild("Scrolling");

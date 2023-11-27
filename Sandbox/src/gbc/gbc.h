@@ -12,7 +12,12 @@
 namespace GBC
 {
   const uint16_t entry = 0x0100;
- 
+
+  enum class Debug
+  {
+    RUN, STOP, STEP
+  };
+  
   struct Spec
   {
     inline Spec()
@@ -30,6 +35,8 @@ namespace GBC
 
     CPU cpu;
 
+    Debug dstate = Debug::RUN;
+    
     const char* rom;
 
     void Init(const char* rom_path);

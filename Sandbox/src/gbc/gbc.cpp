@@ -117,14 +117,26 @@ namespace GBC
 
   void Spec::Update()
   {
+    bool adt = false;
     while(!kill)
     {
-      if(cpu.state == State::RUN)
+      if(!adt)
       {
+	adt = true;
 	add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
+      }
+
+      if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
+      {
+	adt = false;
 	cpu.Validate_Opcode();
 
 	ppu.Render();
+
+	if(dstate == Debug::STEP)
+	{
+	  dstate = Debug::STOP;
+	}
       }
 
       if(cpu.state == State::HALT)
@@ -142,6 +154,7 @@ namespace GBC
 
       io.Serial_Update();
       io.Serial_Print();
+
     }
   }
   
