@@ -190,18 +190,29 @@ namespace Banana
     static std::string adstop = "0000";
     static std::string breakaddr = "";
 
+    static std::string adop = "00";
+    static std::string breakop = "";
+    
     ImGui::Text(std::string("Break: 0x" + breakaddr).c_str());
     
     ImGui::PushItemWidth(100);
-    if(ImGui::InputText(" ", adstop.data(), 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_EnterReturnsTrue))
+    if(ImGui::InputText("$", adstop.data(), 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_EnterReturnsTrue))
     {
       breakaddr = adstop;
       Stats::spec->breakaddr = String_To_Hex(adstop);
     }
-
+   
     if(String_To_Hex(breakaddr) == Stats::spec->cpu.PC)
     {
       Stats::spec->dstate = GBC::Debug::STOP;
+    }
+
+    ImGui::SameLine();
+    ImGui::PushItemWidth(50);
+    if(ImGui::InputText(" ", adop.data(), 5, ImGuiInputTextFlags_CharsHexadecimal | ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_EnterReturnsTrue))
+    {
+      breakop = adop;
+      Stats::spec->breakop = String_To_Hex(breakop);
     }
 
     static bool step_mode = false;
