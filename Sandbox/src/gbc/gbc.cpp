@@ -132,7 +132,7 @@ namespace GBC
       uint8_t H = cpu.HL>> 8;
       uint8_t L = cpu.HL;
 
-      printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X\n", A, F, B, C, D, E, H, L, cpu.SP, cpu.PC);
+      //printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X\n", A, F, B, C, D, E, H, L, cpu.SP, cpu.PC);
 
       if(breakop == bus.Read(cpu.PC))
       {
@@ -148,6 +148,8 @@ namespace GBC
       if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
       {
 	adt = false;
+	bus.PC = cpu.PC;
+	
 	cpu.Validate_Opcode();
 
 	ppu.Render();
@@ -172,7 +174,7 @@ namespace GBC
       }
 
       io.Serial_Update();
-      //io.Serial_Print();
+      io.Serial_Print();
 
     }
   }

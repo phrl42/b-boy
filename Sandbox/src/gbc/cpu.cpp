@@ -423,7 +423,7 @@ namespace GBC
 
     if(r == IMode::LOW)
     {
-      val = *src_value;
+      val = (uint8_t)*src_value;
     }
 
     if(r == IMode::ALL)
@@ -477,7 +477,7 @@ namespace GBC
       Set_Half_Carry(*dest_register, val, false);
       Set_Carry_Plus(*dest_register, val, false);
       *dest_register += val;
-    }
+   }
 
     return 0;
   }
