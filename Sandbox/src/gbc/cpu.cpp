@@ -174,7 +174,7 @@ namespace GBC
 
     if(r == IMode::LOW)
     {
-      val = (*src_value << 8) >> 8;
+      val = (uint8_t)*src_value;
     }
 
     if(r == IMode::ALL)
