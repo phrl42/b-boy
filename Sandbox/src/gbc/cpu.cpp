@@ -148,7 +148,7 @@ namespace GBC
 
   void CPU::Set_Half_Carry_Signed(uint16_t src_register, int8_t val)
   {
-    uint16_t erase_val = 0x0F00;
+    uint16_t erase_val = 0x0FFF;
     uint16_t check_val = 0x1000;
 
     bool cval = 0;
@@ -157,7 +157,8 @@ namespace GBC
     val &= erase_val;
     
     src_register += val;
-    if((src_register & check_val) == check_val)
+    
+    if(src_register >= check_val)
     {
       cval = 1;
     }      
@@ -294,7 +295,9 @@ namespace GBC
     if(r == IMode::E8)
     {
       PC += 1;
-      val = *src_value + (int8_t)bus->Read(PC);
+      uint16_t src_val = SP + (int8_t)bus->Read(PC);
+      HL = src_val;
+      return 0;
     }
     
     // only counts for 0x08
@@ -519,8 +522,8 @@ namespace GBC
       PC += 1;
       int8_t val = (int8_t)bus->Read(PC);
 
-      Set_Carry_Signed(*dest_register, val);
       Set_Half_Carry_Signed(*dest_register, val);
+      Set_Carry_Signed(*dest_register, val);
       
       *dest_register += val;
 
