@@ -202,8 +202,7 @@ namespace GBC
 
     bool cval = 0;
 
-    A -= 1;
-    if((int)(A - val) < 0)
+    if((int)(((A & 0xF) - (val & 0xF)) - Get_Bit_N(AF, C_FLAG)) < 0)
     {
       cval = 1;
     }
@@ -1170,7 +1169,7 @@ namespace GBC
       Set_Half_Carry_MinusC(A, val);
       Set_Carry_MinusC(A, val);
 
-      A -= val - cflag;
+      A -= val + cflag;
 
       *dest_register &= 0x00FF;
       *dest_register |= A << 8;
