@@ -112,10 +112,15 @@ namespace GBC
     void Set_Half_Carry(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Half_Carry_DEC(uint8_t src_register);
     void Set_Half_Carry_Minus(uint16_t src_register, int val);
-    
+
+    // special operation for half carry
+    void Set_Half_Carry_MinusC(uint16_t src_register, int val);
+    void Set_Half_CarryC(uint16_t src_register, uint16_t val, bool bit8);
+    void Set_Carry_PlusC(uint16_t src_register, uint16_t val, bool bit8);
+    void Set_Carry_MinusC(uint16_t src_register, uint8_t val);
+
     void Set_Carry_Plus(uint16_t src_register, uint16_t val, bool bit8);
     void Set_Carry_Minus(uint16_t src_register, uint8_t val);
-
     void Set_Carry_Signed(uint16_t src_register, int8_t val);
     void Set_Half_Carry_Signed(uint16_t src_register, int8_t val);
     

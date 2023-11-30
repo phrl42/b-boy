@@ -47,6 +47,14 @@ namespace GBC
     return;
   }
   
+  void CPU::Set_Half_Carry_MinusC(uint16_t src_register, int val)
+  {
+    bool h = (((int)(src_register & 0xF) - (val & 0xF)) - Get_Bit_N(AF, C_FLAG)) < 0;
+
+    Set_Bit_N(&AF, H_FLAG, h);
+    return;
+  }
+
   void CPU::Set_Half_Carry(uint16_t src_register, uint16_t val, bool bit8)
   {
     uint16_t erase_val = 0x0F;
@@ -63,6 +71,32 @@ namespace GBC
     val &= erase_val;
     
     src_register += val;
+    if(src_register >= check_val)
+    {
+      cval = 1;
+    }      
+
+    Set_Bit_N(&AF, H_FLAG, cval);
+    return;
+  }
+
+  void CPU::Set_Half_CarryC(uint16_t src_register, uint16_t val, bool bit8)
+  {
+    uint16_t erase_val = 0x0F;
+    uint16_t check_val = 0x10;
+
+    bool cval = 0;
+    if(!bit8)
+    {
+      erase_val = 0x0FFF;
+      check_val = 0x1000;
+    }
+
+    src_register &= erase_val;
+    val &= erase_val;
+    
+    src_register += val;
+    src_register -= Get_Bit_N(AF, C_FLAG);
     if(src_register >= check_val)
     {
       cval = 1;
@@ -90,6 +124,27 @@ namespace GBC
     Set_Bit_N(&AF, C_FLAG, cval);
     return;
   }
+
+  void CPU::Set_Carry_PlusC(uint16_t src_register, uint16_t val, bool bit8)
+  {
+    uint16_t check_val = 0xFF;
+    bool cval = 0;
+    
+    if(!bit8)
+    {
+      check_val = 0xFFFF;
+    }
+
+    src_register += Get_Bit_N(AF, C_FLAG);
+    if((int)(src_register + val) > check_val)
+    {
+      cval = 1;
+    }
+
+    Set_Bit_N(&AF, C_FLAG, cval);
+    return;
+  }
+
 
   void CPU::Set_Half_Carry_Signed(uint16_t src_register, int8_t val)
   {
@@ -125,7 +180,6 @@ namespace GBC
     return;
   }
 
-
   void CPU::Set_Carry_Minus(uint16_t src_register, uint8_t val)
   {
     uint8_t A = src_register;
@@ -142,6 +196,23 @@ namespace GBC
     return;
   }
   
+  void CPU::Set_Carry_MinusC(uint16_t src_register, uint8_t val)
+  {
+    uint8_t A = src_register;
+
+    bool cval = 0;
+
+    A -= 1;
+    if((int)(A - val) < 0)
+    {
+      cval = 1;
+    }
+
+    Set_Bit_N(&AF, C_FLAG, cval);
+    
+    return;
+  }
+
   uint8_t CPU::PREFIX(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     PC += 1;
@@ -1092,22 +1163,21 @@ namespace GBC
       val = bus->Read(PC);
     }
 
-    val += cflag;
-    
     if(w == IMode::HIGH)
     {
       uint8_t A = *dest_register >> 8;
 
-      Set_Half_Carry_Minus(A, val);
-      Set_Carry_Minus(A, val);
+      Set_Half_Carry_MinusC(A, val);
+      Set_Carry_MinusC(A, val);
 
-      A -= val;
+      A -= val - cflag;
 
       *dest_register &= 0x00FF;
       *dest_register |= A << 8;
+
+      Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
     }
     
-    Set_Bit_N(&AF, Z_FLAG, (bool)((*dest_register >> 8) == 0));
     return 0;
   }
 
@@ -1139,20 +1209,17 @@ namespace GBC
       val = bus->Read(PC);
     }
 
-    val += cflag;
-
     uint8_t A = *dest_register >> 8;
     
-    Set_Half_Carry(A, val, true);
-    Set_Carry_Plus(A, val, true);
+    Set_Half_CarryC(A, val, true);
+    Set_Carry_PlusC(A, val, true);
 
-    A += val;
+    A += (uint8_t)(val + cflag);
 
     *dest_register &= 0x00FF;
     *dest_register |= A << 8;
 
-    
-    Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
+    Set_Bit_N(&AF, Z_FLAG, (bool)((uint8_t)A == 0));
     return 0;
   }
 
