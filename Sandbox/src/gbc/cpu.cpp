@@ -26,7 +26,7 @@ namespace GBC
       IME = true;
     }
 
-// keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
+    // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
     uint8_t opcode = bus->Read(PC);
     (this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
     PC += 1;
@@ -413,6 +413,7 @@ namespace GBC
 
   uint8_t CPU::ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    if(PC == 0x100) printf("it kinda worked: %x + %x\n", *dest_register, *src_value);
     uint16_t val = 0;
     Set_Bit_N(&AF, N_FLAG, 0);
 
@@ -477,7 +478,7 @@ namespace GBC
       Set_Half_Carry(*dest_register, val, false);
       Set_Carry_Plus(*dest_register, val, false);
       *dest_register += val;
-   }
+    }
 
     return 0;
   }
