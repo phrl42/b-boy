@@ -581,12 +581,12 @@ namespace GBC
 
     if(r == IMode::HIGH)
     {
-      val = (*src_value >> 8) << 8;
+      val = *src_value >> 8;
     }
 
     if(r == IMode::LOW)
     {
-      val = *src_value << 8;
+      val = (uint8_t)*src_value;
     }
 
     if(r == IMode::ALL)
@@ -607,7 +607,7 @@ namespace GBC
 
     if(w == IMode::HIGH)
     {
-      *dest_register |= val;
+      *dest_register |= val << 8;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)((uint8_t)(*dest_register >> 8) == 0));
@@ -1092,13 +1092,13 @@ namespace GBC
       val = bus->Read(PC);
     }
 
-    val -= cflag;
+    val += cflag;
     
     if(w == IMode::HIGH)
     {
       uint8_t A = *dest_register >> 8;
 
-      Set_Half_Carry(A, -1 * val, true);
+      Set_Half_Carry_Minus(A, val);
       Set_Carry_Minus(A, val);
 
       A -= val;
