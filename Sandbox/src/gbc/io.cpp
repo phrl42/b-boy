@@ -64,9 +64,11 @@ namespace GBC
   
   void IO::Serial_Print()
   {
-    if(serial[0])
+    static int vsize = serial_size;
+    if(vsize != serial_size)
     {
       printf("[GameBoy] [SERIAL]: %s\n", serial);
+      vsize = serial_size;
     }
   }
 };

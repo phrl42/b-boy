@@ -55,7 +55,7 @@ namespace GBC
     bool cval = 0;
     if(!bit8)
     {
-      erase_val = 0x0F00;
+      erase_val = 0x0FFF;
       check_val = 0x1000;
     }
 
@@ -63,7 +63,7 @@ namespace GBC
     val &= erase_val;
     
     src_register += val;
-    if((src_register & check_val) == check_val)
+    if(src_register >= check_val)
     {
       cval = 1;
     }      
