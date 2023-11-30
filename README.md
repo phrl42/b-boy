@@ -12,7 +12,7 @@ Currently Work In Progress!
 - [X] 01-special
 - [ ] 02-interrupts
 - [ ] 03-op sp,hl
-- [ ] 04-ld r,imm
+- [X] 04-ld r,imm
 - [X] 05-op rp
 - [X] 06-ld r,r
 - [ ] 07-jr,jp,call,ret,rst

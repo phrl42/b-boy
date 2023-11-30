@@ -41,7 +41,7 @@ namespace GBC
 
   void CPU::Set_Half_Carry_Minus(uint16_t src_register, int val)
   {
-    bool h = ((int)(src_register & 0xF) - (val & 0xF)) < 0;
+    bool h = ((int)(src_register & 0xF) - (int)(val & 0xF)) < 0;
 
     Set_Bit_N(&AF, H_FLAG, h);
     return;
@@ -49,7 +49,7 @@ namespace GBC
   
   void CPU::Set_Half_Carry_MinusC(uint16_t src_register, int val)
   {
-    bool h = (((int)(src_register & 0xF) - (val & 0xF)) - Get_Bit_N(AF, C_FLAG)) < 0;
+    bool h = (int)(((int)(src_register & 0xF) - (int)(val & 0xF)) - (int)Get_Bit_N(AF, C_FLAG)) < 0;
 
     Set_Bit_N(&AF, H_FLAG, h);
     return;
@@ -96,7 +96,7 @@ namespace GBC
     val &= erase_val;
     
     src_register += val;
-    src_register -= Get_Bit_N(AF, C_FLAG);
+    src_register += Get_Bit_N(AF, C_FLAG);
     if(src_register >= check_val)
     {
       cval = 1;
@@ -128,6 +128,7 @@ namespace GBC
   void CPU::Set_Carry_PlusC(uint16_t src_register, uint16_t val, bool bit8)
   {
     uint16_t check_val = 0xFF;
+    
     bool cval = 0;
     
     if(!bit8)
@@ -135,8 +136,7 @@ namespace GBC
       check_val = 0xFFFF;
     }
 
-    src_register += Get_Bit_N(AF, C_FLAG);
-    if((int)(src_register + val) > check_val)
+    if((int)(((src_register + val) + Get_Bit_N(AF, C_FLAG))) > check_val)
     {
       cval = 1;
     }
@@ -202,7 +202,7 @@ namespace GBC
 
     bool cval = 0;
 
-    if((int)(((A & 0xF) - (val & 0xF)) - Get_Bit_N(AF, C_FLAG)) < 0)
+    if((int)((int)A - (int)val - (int)Get_Bit_N(AF, C_FLAG)) < 0)
     {
       cval = 1;
     }
