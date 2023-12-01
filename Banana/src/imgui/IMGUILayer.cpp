@@ -321,6 +321,7 @@ namespace Banana
 
     std::string msg = "FPS: " + std::to_string(1 / dt);
     ImGui::Text(msg.c_str());
+    ImGui::Text(Stats::spec->io.serial);
     // maybe put rom name here
     // maybe but restart buttons and stuff in here
     ImGui::End();

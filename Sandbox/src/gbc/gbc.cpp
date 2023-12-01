@@ -174,8 +174,6 @@ namespace GBC
       }
 
       io.Serial_Update();
-      io.Serial_Print();
-
     }
   }
   

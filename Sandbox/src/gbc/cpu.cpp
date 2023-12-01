@@ -145,42 +145,6 @@ namespace GBC
     return;
   }
 
-
-  void CPU::Set_Half_Carry_Signed(uint16_t src_register, int8_t val)
-  {
-    uint16_t erase_val = 0x0FFF;
-    uint16_t check_val = 0x1000;
-
-    bool cval = 0;
-
-    src_register &= erase_val;
-    val &= erase_val;
-    
-    src_register += val;
-    
-    if(src_register >= check_val)
-    {
-      cval = 1;
-    }      
-
-    Set_Bit_N(&AF, H_FLAG, cval);
-    return;
-  }
-  
-  void CPU::Set_Carry_Signed(uint16_t src_register, int8_t val)
-  {
-    uint16_t check_val = 0xFFFF;
-    bool cval = 0;
-    
-    if((int)(src_register + val) > check_val)
-    {
-      cval = 1;
-    }
-
-    Set_Bit_N(&AF, C_FLAG, cval);
-    return;
-  }
-
   void CPU::Set_Carry_Minus(uint16_t src_register, uint8_t val)
   {
     uint8_t A = src_register;
@@ -295,8 +259,14 @@ namespace GBC
     if(r == IMode::E8)
     {
       PC += 1;
-      uint16_t src_val = SP + (int8_t)bus->Read(PC);
-      HL = src_val;
+      uint8_t val = bus->Read(PC);
+
+      uint16_t uval = SP + (int8_t)val;
+      
+      Set_Bit_N(&AF, H_FLAG, (SP & 0x000F) + (val & 0x000F) >= 0x0010);
+      Set_Bit_N(&AF, C_FLAG, (bool)((int)(((SP & 0x00FF) + (val & 0x00FF))) >= 0x0100));
+
+      *dest_register = uval;
       return 0;
     }
     
@@ -486,7 +456,6 @@ namespace GBC
 
   uint8_t CPU::ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    if(PC == 0x100) printf("it kinda worked: %x + %x\n", *dest_register, *src_value);
     uint16_t val = 0;
     Set_Bit_N(&AF, N_FLAG, 0);
 
@@ -520,12 +489,11 @@ namespace GBC
     if(r == IMode::E8)
     {
       PC += 1;
-      int8_t val = (int8_t)bus->Read(PC);
+      uint8_t val = bus->Read(PC);
 
-      Set_Half_Carry_Signed(*dest_register, val);
-      Set_Carry_Signed(*dest_register, val);
-      
-      *dest_register += val;
+      Set_Bit_N(&AF, H_FLAG, (*dest_register & 0x000F) + (val & 0x000F) >= 0x0010);
+      Set_Bit_N(&AF, C_FLAG, (bool)((int)(((*dest_register & 0xFF) + (val & 0xFF))) >= 0x0100));
+      *dest_register += (int8_t)val;
 
       Set_Bit_N(&AF, Z_FLAG, 0);
       Set_Bit_N(&AF, N_FLAG, 0);

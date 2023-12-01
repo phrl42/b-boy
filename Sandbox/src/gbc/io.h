@@ -22,7 +22,8 @@ namespace GBC
     uint8_t SB = 0;
     uint8_t SC = 0;	
 
-    char serial[1024] = {0};
     int serial_size = 0;
+  public:
+    char serial[1024] = {0};
   };
 };
