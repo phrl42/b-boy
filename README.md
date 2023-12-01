@@ -11,7 +11,7 @@ Currently Work In Progress!
 ## Passing tests
 - [X] 01-special
 - [ ] 02-interrupts
-- [ ] 03-op sp,hl
+- [X] 03-op sp,hl
 - [X] 04-ld r,imm
 - [X] 05-op rp
 - [X] 06-ld r,r

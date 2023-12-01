@@ -266,6 +266,8 @@ namespace GBC
       Set_Bit_N(&AF, H_FLAG, (SP & 0x000F) + (val & 0x000F) >= 0x0010);
       Set_Bit_N(&AF, C_FLAG, (bool)((int)(((SP & 0x00FF) + (val & 0x00FF))) >= 0x0100));
 
+      Set_Bit_N(&AF, N_FLAG, 0);
+      Set_Bit_N(&AF, Z_FLAG, 0);
       *dest_register = uval;
       return 0;
     }
