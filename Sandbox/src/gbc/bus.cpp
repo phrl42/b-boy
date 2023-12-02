@@ -11,6 +11,11 @@ namespace GBC
     {
       cpu_speed = DOUBLE_SPEED;
     }
+
+    for(uint8_t i = 0; i < n; i++)
+    {
+      timer->Tick();
+    }
   }
 
   Bus::Bus(PPU *ppu, Timer *timer, Interrupt *interrupt, IO *io)

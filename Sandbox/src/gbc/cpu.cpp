@@ -28,7 +28,11 @@ namespace GBC
 
     // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
     uint8_t opcode = bus->Read(PC);
-    (this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
+    uint8_t tstates = lookup[opcode].cycle;
+    
+    tstates += (this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
+
+    bus->Emulate_Cycle(tstates, true);
     PC += 1;
   }
 
@@ -374,7 +378,6 @@ namespace GBC
 
   uint8_t CPU::INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    Set_Bit_N(&AF, N_FLAG, 0);
 
     if(w == IMode::ALL)
     {
@@ -388,6 +391,7 @@ namespace GBC
       val += 1;
       
       Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
+      Set_Bit_N(&AF, N_FLAG, 0);
       
       bus->Write(*dest_register, val);
     }
@@ -396,6 +400,7 @@ namespace GBC
     {
       uint8_t H = *dest_register >> 8;
       Set_Half_Carry(H, 1, true);
+      Set_Bit_N(&AF, N_FLAG, 0);
 
       H += 1;
 
@@ -409,6 +414,7 @@ namespace GBC
     {
       uint8_t L = *dest_register;
       Set_Half_Carry(L, 1, true);
+      Set_Bit_N(&AF, N_FLAG, 0);
 
       L +=1;
 
@@ -423,7 +429,6 @@ namespace GBC
   
   uint8_t CPU::DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    Set_Bit_N(&AF, N_FLAG, 1);
 
     if(w == IMode::ALL)
     {
@@ -433,6 +438,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       uint8_t val = bus->Read(*dest_register);
+    Set_Bit_N(&AF, N_FLAG, 1);
       Set_Half_Carry_DEC(val);
       val -= 1;
       
@@ -444,6 +450,7 @@ namespace GBC
     if(w == IMode::HIGH)
     {
       uint8_t H = *dest_register >> 8;
+    Set_Bit_N(&AF, N_FLAG, 1);
       
       Set_Half_Carry_DEC(H);
 
@@ -457,6 +464,7 @@ namespace GBC
     if(w == IMode::LOW)
     {
       uint8_t L = *dest_register;
+    Set_Bit_N(&AF, N_FLAG, 1);
       Set_Half_Carry_DEC(L);
       L -= 1;
       *dest_register &= 0xFF00;
@@ -919,13 +927,15 @@ namespace GBC
     if(w == IMode::R18) lowpage = 0x18;
     if(w == IMode::R28) lowpage = 0x28;
 
+    PC += 1;
+    
     SP -= 1;
     bus->Write(SP, PC >> 8);
 
     SP -= 1;
     bus->Write(SP, PC);
 
-    PC = bus->Read(0x00) << 8 | bus->Read(lowpage);
+    PC = lowpage;
     PC -= 1;
 
     return 0;
@@ -957,7 +967,7 @@ namespace GBC
     SP += 2;
     PC = addr - 1;
     
-    return 12;
+    return 0;
   }
 
   uint8_t CPU::RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -968,7 +978,7 @@ namespace GBC
     SP += 2;
     PC = addr - 1;
      
-    return 16;
+    return 0;
   }
 
   uint8_t CPU::CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1024,7 +1034,7 @@ namespace GBC
     Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
     Set_Bit_N(&AF, H_FLAG, 0);
     Set_Bit_N(&AF, C_FLAG, fc);
-    return 4;
+    return 0;
   }
 
   uint8_t CPU::SCF(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1032,7 +1042,7 @@ namespace GBC
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
     Set_Bit_N(&AF, C_FLAG, 1);
-    return 4;
+    return 0;
   }
 
   uint8_t CPU::RRCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)

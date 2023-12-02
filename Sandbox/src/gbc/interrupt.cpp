@@ -57,7 +57,6 @@ namespace GBC
 
   bool Interrupt::Check_Type(INTERRUPT isr, uint16_t address)
   {
-    printf("Checking for Interrupt: %d\n", (int)isr);
     if(Get_Bit_N(IF, isr) && Get_Bit_N(IE, isr))
     {
       Handle_Type(isr, address);

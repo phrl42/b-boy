@@ -5,7 +5,7 @@ namespace GBC
   Timer::Timer(Interrupt *interrupt)
   {
     this->interrupt = interrupt;
-    DIV = 0xABCC;
+    DIV = 0xAC00;
   }
 
   uint8_t Timer::Read(uint16_t address)

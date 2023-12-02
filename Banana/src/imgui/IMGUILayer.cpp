@@ -187,10 +187,10 @@ namespace Banana
 
     ImGui::Begin("Debugger", nullptr, 0);
 
-    static std::string adstop = "0000";
+    static std::string adstop = "FFFFF";
     static std::string breakaddr = "";
 
-    static std::string adop = "00";
+    static std::string adop = "FFF";
     static std::string breakop = "";
     
     ImGui::Text(std::string("Break: 0x" + breakaddr).c_str());
