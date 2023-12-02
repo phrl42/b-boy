@@ -81,11 +81,11 @@ namespace GBC
     std::ifstream bootrom("assets/roms/bootrom.gb");
     while(bootrom.get(byte))
     {
-      //bus.Write(index, byte);
-      //index += 1;
+      bus.Write(index, byte);
+      index += 1;
     }
 
-    //if(index != entry) GBC_LOG("Loading BootRom failed.");
+    if(index != entry) GBC_LOG("Loading BootRom failed.");
 
     file.close();
     return true;
@@ -139,7 +139,7 @@ namespace GBC
 	
 	cpu.Validate_Opcode();
 
-	//ppu.Render();
+	ppu.Render();
 
 	if(dstate == Debug::STEP)
 	{

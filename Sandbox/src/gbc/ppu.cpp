@@ -83,6 +83,8 @@ namespace GBC
     default:
       GBC_LOG("[PPU]: WRONG READ");
     }
+
+    return 0;
   }
   
   void PPU::Write(uint16_t address, uint8_t value)
@@ -153,16 +155,23 @@ namespace GBC
  
   void PPU::Render()
   {
-    UpdateTiles();
+    UpdateMaps();
   }
 
-  void PPU::UpdateTiles()
+  Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
     // 1 tile = 16 byte
+    Tile temp = {0};
+
+    uint16_t start = index * 16;
+
+    if(!Get_Bit_N(LCDC, 4) && BGW)
+    {
+      start = 0x1000 + (int8_t)((int8_t)(index) * 16);
+    }
 
     int row_index = 0;
-    int tile_index = 0;
-    for(uint16_t pos = 0; pos < A_TileDataEND - A_TileData; pos += 2)
+    for(uint16_t pos = start; pos < start+15; pos += 2)
     {
       uint16_t lower_row = tile_data[pos];
       uint16_t higher_row = tile_data[pos+1];
@@ -176,17 +185,26 @@ namespace GBC
 
 	// reverse order is required by gpu
 	res_bit = higher_bit << 1 | lower_bit;
-	tile[tile_index].row[row_index].bpp[i] = res_bit;
+	temp.row[row_index].bpp[i] = res_bit;
       }
 
-      if(row_index == 7)
-      {
-	row_index = 0;
-	tile_index++;
-	continue;
-      }
       row_index++;
     }
-  }
 
+    return temp;
+  }
+  
+  void PPU::UpdateMaps()
+  {
+    for(uint16_t i = 0; i < 32*32; i++)
+    {
+      tmap1[i] = IndexToTile(map1[i], true);
+    }
+
+    for(uint16_t i = 0; i < 32*32; i++)
+    {
+      tmap2[i] = IndexToTile(map2[i], true);
+    }
+  }
+  
 };

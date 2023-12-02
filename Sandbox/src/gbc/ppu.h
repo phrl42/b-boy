@@ -82,22 +82,39 @@ namespace GBC
   struct PPU
   {
     // 15-Bit RGB Color
-    //uint16_t display[TFT_HEIGHT][TFT_WIDTH];
-
     PPU();
 
     uint8_t Read(uint16_t address);
     void Write(uint16_t address, uint8_t value);
     
     void Render();
-    void UpdateTiles();
+
+    void UpdateMaps();
     
-    Tile tile[384 * 2] = {0};
-   
+    Tile IndexToTile(uint8_t index, bool BGW);
+    
   private:
     uint8_t tile_data[A_TileDataEND - A_TileData] = {0};
 
     uint8_t map1[32*32] = {0};
     uint8_t map2[32*32] = {0};
-   };
+
+  public:
+    Tile tmap1[32*32] = {0};
+    Tile tmap2[32*32] = {0};
+
+  private:
+    uint8_t LCDC = 16;
+    uint8_t STAT = 0;
+
+    uint8_t SCX = 0;
+    uint8_t SCY = 0;
+
+    uint8_t LY = 0;
+    uint8_t LYC = 0;
+
+    uint8_t DMA = 0;
+    
+    uint8_t BGP = 0;
+  };
 };

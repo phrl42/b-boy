@@ -29,7 +29,7 @@ namespace SANDBOX
     spec.Init("assets/roms/Tetris.gb");
     Stats::spec = &spec;
 
-    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 256));
+    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tmap1, 32*32));
 
     tilemap.transform.proj = Banana::Projection::PERSPECTIVE;
 

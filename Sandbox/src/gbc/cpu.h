@@ -34,7 +34,7 @@ namespace GBC
     uint16_t HL = DEFAULT_HL;
 
     uint16_t SP = DEFAULT_SP; // Stack Pointer
-    uint16_t PC = 0x0100; // Program Counter
+    uint16_t PC = 0x0; // Program Counter
 
     bool IME = false; // Interrupt Flag
     bool eIME = false; // info whether IME should be activated in the next step
