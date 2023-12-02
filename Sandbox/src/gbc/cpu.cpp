@@ -1250,12 +1250,12 @@ namespace GBC
 
     if(r == IMode::HIGH)
     {
-      val = *dest_register >> 8;
+      val = *src_value >> 8;
     }
 
     if(r == IMode::LOW)
     {
-      val = *dest_register;
+      val = *src_value;
     }
 
     if(r == IMode::MEM)
@@ -1273,12 +1273,14 @@ namespace GBC
     
     if(r == IMode::HIGH)
     {
-      *dest_register &= val << 8;
+      *src_value &= 0x00FF;
+      *src_value |= val << 8;
     }
 
     if(r == IMode::LOW)
     {
-      *dest_register &= val;
+      *src_value &= 0xFF00;
+      *src_value |= val;
     }
     
     return 8;
@@ -1290,19 +1292,19 @@ namespace GBC
 
     if(r == IMode::HIGH)
     {
-      val = *dest_register >> 8;
+      val = *src_value >> 8;
     }
 
     if(r == IMode::LOW)
     {
-      val = *dest_register;
+      val = *src_value;
     }
 
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
 
-      Set_Bit_N(&val, (uint8_t)w, 0);
+      Set_Bit_N(&val, (uint8_t)w, 1);
 
       bus->Write(*src_value, val);
       return 16;
@@ -1313,12 +1315,14 @@ namespace GBC
     
     if(r == IMode::HIGH)
     {
-      *dest_register &= val << 8;
+      *src_value &= 0x00FF;
+      *src_value |= val << 8;
     }
 
     if(r == IMode::LOW)
     {
-      *dest_register &= val;
+      *src_value &= 0xFF00;
+      *src_value |= val;
     }
     
     return 8;
@@ -1374,15 +1378,20 @@ namespace GBC
     }
 
     uint8_t low = val;
-    low &= 0xF0;
-    low >>= 4;
+    low &= 0x0F;
+    low <<= 4;
 
     uint8_t high = val;
-    high &= 0x0F;
-    high <<= 4;
+    high &= 0xF0;
+    high >>= 4;
     
     val = 0;
     val = high | low;
+
+    Set_Bit_N(&AF, Z_FLAG, val == 0);
+    Set_Bit_N(&AF, H_FLAG, 0);
+    Set_Bit_N(&AF, N_FLAG, 0);
+    Set_Bit_N(&AF, C_FLAG, 0);
 
     if(w == IMode::LOW)
     {

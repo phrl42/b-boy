@@ -16,10 +16,10 @@ Currently Work In Progress!
 - [X] 05-op rp
 - [X] 06-ld r,r
 - [ ] 07-jr,jp,call,ret,rst
-- [ ] 08-misc instrs
-- [ ] 09-op r,r
-- [ ] 10-bit ops
-- [ ] 11-op a,(hl)
+- [X] 08-misc instrs
+- [X] 09-op r,r
+- [X] 10-bit ops
+- [X] 11-op a,(hl)
 
 
 
