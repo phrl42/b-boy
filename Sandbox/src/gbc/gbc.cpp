@@ -1,6 +1,7 @@
 #include <cstring>
 #include <sstream>
 #include <cstdlib>
+#include <time.h>
 
 #include "gbc/gbc.h"
 #include "gbc/bitwise.h"
@@ -132,7 +133,7 @@ namespace GBC
       uint8_t H = cpu.HL>> 8;
       uint8_t L = cpu.HL;
 
-      printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", A, F, B, C, D, E, H, L, cpu.SP, cpu.PC, bus.Read(cpu.PC), bus.Read(cpu.PC+1), bus.Read(cpu.PC+2), bus.Read(cpu.PC+3));
+//printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n", A, F, B, C, D, E, H, L, cpu.SP, cpu.PC, bus.Read(cpu.PC), bus.Read(cpu.PC+1), bus.Read(cpu.PC+2), bus.Read(cpu.PC+3));
 
       if(breakop == bus.Read(cpu.PC))
       {
@@ -142,7 +143,7 @@ namespace GBC
       if(!adt)
       {
 	adt = true;
-	add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
+	//add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
       }
 
       if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
@@ -152,7 +153,7 @@ namespace GBC
 	
 	cpu.Validate_Opcode();
 
-	ppu.Render();
+	//ppu.Render();
 
 	if(dstate == Debug::STEP)
 	{
