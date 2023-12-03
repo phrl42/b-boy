@@ -29,7 +29,7 @@ namespace SANDBOX
     spec.Init("assets/roms/01-special.gb");
     Stats::spec = &spec;
 
-    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 192));
+    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 256));
 
     tilemap.transform.proj = Banana::Projection::PERSPECTIVE;
 

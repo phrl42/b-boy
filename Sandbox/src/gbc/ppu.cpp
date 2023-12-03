@@ -230,10 +230,9 @@ namespace GBC
     return temp;
   }
 
-  // debug only
   void PPU::UpdateTiles()
   {
-    tile_data[0] = 0x3C;
+    /*tile_data[0] = 0x3C;
     tile_data[1] = 0x7E;
     tile_data[2] = 0x42;
     tile_data[3] = 0x42;
@@ -249,7 +248,7 @@ namespace GBC
     tile_data[13] = 0x56;
     tile_data[14] = 0x38;
     tile_data[15] = 0x7C;
-
+    */
     int row_index = 0;
     int tile_index = 0;
     for(uint16_t pos = 0; pos <= A_TileDataEND - A_TileData; pos += 2)
