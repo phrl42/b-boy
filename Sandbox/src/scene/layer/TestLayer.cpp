@@ -26,10 +26,10 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/Tetris.gb");
+    spec.Init("assets/roms/01-special.gb");
     Stats::spec = &spec;
 
-    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tmap1, 32*32));
+    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.tile, 16));
 
     tilemap.transform.proj = Banana::Projection::PERSPECTIVE;
 
@@ -88,6 +88,8 @@ namespace SANDBOX
 	//ent[y][x].Render(dt);
       }
     }
+
+    spec.ppu.UpdateTiles();
 
     Banana::TileComponent *tc = (Banana::TileComponent*)tilemap.GetComponent("TileComponent");
     tc->UpdateTileData();

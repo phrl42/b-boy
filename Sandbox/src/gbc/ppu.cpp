@@ -37,22 +37,31 @@ namespace GBC
     {
       return map2[address - A_TileMap2]; 
     }
-    
+
+    if(address <= A_OAMEND && address >= A_OAM)
+    {
+      return oam[address - A_OAM];
+    }
+
     switch(address)
     {
     case A_OAM:
       break;
 
     case A_LCDC:
+      return LCDC;
       break;
 
     case A_STAT:
+      return STAT;
       break;
 
     case A_SCX:
+      return SCX;
       break;
 
     case A_SCY:
+      return SCY;
       break;
 
     case A_LY:
@@ -60,24 +69,31 @@ namespace GBC
       break;
 
     case A_LYC:
+      return LYC;
       break;
 
     case A_DMA:
+      return DMA;
       break;
 
     case A_BGP:
+      return BGP;
       break;
 
     case A_OBP0:
+      return OBP0;
       break;
 
     case A_OBP1:
+      return OBP1;
       break;
 
     case A_WX:
+      return WX;
       break;
 
     case A_WY:
+      return WY;
       break;
 
     default:
@@ -107,55 +123,75 @@ namespace GBC
       return;
     }
 
+    if(address <= A_OAMEND && address >= A_OAM)
+    {
+      oam[address - A_OAM] = value;
+      return;
+    }
+
     switch(address)
     {
     case A_OAM:
       break;
 
     case A_LCDC:
+      LCDC = value;
       break;
 
     case A_STAT:
+      STAT = value;
       break;
 
     case A_SCX:
+      SCX = value;
       break;
 
     case A_SCY:
+      SCY = value;
       break;
 
     case A_LY:
+      LY = value;
       break;
 
     case A_LYC:
+      LYC = value;
       break;
 
     case A_DMA:
+      DMA = value;
       break;
 
     case A_BGP:
+      BGP = value;
       break;
 
     case A_OBP0:
+      OBP0 = value;
       break;
 
     case A_OBP1:
+      OBP1 = value;
       break;
 
     case A_WX:
+      WX = value;
       break;
 
     case A_WY:
+      WY = value;
       break;
 
     default:
       GBC_LOG("[PPU]: WRONG WRITE");
     }
+
+    return;
   }
  
   void PPU::Render()
   {
-    UpdateMaps();
+    //UpdateMaps();
   }
 
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
@@ -171,7 +207,7 @@ namespace GBC
     }
 
     int row_index = 0;
-    for(uint16_t pos = start; pos < start+15; pos += 2)
+    for(uint16_t pos = start; pos <= start+15; pos += 2)
     {
       uint16_t lower_row = tile_data[pos];
       uint16_t higher_row = tile_data[pos+1];
@@ -192,6 +228,55 @@ namespace GBC
     }
 
     return temp;
+  }
+
+  // debug only
+  void PPU::UpdateTiles()
+  {
+    tile_data[0] = 0x3C;
+    tile_data[1] = 0x7E;
+    tile_data[2] = 0x42;
+    tile_data[3] = 0x42;
+    tile_data[4] = 0x42;
+    tile_data[5] = 0x42;
+    tile_data[6] = 0x42;
+    tile_data[7] = 0x42;
+    tile_data[8] = 0x7E;
+    tile_data[9] = 0x5E;
+    tile_data[10] = 0x7E;
+    tile_data[11] = 0x0A;
+    tile_data[12] = 0x7C;
+    tile_data[13] = 0x56;
+    tile_data[14] = 0x38;
+    tile_data[15] = 0x7C;
+
+    int row_index = 0;
+    int tile_index = 0;
+    for(uint16_t pos = 0; pos <= A_TileDataEND - A_TileData; pos += 2)
+    {
+      uint16_t lower_row = tile_data[pos];
+      uint16_t higher_row = tile_data[pos+1];
+      
+      for(uint8_t i = 0; i <= 7; i++)
+      {
+	uint8_t res_bit = 0;
+
+	uint8_t lower_bit = Get_Bit_N(lower_row, 7 - i);
+	uint8_t higher_bit = Get_Bit_N(higher_row, 7 - i);
+
+	// reverse order is required by gpu
+	res_bit = higher_bit << 1 | lower_bit;
+	tile[tile_index].row[row_index].bpp[i] = res_bit;
+      }
+
+      if(row_index == 7)
+      {
+	row_index = 0;
+	tile_index++;
+	continue;
+      }
+      row_index++;
+    }
   }
   
   void PPU::UpdateMaps()

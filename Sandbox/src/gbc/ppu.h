@@ -16,6 +16,7 @@
 
 // Object Attribute Map
 #define A_OAM 0xFE00
+#define A_OAMEND 0xFE9F
 // 4 byte space 
     
 // LCD Control (R/W)
@@ -78,6 +79,18 @@ namespace GBC
     // saved with 2bpp
     PixelRow row[8];
   };
+
+  struct Object
+  {
+    Tile tile[2];
+    bool two_tile;
+
+    uint8_t y;
+    uint8_t x;
+
+    uint8_t index;
+    uint8_t flags;
+  };
   
   struct PPU
   {
@@ -90,7 +103,9 @@ namespace GBC
     void Render();
 
     void UpdateMaps();
-    
+
+    // debug only
+    void UpdateTiles();
     Tile IndexToTile(uint8_t index, bool BGW);
     
   private:
@@ -99,16 +114,23 @@ namespace GBC
     uint8_t map1[32*32] = {0};
     uint8_t map2[32*32] = {0};
 
+    uint8_t oam[A_OAMEND - A_OAM] = {0};
   public:
     Tile tmap1[32*32] = {0};
     Tile tmap2[32*32] = {0};
 
+    Tile tile[384*2] = {0};
+    
+    Object objects[40] = {0};
   private:
     uint8_t LCDC = 16;
     uint8_t STAT = 0;
 
     uint8_t SCX = 0;
     uint8_t SCY = 0;
+    
+    uint8_t WX = 0;
+    uint8_t WY = 0;
 
     uint8_t LY = 0;
     uint8_t LYC = 0;
@@ -116,5 +138,8 @@ namespace GBC
     uint8_t DMA = 0;
     
     uint8_t BGP = 0;
+
+    uint8_t OBP0 = 0;
+    uint8_t OBP1 = 0;
   };
 };

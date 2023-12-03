@@ -46,18 +46,12 @@ namespace Banana
     GBC::Tile *beg = tile;
     for(uint32_t t = 0; t < n; t++)
     {
-      uint8_t x = 0;
-      uint8_t y = 7;
-  
-      for(uint8_t i = 0; i < 64; i++)
+      for(int y = 7; y >= 0; y--)
       {
-	if(i % 8 == 0 && i != 0)
+	for(uint8_t x = 0; x <= 7; x++)
 	{
-	  y -= 1;
-	  x = 0;
+	  pixels[((y * this->spec.width) + x) + (t * 8)] = palette[tile->row[7 - y].bpp[x]];
 	}
-	pixels[(((7 - y) * 8) + x) + ((t) * 64)] = palette[tile->row[7 - y].bpp[x]];
-	x += 1;
       }
       tile++;
     }
