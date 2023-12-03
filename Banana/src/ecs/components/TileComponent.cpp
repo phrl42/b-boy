@@ -23,10 +23,11 @@ namespace Banana
     this->spec.size = spec.width * spec.height * 4;
     this->spec.format = ImageFormat::RGBA8;
 
-    for(uint32_t i = 0; i < spec.size; i++)
+    for(uint32_t i = 0; i < spec.width * spec.height; i++)
     {
       pixels.push_back({0, 0, 0, 255});
     }
+
     this->spec.data = (void*)pixels.data();
     
     this->quad = QuadComponent(&spec);
@@ -44,17 +45,21 @@ namespace Banana
     Pixel palette[4] = {{224, 248, 208, 255}, {136, 192, 112, 255}, {52, 104, 86, 255}, {8, 24, 32, 255}};
 
     GBC::Tile *beg = tile;
+    uint32_t roffset = 0;
+    uint32_t cap_n = n > 8 ? 8 : n;
     for(uint32_t t = 0; t < n; t++)
     {
-      for(int y = 7; y >= 0; y--)
+      if(t % 8 == 0 && t != 0) roffset += 8 * 8 * 8;
+      for(uint8_t y = 0; y <= 7; y++)
       {
 	for(uint8_t x = 0; x <= 7; x++)
 	{
-	  pixels[((y * this->spec.width) + x) + (t * 8)] = palette[tile->row[7 - y].bpp[x]];
+	  pixels[((y * 8 * cap_n) + x) + ((t % 8) * cap_n) + roffset] = palette[tile->row[7 - y].bpp[x]];
 	}
       }
       tile++;
     }
+
     tile = beg;
     spec.data = (void*)pixels.data();
 
