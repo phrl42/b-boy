@@ -194,6 +194,16 @@ namespace GBC
     
   }
 
+  void PPU::DMATransfer(Bus *bus)
+  {
+    uint16_t address = DMA * 0x0100;
+    
+    for(uint16_t byte = 0; byte < 0xA0; byte++)
+    {
+      oam[byte] = bus->Read(address+byte);
+    }
+  }
+  
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
     // 1 tile = 16 byte
@@ -271,6 +281,16 @@ namespace GBC
     {
       tmap2[i] = IndexToTile(map2[i], true);
     }
+  }
+
+  void PPU::UpdateOAM()
+  {
+    for(uint8_t i = 0; i < 40; i++)
+    {
+      objects[i].tile[0] = IndexToTile(objects[i].index, false);
+    }
+
+    
   }
   
 };
