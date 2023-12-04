@@ -69,7 +69,7 @@ namespace GBC
       break;
 
     case A_LY:
-      return 0x90;
+      return LY;
       break;
 
     case A_LYC:
@@ -200,12 +200,43 @@ namespace GBC
   {
     
   }
+  
+  uint8_t PPU::TileToScreen(uint16_t x, uint16_t y, bool map2)
+  {
+    Tile *tile = map2 ? tmap2 : tmap1;
+    uint32_t roffset = 0;
+    uint32_t cap_n = 8;
+
+    uint32_t nt = 0;
+    uint16_t ny = y;
+    uint16_t nx = x;
+
+    if(x % 8 != 0)
+    {
+      nx += 8 - (x % 8);
+    }
+
+    if(y % 8 != 0)
+    {
+      ny += 8 - (y % 8);
+    }
+    
+
+    nt = ((ny / 8) * 8) + (nx / 8);
+
+    nx = x % 8;
+    ny = y % 8;
+
+    tile += nt-1;
+
+    return tile->row[ny].bpp[nx];
+  }
 
   // progresses one dot
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
-
+    printf("dot %d and LY %d\n", rend.dot, LY);
     if(rend.dot == 0) rend.mode = Mode::TWO;
     
     if(rend.mode == Mode::TWO)
@@ -235,9 +266,8 @@ namespace GBC
 
       }
     }
-
     
-    rend.dot++;
+    rend.dot += 1;
     if(rend.dot == 80) rend.mode = Mode::THREE;
     if(rend.x == 172) rend.mode = Mode::ZERO;
     if(rend.dot == 456)

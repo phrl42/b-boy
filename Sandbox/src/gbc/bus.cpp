@@ -67,7 +67,7 @@ namespace GBC
       {
 	value = io->Read(address);
       }
-      else if(address >= A_LY && address <= A_WX)
+      else if(address >= A_LCDC && address <= A_WX)
       {
 	value = ppu->Read(address);
       }
@@ -133,7 +133,7 @@ namespace GBC
 	io->Write(address, value);
       }
 
-      if(address >= A_LY && address <= A_WX)
+      if(address >= A_LCDC && address <= A_WX)
       {
 	ppu->Write(address, value);
       }

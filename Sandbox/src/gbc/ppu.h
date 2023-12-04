@@ -127,30 +127,7 @@ namespace GBC
     void Render();
     void Tick();
 
-    // todo: make a more efficient algorithm
-    inline uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2)
-    {
-      Tile *tile = map2 ? tmap2 : tmap1;
-      uint32_t roffset = 0;
-      uint32_t cap_n = 8;
-
-      uint8_t pixels[32*32*8*8];
-      
-      for(uint32_t t = 0; t < 32*32; t++)
-      {
-	if(t % 8 == 0 && t != 0) roffset += 8 * 8 * 8;
-	for(uint8_t y = 0; y <= 7; y++)
-	{
-	  for(uint8_t x = 0; x <= 7; x++)
-	  {
-	    pixels[((y * 8 * cap_n) + x) + ((t % 8) * cap_n) + roffset] = tile->row[y].bpp[x];
-	  }
-	}
-	tile++;
-      }
-
-      return pixels[(y * 32*8) + x];
-    }
+    uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2);
     
   private:
 
