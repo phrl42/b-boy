@@ -15,6 +15,8 @@ namespace GBC
     for(uint8_t i = 0; i < n; i++)
     {
       timer->Tick();
+      //ppu->Tick();
+      
     }
   }
 
@@ -26,28 +28,28 @@ namespace GBC
     this->io = io;
   }
 
-  uint8_t Bus::Read(uint16_t address)
+  uint8_t Bus::Read(uint16_t address, bool emu)
   {
+    uint8_t value = 0;
     if(address <= 0x7FFF)
     {
-      return space[address];
+      value = space[address];
       // ROM reading
     }
     else if(address <= 0x9FFF)
     {
       // VRAM reading
-      return ppu->Read(address);
+      value = ppu->Read(address);
     }
     else if(address <= 0xDFFF)
     {
-      return space[address];
+      value = space[address];
       // WRAM
     }
     else if(address <= 0xFDFF)
     {
       // echo ram
       GBC_LOG("ECHO RAM READ UNSUPPORTED");
-      return 0;
     }
     else if(address <= 0xFE9F)
     {
@@ -58,38 +60,41 @@ namespace GBC
     {
       // no use
       GBC_LOG("ILLEGAL READ");
-      return 0;
     }
     else if(address <= 0xFFFF)
     {
       // IO / HRAM / Interrupt / Timer
       if(address <= A_SC && address >= A_JOYPAD)
       {
-	return io->Read(address);
+	value = io->Read(address);
       }
-
-      if(address >= A_LY && address <= A_WX)
+      else if(address >= A_LY && address <= A_WX)
       {
-	return ppu->Read(address);
+	value = ppu->Read(address);
       }
-
-      if(address == A_IF || address == A_IE)
+      else if(address == A_IF || address == A_IE)
       {
-	return interrupt->Read(address);
+	value = interrupt->Read(address);
       }
-
-      if(address >= A_DIV && address <= A_TAC)
+      else if(address >= A_DIV && address <= A_TAC)
       {
-	return timer->Read(address);
+	value = timer->Read(address);
       }
-
-      return space[address];
-      
+      else
+      {
+	value = space[address];
+      }
     }
 
+    if(emu)
+    {
+      Emulate_Cycle(4, true);
+    }
+
+    return value;
   }
   
-  void Bus::Write(uint16_t address, uint8_t value)
+  void Bus::Write(uint16_t address, uint8_t value, bool emu)
   {
     if(address <= 0x7FFF)
     {
@@ -150,6 +155,10 @@ namespace GBC
       }
     }
 
+    if(emu)
+    {
+      Emulate_Cycle(4, true);
+    }
   }
   
 };

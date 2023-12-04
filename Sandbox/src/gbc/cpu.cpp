@@ -27,10 +27,12 @@ namespace GBC
     }
 
     // keep in mind: the GameBoy CPU (SM83) has Little-Endianness (reads multiple bytes backwards from ram)
-    uint8_t opcode = bus->Read(PC);
+    uint8_t opcode = bus->Read(PC, false);
+
     uint8_t tstates = lookup[opcode].cycle;
+    if(opcode == 0xCB) tstates = lookup_cb[bus->Read(PC+1, false)].cycle;
     
-    tstates += (this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
+    tstates -= (int8_t)(this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
 
     bus->Emulate_Cycle(tstates, true);
     PC += 1;
@@ -193,19 +195,20 @@ namespace GBC
   {
     IME = true;
 
-    return 4;
+    return 0;
   }
 
   uint8_t CPU::DI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     IME = false;
     
-    return 4;
+    return 0;
   }
 
   uint8_t CPU::LD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint16_t val = 0;
+    int n = 0;
     if(r == IMode::HIGH)
     {
       val = *src_value >> 8;
@@ -244,12 +247,14 @@ namespace GBC
       uint16_t addr = Combine(bus->Read(PC+1), bus->Read(PC)); 
       PC += 1;
       val = bus->Read(addr);
+      n += -16;
     }
 
     if(r == IMode::N8)
     {
       PC += 1;
       val = bus->Read(PC);
+      n += -4;
     }
     
     if(r == IMode::N16)
@@ -257,6 +262,7 @@ namespace GBC
       PC += 1;
       val = Combine(bus->Read(PC+1), bus->Read(PC));
       PC += 1;
+      n += -8;
     }
 
     // special reading for 0xF8
@@ -273,7 +279,7 @@ namespace GBC
       Set_Bit_N(&AF, N_FLAG, 0);
       Set_Bit_N(&AF, Z_FLAG, 0);
       *dest_register = uval;
-      return 0;
+      return -4;
     }
     
     // only counts for 0x08
@@ -284,7 +290,7 @@ namespace GBC
       PC += 1;
       bus->Write(addr, val);
       bus->Write(addr+1, (val >> 8));
-      return 0;
+      return -16;
     }
 
     if(w == IMode::HIGH)
@@ -307,6 +313,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
+      n += -4;
     }
 
     if(w == IMode::MEMI)
@@ -319,6 +326,7 @@ namespace GBC
     {
       bus->Write(*dest_register, val);
       *dest_register -= 1;
+      n += -4;
     }
 
     if(w == IMode::A16)
@@ -328,9 +336,10 @@ namespace GBC
       PC += 1;
 
       bus->Write(addr, val);
+      n += -4;
     }
 
-    return 0;
+    return n;
   }
 
 
@@ -378,7 +387,7 @@ namespace GBC
 
   uint8_t CPU::INC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    int n = 0;
     if(w == IMode::ALL)
     {
       *dest_register += 1;
@@ -394,6 +403,7 @@ namespace GBC
       Set_Bit_N(&AF, N_FLAG, 0);
       
       bus->Write(*dest_register, val);
+      n += -4;
     }
    
     if(w == IMode::HIGH)
@@ -424,12 +434,12 @@ namespace GBC
       Set_Bit_N(&AF, Z_FLAG, (bool)(L == 0));
     }
 
-    return 0;
+    return n;
   }
   
   uint8_t CPU::DEC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-
+    int n = 0;
     if(w == IMode::ALL)
     {
       *dest_register -= 0x01;
@@ -445,6 +455,7 @@ namespace GBC
       Set_Bit_N(&AF, Z_FLAG, val == 0);
 
       bus->Write(*dest_register, val);
+      n += -4;
     }
     
     if(w == IMode::HIGH)
@@ -473,11 +484,12 @@ namespace GBC
       Set_Bit_N(&AF, Z_FLAG, (bool)(L == 0));
     }
 
-    return 0;
+    return n;
   }
 
   uint8_t CPU::ADD(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint16_t val = 0;
     Set_Bit_N(&AF, N_FLAG, 0);
 
@@ -499,6 +511,7 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
@@ -519,7 +532,7 @@ namespace GBC
 
       Set_Bit_N(&AF, Z_FLAG, 0);
       Set_Bit_N(&AF, N_FLAG, 0);
-      return 0;
+      return -4;
     }
 
     if(w == IMode::HIGH)
@@ -543,11 +556,12 @@ namespace GBC
       *dest_register += val;
     }
 
-    return 0;
+    return n;
   }
 
   uint8_t CPU::SUB(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint8_t val = 0;
 
     Set_Bit_N(&AF, N_FLAG, 0);
@@ -565,6 +579,7 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
@@ -587,11 +602,12 @@ namespace GBC
       Set_Bit_N(&AF, N_FLAG, 1);
     }
 
-    return 0;
+    return n;
   }
 
   uint8_t CPU::AND(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint16_t val = 0;
 
     if(r == IMode::HIGH)
@@ -612,12 +628,14 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
     {
       PC += 1;
       val = bus->Read(PC);
+      n += -4;
     }
 
     if(w == IMode::HIGH)
@@ -635,11 +653,12 @@ namespace GBC
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 1);
     Set_Bit_N(&AF, C_FLAG, 0);
-    return 0;
+    return n;
   }
 
   uint8_t CPU::OR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint16_t val = 0;
 
     if(r == IMode::HIGH)
@@ -660,12 +679,14 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
     {
       PC += 1;
       val = bus->Read(PC);
+      n += -4;
     }
 
     if(w == IMode::HIGH)
@@ -678,11 +699,13 @@ namespace GBC
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
     Set_Bit_N(&AF, C_FLAG, 0);
-    return 0;
+    
+    return n;
   }
 
   uint8_t CPU::XOR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint8_t val = 0;
 
     if(r == IMode::HIGH)
@@ -703,12 +726,14 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
     {
       PC += 1;
       val = bus->Read(PC);
+      n += -4;
     }
 
     if(w == IMode::HIGH)
@@ -743,7 +768,7 @@ namespace GBC
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
     Set_Bit_N(&AF, C_FLAG, 0);
-    return 0;
+    return n;
   }
 
   uint8_t CPU::POP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -769,7 +794,7 @@ namespace GBC
     *dest_register |= (bus->Read(SP) << 8);
     SP++;
 
-    return 0;
+    return -12;
   }
 
   uint8_t CPU::PUSH(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -779,7 +804,7 @@ namespace GBC
     SP--;
     bus->Write(SP, *dest_register);
 
-    return 0;
+    return -4;
   }
 
   uint8_t CPU::JP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -788,29 +813,29 @@ namespace GBC
 
     if(w == IMode::Z)
     {
-      if(!Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(!Get_Bit_N(AF, Z_FLAG)) return -12;
     }
     
     if(w == IMode::NZ)
     {
-      if(Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(Get_Bit_N(AF, Z_FLAG)) return -12;
     }
 
     if(w == IMode::C)
     {
-      if(!Get_Bit_N(AF, C_FLAG)) return 0;
+      if(!Get_Bit_N(AF, C_FLAG)) return -12;
     }
    
     if(w == IMode::NC)
     {
-      if(Get_Bit_N(AF, C_FLAG)) return 0;
+      if(Get_Bit_N(AF, C_FLAG)) return -12;
     }
 
     if(w == IMode::ALL)
     {
       PC = *dest_register;
       PC -= 1;
-      return 0;
+      return -12;
     }
 
     PC -= 2;
@@ -821,7 +846,7 @@ namespace GBC
     PC = addr;
     PC -= 1;
     
-    return 4;
+    return -8;
   }
   
   uint8_t CPU::JR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -830,22 +855,22 @@ namespace GBC
     
     if(w == IMode::Z)
     {
-      if(!Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(!Get_Bit_N(AF, Z_FLAG)) return -4;
     }
     
     if(w == IMode::C)
     {
-      if(!Get_Bit_N(AF, C_FLAG)) return 0;
+      if(!Get_Bit_N(AF, C_FLAG)) return -4;
     }
 
     if(w == IMode::NZ)
     {
-      if(Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(Get_Bit_N(AF, Z_FLAG)) return -4;
     }
     
     if(w == IMode::NC)
     {
-      if(Get_Bit_N(AF, C_FLAG)) return 0;
+      if(Get_Bit_N(AF, C_FLAG)) return -4;
     }
 
     if(r == IMode::E8 || w == IMode::E8)
@@ -855,7 +880,7 @@ namespace GBC
       PC += 1;
     }
 
-    return 4;
+    return -4;
   }
 
   uint8_t CPU::CALL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -864,21 +889,21 @@ namespace GBC
 
     if(w == IMode::Z)
     {
-      if(!Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(!Get_Bit_N(AF, Z_FLAG)) return -12;
     }
     if(w == IMode::NZ)
     {
-      if(Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(Get_Bit_N(AF, Z_FLAG)) return -12;
     }
 
     if(w == IMode::C)
     {
-      if(!Get_Bit_N(AF, C_FLAG)) return 0;
+      if(!Get_Bit_N(AF, C_FLAG)) return -12;
     }
    
     if(w == IMode::NC)
     {
-      if(Get_Bit_N(AF, C_FLAG)) return 0;
+      if(Get_Bit_N(AF, C_FLAG)) return -12;
     }
 
     PC += 1;
@@ -911,7 +936,7 @@ namespace GBC
     }
 
     PC -= 1;
-    return 12;
+    return -16;
   }
 
   uint8_t CPU::RST(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -938,36 +963,36 @@ namespace GBC
     PC = lowpage;
     PC -= 1;
 
-    return 0;
+    return -8;
   }
 
   uint8_t CPU::RET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     if(w == IMode::Z)
     {
-      if(!Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(!Get_Bit_N(AF, Z_FLAG)) return -12;
     }
     
     if(w == IMode::NZ)
     {
-      if(Get_Bit_N(AF, Z_FLAG)) return 0;
+      if(Get_Bit_N(AF, Z_FLAG)) return -12;
     }
 
     if(w == IMode::C)
     {
-      if(!Get_Bit_N(AF, C_FLAG)) return 0;
+      if(!Get_Bit_N(AF, C_FLAG)) return -12;
     }
    
     if(w == IMode::NC)
     {
-      if(Get_Bit_N(AF, C_FLAG)) return 0;
+      if(Get_Bit_N(AF, C_FLAG)) return -12;
     }
 
     uint16_t addr = Combine(bus->Read(SP+1), bus->Read(SP));
     SP += 2;
     PC = addr - 1;
     
-    return 0;
+    return -8;
   }
 
   uint8_t CPU::RETI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -978,7 +1003,7 @@ namespace GBC
     SP += 2;
     PC = addr - 1;
      
-    return 0;
+    return -8;
   }
 
   uint8_t CPU::CPL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1001,7 +1026,7 @@ namespace GBC
     Set_Bit_N(&AF, H_FLAG, 0);
 
     Set_Bit_N(&AF, C_FLAG, Get_Bit_N(AF, C_FLAG) == 0);
-    return 4;
+    return 0;
   }
 
   uint8_t CPU::DAA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1064,7 +1089,7 @@ namespace GBC
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
 
-    return 4;
+    return 0;
   }
 
   uint8_t CPU::RRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1084,7 +1109,7 @@ namespace GBC
     Set_Bit_N(&AF, Z_FLAG, 0);
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 4;
+    return 0;
   }
   
   uint8_t CPU::RLCA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1106,7 +1131,7 @@ namespace GBC
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
 
-    return 4;
+    return 0;
   }
 
   uint8_t CPU::RLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1126,11 +1151,12 @@ namespace GBC
     Set_Bit_N(&AF, Z_FLAG, 0);
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 4;
+    return 0;
   }
     
   uint8_t CPU::SBC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint8_t val = 0;
     uint8_t cflag = Get_Bit_N(AF, C_FLAG);
     
@@ -1149,12 +1175,14 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
     {
       PC += 1;
       val = bus->Read(PC);
+      n += -4;
     }
 
     if(w == IMode::HIGH)
@@ -1172,11 +1200,12 @@ namespace GBC
       Set_Bit_N(&AF, Z_FLAG, (bool)(A == 0));
     }
     
-    return 0;
+    return n;
   }
 
   uint8_t CPU::ADC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint8_t val = 0;
     uint8_t cflag = Get_Bit_N(AF, C_FLAG);
     
@@ -1195,12 +1224,14 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
     {
       PC += 1;
       val = bus->Read(PC);
+      n += -4;
     }
 
     uint8_t A = *dest_register >> 8;
@@ -1214,11 +1245,12 @@ namespace GBC
     *dest_register |= A << 8;
 
     Set_Bit_N(&AF, Z_FLAG, (bool)((uint8_t)A == 0));
-    return 0;
+    return n;
   }
 
   uint8_t CPU::CP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
+    int n = 0;
     uint8_t val = 0;
     Set_Bit_N(&AF, N_FLAG, 1);
 
@@ -1235,12 +1267,14 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
+      n += -4;
     }
 
     if(r == IMode::N8)
     {
       PC += 1;
       val = bus->Read(PC);
+      n += -4;
     }
     
     uint8_t dest_val = *dest_register >> 8;
@@ -1251,7 +1285,7 @@ namespace GBC
     Set_Half_Carry_Minus(dest_val, val);
     Set_Carry_Minus(dest_val, val);
 
-    return 0;
+    return n;
   }
 
   uint8_t CPU::RES(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1275,7 +1309,7 @@ namespace GBC
       Set_Bit_N(&val, (uint8_t)w, 0);
 
       bus->Write(*src_value, val);
-      return 16;
+      return -8;
     }
 
     Set_Bit_N(&val, (uint8_t)w, 0);
@@ -1293,7 +1327,7 @@ namespace GBC
       *src_value |= val;
     }
     
-    return 8;
+    return 0;
   }
 
   uint8_t CPU::SET(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
@@ -1317,7 +1351,7 @@ namespace GBC
       Set_Bit_N(&val, (uint8_t)w, 1);
 
       bus->Write(*src_value, val);
-      return 16;
+      return -8;
     }
 
     Set_Bit_N(&val, (uint8_t)w, 1);
@@ -1341,7 +1375,7 @@ namespace GBC
   uint8_t CPU::IBIT(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 0;
+    int n = 0;
     if(r == IMode::LOW)
     {
       val = *src_value;
@@ -1355,7 +1389,7 @@ namespace GBC
     if(r == IMode::MEM)
     {
       val = bus->Read(*src_value);
-      n = 4;
+      n += -4;
     }
 
     uint8_t setv = Get_Bit_N(val, (uint8_t)w);
@@ -1363,13 +1397,13 @@ namespace GBC
     Set_Bit_N(&AF, Z_FLAG, (bool)(setv == 0));
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 1);
-    return 8 + n;
+    return n;
   }
 
   uint8_t CPU::SWAP(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 1;
     
     if(w == IMode::LOW)
     {
@@ -1384,7 +1418,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
-      n = 2;
+      n += -4;
     }
 
     uint8_t low = val;
@@ -1418,15 +1452,16 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
+      n += -4;
     }
 
-    return 8 * n;
+    return n;
   }
 
   uint8_t CPU::SLA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 0;
 
     if(w == IMode::LOW)
     {
@@ -1441,6 +1476,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
+      n += -4;
     }
 
     uint8_t top = Get_Bit_N(val, 7);
@@ -1461,7 +1497,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
-      n = 2;
+      n += -4;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
@@ -1469,13 +1505,13 @@ namespace GBC
 
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 8 * n;
+    return n;
   }
 
   uint8_t CPU::SRA(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 0;
 
     if(w == IMode::LOW)
     {
@@ -1490,6 +1526,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
+      n += -4;
     }
 
     uint8_t bottom = Get_Bit_N(val, 0);
@@ -1512,7 +1549,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
-      n = 2;
+      n += -4;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
@@ -1520,13 +1557,13 @@ namespace GBC
 
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 8 * n;
+    return n;
   }
 
   uint8_t CPU::RR(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 0;
 
     if(w == IMode::LOW)
     {
@@ -1541,6 +1578,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
+      n += -4;
     }
 
     uint8_t bottom = Get_Bit_N(val, 0);
@@ -1564,7 +1602,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
-      n = 2;
+      n += -4;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
@@ -1572,13 +1610,13 @@ namespace GBC
 
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 8 * n;
+    return n;
   }
 
   uint8_t CPU::RL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 0;
 
     if(w == IMode::LOW)
     {
@@ -1593,6 +1631,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
+      n += -4;
     }
 
     uint8_t top = Get_Bit_N(val, 7);
@@ -1616,7 +1655,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
-      n = 2;
+      n += -4;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
@@ -1624,13 +1663,13 @@ namespace GBC
 
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 8 * n;
+    return n;
   }
 
   uint8_t CPU::RRC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 0;
 
     if(w == IMode::LOW)
     {
@@ -1645,6 +1684,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
+      n += -4;
     }
 
     uint8_t bottom = Get_Bit_N(val, 0);
@@ -1666,7 +1706,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
-      n = 2;
+      n += -4;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
@@ -1674,13 +1714,13 @@ namespace GBC
 
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 8 * n;
+    return n;
   }
 
   uint8_t CPU::SRL(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 0;
 
     if(w == IMode::LOW)
     {
@@ -1695,6 +1735,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
+      n += -4;
     }
 
     uint8_t bottom = Get_Bit_N(val, 0);
@@ -1716,7 +1757,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
-      n = 2;
+      n += -4;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
@@ -1724,13 +1765,13 @@ namespace GBC
 
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 8 * n;
+    return n;
   }
 
   uint8_t CPU::RLC(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
     uint8_t val = 0;
-    uint8_t n = 1;
+    int n = 0;
 
     if(w == IMode::LOW)
     {
@@ -1745,6 +1786,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       val = bus->Read(*dest_register);
+      n += -4;
     }
 
     uint8_t top = Get_Bit_N(val, 7);
@@ -1766,7 +1808,7 @@ namespace GBC
     if(w == IMode::MEM)
     {
       bus->Write(*dest_register, val);
-      n = 2;
+      n += -4;
     }
 
     Set_Bit_N(&AF, Z_FLAG, (bool)(val == 0));
@@ -1774,7 +1816,7 @@ namespace GBC
 
     Set_Bit_N(&AF, N_FLAG, 0);
     Set_Bit_N(&AF, H_FLAG, 0);
-    return 8 * n;
+    return n;
   }
   
 };

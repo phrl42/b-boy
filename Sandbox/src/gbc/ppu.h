@@ -102,10 +102,10 @@ namespace GBC
     
     void Render();
 
+    // functions called by main thread
     void UpdateMaps();
+    void UpdateTiles(); // debug only
 
-    // debug only
-    void UpdateTiles();
     Tile IndexToTile(uint8_t index, bool BGW);
     
   private:

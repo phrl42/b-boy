@@ -191,7 +191,7 @@ namespace GBC
  
   void PPU::Render()
   {
-    UpdateMaps();
+    
   }
 
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
@@ -231,23 +231,6 @@ namespace GBC
 
   void PPU::UpdateTiles()
   {
-    /*tile_data[0] = 0x3C;
-    tile_data[1] = 0x7E;
-    tile_data[2] = 0x42;
-    tile_data[3] = 0x42;
-    tile_data[4] = 0x42;
-    tile_data[5] = 0x42;
-    tile_data[6] = 0x42;
-    tile_data[7] = 0x42;
-    tile_data[8] = 0x7E;
-    tile_data[9] = 0x5E;
-    tile_data[10] = 0x7E;
-    tile_data[11] = 0x0A;
-    tile_data[12] = 0x7C;
-    tile_data[13] = 0x56;
-    tile_data[14] = 0x38;
-    tile_data[15] = 0x7C;
-    */
     int row_index = 0;
     int tile_index = 0;
     for(uint16_t pos = 0; pos <= A_TileDataEND - A_TileData; pos += 2)
