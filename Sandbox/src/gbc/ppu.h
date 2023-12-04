@@ -2,6 +2,9 @@
 #include "Sandbox.h"
 #include "gbc/bitwise.h"
 
+#define WIDTH 160
+#define HEIGHT 144
+
 // PPU Registers are located in RAM
 // Tile Data Location
 #define A_TileData 0x8000
@@ -21,14 +24,14 @@
     
 // LCD Control (R/W)
 #define A_LCDC 0xFF40
-// 7 LCD Display Enable
-// 6 Window Tile Map Address
+// 7 LCD Enable
+// 6 Window Tile Map
 // 5 Window Enable
-// 4 BG & Window Tile Data
-// 3 BG Tile Map Address
+// 4 BG and W Tile Map
+// 3 BG Tile Map
 // 2 OBJ Size
 // 1 OBJ Enable
-// 0 BG Enable
+// 0 BG and W Enable
     
 // LCD Status (R/W)
 #define A_STAT 0xFF41
@@ -78,11 +81,11 @@ namespace GBC
   {
     // saved with 2bpp
     PixelRow row[8];
+
   };
 
   struct Object
   {
-    Tile tile[2];
     bool two_tile;
 
     uint8_t y;
@@ -90,6 +93,16 @@ namespace GBC
 
     uint8_t index;
     uint8_t flags;
+  };
+
+  struct Line
+  {
+    uint8_t bpp[WIDTH];
+  };
+  
+  struct Screen
+  {
+    Line line[HEIGHT];
   };
   
   struct PPU
@@ -99,29 +112,82 @@ namespace GBC
 
     uint8_t Read(uint16_t address);
     void Write(uint16_t address, uint8_t value);
-    
-    void Render();
+
+    void UpdateSettings();
 
     // functions called by main thread
     void UpdateMaps();
     void UpdateTiles(); // debug only
 
+    void UpdateOAM();
+    void DMATransfer(uint8_t *chunk);
+    
     Tile IndexToTile(uint8_t index, bool BGW);
+
+    void Render();
+    void Tick();
+
+    // todo: make a more efficient algorithm
+    inline uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2)
+    {
+      Tile *tile = map2 ? tmap2 : tmap1;
+      uint32_t roffset = 0;
+      uint32_t cap_n = 8;
+
+      uint8_t pixels[32*32*8*8];
+      
+      for(uint32_t t = 0; t < 32*32; t++)
+      {
+	if(t % 8 == 0 && t != 0) roffset += 8 * 8 * 8;
+	for(uint8_t y = 0; y <= 7; y++)
+	{
+	  for(uint8_t x = 0; x <= 7; x++)
+	  {
+	    pixels[((y * 8 * cap_n) + x) + ((t % 8) * cap_n) + roffset] = tile->row[y].bpp[x];
+	  }
+	}
+	tile++;
+      }
+
+      return pixels[(y * 32*8) + x];
+    }
     
   private:
-    uint8_t tile_data[A_TileDataEND - A_TileData] = {0};
+
+    enum class Mode
+    {
+      ZERO=0, ONE, TWO, THREE
+    };
+
+    struct Renderer
+    {
+      Mode mode = Mode::TWO;
+      uint16_t dot = 0;
+
+      uint8_t x = 0;
+    };
+
+    Renderer rend;
+    
+    uint8_t tile_data[0x1800] = {0};
 
     uint8_t map1[32*32] = {0};
     uint8_t map2[32*32] = {0};
 
-    uint8_t oam[A_OAMEND - A_OAM] = {0};
+    uint8_t oam[0xA0] = {0};
+
+    Object objects[40] = {0};
+
+    Screen screen;
   public:
+    Tile screen_tiles[360] = {0}; 
+    
     Tile tmap1[32*32] = {0};
     Tile tmap2[32*32] = {0};
 
     Tile tile[384*2] = {0};
-    
-    Object objects[40] = {0};
+
+    Tile OAM_tiles[40] = {0};
   private:
     uint8_t LCDC = 16;
     uint8_t STAT = 0;

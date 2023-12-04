@@ -1,4 +1,5 @@
 #include "gbc/ppu.h"
+#include "gbc/bus.h"
 
 namespace GBC
 {
@@ -25,16 +26,19 @@ namespace GBC
   {
     if(address <= A_TileDataEND && address >= A_TileData)
     {
+      if(rend.mode == Mode::THREE) return 0xFF;
       return tile_data[address - A_TileData];
     }
     
     if(address <= A_TileMap1END && address >= A_TileMap1)
     {
+      if(rend.mode == Mode::THREE) return 0xFF;
       return map1[address - A_TileMap1];
     }
 
     if(address <= A_TileMap2END && address >= A_TileMap2)
     {
+      if(rend.mode == Mode::THREE) return 0xFF;
       return map2[address - A_TileMap2]; 
     }
 
@@ -107,18 +111,21 @@ namespace GBC
   {
     if(address <= A_TileDataEND && address >= A_TileData)
     {
+      if(rend.mode == Mode::THREE) return;
       tile_data[address - A_TileData] = value;
       return;
     }
 
     if(address <= A_TileMap1END && address >= A_TileMap1)
     {
+      if(rend.mode == Mode::THREE) return;
       map1[address - A_TileMap1] = value;
       return;
     }
 
     if(address <= A_TileMap2END && address >= A_TileMap2)
     {
+      if(rend.mode == Mode::THREE) return;
       map2[address - A_TileMap2] = value;
       return;
     }
@@ -188,19 +195,79 @@ namespace GBC
 
     return;
   }
- 
-  void PPU::Render()
+
+  void PPU::UpdateSettings()
   {
     
   }
 
-  void PPU::DMATransfer(Bus *bus)
+  // progresses one dot
+  void PPU::Render()
   {
-    uint16_t address = DMA * 0x0100;
+    if(!Get_Bit_N(LCDC, 7)) return;
+
+    if(rend.dot == 0) rend.mode = Mode::TWO;
     
+    if(rend.mode == Mode::TWO)
+    {
+      //oam[A_OAM + dot];
+    }
+    
+    if(rend.mode == Mode::THREE)
+    {
+      // draw bg
+      if(Get_Bit_N(LCDC, 0))
+      {
+	uint8_t pixel = TileToScreen(SCX, SCY, false);//Get_bit_N(LCDC, 4));
+	screen.line[LY].bpp[rend.x] = pixel;
+	rend.x += 1;
+      }
+      
+      // draw window
+      if(Get_Bit_N(LCDC, 5) && Get_Bit_N(LCDC, 0))
+      {
+
+      }
+      
+      // draw obj
+      if(Get_Bit_N(LCDC, 1))
+      {
+
+      }
+    }
+
+    
+    rend.dot++;
+    if(rend.dot == 80) rend.mode = Mode::THREE;
+    if(rend.x == 172) rend.mode = Mode::ZERO;
+    if(rend.dot == 456)
+    {
+      LY += 1;
+      rend.x = 0;
+      rend.dot = 0;
+    }
+    if(LY == 144)
+    {
+      rend.mode = Mode::ONE;
+    }
+    if(LY == 154)
+    {
+      LY = 0;
+    }
+  }
+
+  // called every t-cycle
+  void PPU::Tick()
+  {
+    Render();
+  }
+  
+  void PPU::DMATransfer(uint8_t *chunk)
+  {
     for(uint16_t byte = 0; byte < 0xA0; byte++)
     {
-      oam[byte] = bus->Read(address+byte);
+      oam[byte] = *chunk;
+      chunk++;
     }
   }
   
@@ -287,9 +354,8 @@ namespace GBC
   {
     for(uint8_t i = 0; i < 40; i++)
     {
-      objects[i].tile[0] = IndexToTile(objects[i].index, false);
+      OAM_tiles[i] = IndexToTile(objects[i].index, false);
     }
-
     
   }
   

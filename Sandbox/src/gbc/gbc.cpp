@@ -139,7 +139,7 @@ namespace GBC
 	
 	cpu.Validate_Opcode();
 
-	//ppu.Render();
+	ppu.UpdateSettings();
 
 	if(dstate == Debug::STEP)
 	{

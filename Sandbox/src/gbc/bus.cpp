@@ -15,8 +15,7 @@ namespace GBC
     for(uint8_t i = 0; i < n; i++)
     {
       timer->Tick();
-      //ppu->Tick();
-      
+      ppu->Tick();
     }
   }
 
@@ -152,6 +151,11 @@ namespace GBC
       if(address >= 0xFF80 && address <= 0xFFFE)
       {
 	space[address] = value;
+      }
+
+      if(address == A_DMA)
+      {
+	ppu->DMATransfer(space + (value * 0x0100));
       }
     }
 
