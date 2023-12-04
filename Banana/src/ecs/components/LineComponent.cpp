@@ -34,11 +34,9 @@ namespace Banana
   {
     Pixel palette[4] = {{224, 248, 208, 255}, {136, 192, 112, 255}, {52, 104, 86, 255}, {8, 24, 32, 255}};
 
-    uint32_t roffset = 0;
-    uint32_t cap_n = n > 8 ? 8 : n;
-    for(uint8_t y = 0; y < 144; y++)
+    for(uint8_t y = 0; y < HEIGHT; y++)
     {
-      for(uint8_t x = 0; x <= 7; x++)
+      for(uint8_t x = 0; x <= WIDTH; x++)
       {
 	pixels[(y * WIDTH) + x] = palette[screen->line[y].bpp[x]];
       }
