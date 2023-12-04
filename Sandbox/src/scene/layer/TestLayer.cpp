@@ -5,6 +5,7 @@
 #include "ecs/components/QuadComponent.h"
 #include "ecs/components/TextComponent.h"
 #include "ecs/components/TileComponent.h"
+#include "ecs/components/LineComponent.h"
 
 #include "imgui_debug.h"
 
@@ -29,13 +30,23 @@ namespace SANDBOX
     spec.Init("assets/roms/01-special.gb");
     Stats::spec = &spec;
 
-    tilemap.AddComponent(new Banana::TileComponent(spec.ppu.OAM_tiles, 40));
+    screen.AddComponent(new Banana::LineComponent(&spec.ppu.screen));
+    Banana::LineComponent *lc = (Banana::LineComponent*)screen.GetComponent("LineComponent");
+    
+    tmap1.AddComponent(new Banana::TileComponent(spec.ppu.tmap1, 32*32));
+    Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");
 
-    tilemap.transform.proj = Banana::Projection::PERSPECTIVE;
+    tmap2.AddComponent(new Banana::TileComponent(spec.ppu.tmap2, 32*32));
+    Banana::TileComponent *tct = (Banana::TileComponent*)tmap2.GetComponent("TileComponent");
+    
+    tiles.AddComponent(new Banana::TileComponent(spec.ppu.tile, 200));
+    Banana::TileComponent *tilest = (Banana::TileComponent*)tiles.GetComponent("TileComponent");
 
-    Banana::TileComponent *tc = (Banana::TileComponent*)tilemap.GetComponent("TileComponent");
-    Stats::tiles_id = tc->GetTextureID();
-   }
+    Stats::tmap1_id = tc->GetTextureID();
+    Stats::tmap2_id = tct->GetTextureID();
+    Stats::tiles_id = tilest->GetTextureID();
+    Stats::screen_id = lc->GetTextureID();
+  }
 
   TestLayer::~TestLayer()
   {
@@ -74,26 +85,19 @@ namespace SANDBOX
       first = false;
       emu = std::thread(&GBC::Spec::Update, &spec);
     }
-    float one_width = 2.0f / TFT_WIDTH;
-    float one_height = 2.0f / TFT_HEIGHT;
-    for(size_t y = 0; y < TFT_HEIGHT; y++)
-    {
-      for(size_t x = 0; x < TFT_WIDTH; x++)
-      {
-	
-	//ent[y][x].transform.proj = Banana::Projection::NONE;
-	//ent[y][x].transform.pos = {(x * one_width) - 1, (((y * one_height) * -1) + 1) - one_height, 0};
-	//ent[y][x].transform.size = {one_width, one_height, 0};
-	//ent[y][x].transform.color = {spec.gpu.display[y][x], spec.gpu.display[y][x], spec.gpu.display[y][x], 1};
-	//ent[y][x].Render(dt);
-      }
-    }
 
     spec.ppu.UpdateMaps();
     spec.ppu.UpdateOAM();
+    spec.ppu.UpdateTiles();
     
-    Banana::TileComponent *tc = (Banana::TileComponent*)tilemap.GetComponent("TileComponent");
+    Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");
+    Banana::TileComponent *tct = (Banana::TileComponent*)tmap2.GetComponent("TileComponent");
+    Banana::TileComponent *tctiles = (Banana::TileComponent*)tiles.GetComponent("TileComponent");
+    Banana::LineComponent *screent = (Banana::LineComponent*)screen.GetComponent("LineComponent");
+    
     tc->UpdateTileData();
-
+    tct->UpdateTileData();
+    tctiles->UpdateTileData();
+    screent->UpdateTileData();
   }
 };

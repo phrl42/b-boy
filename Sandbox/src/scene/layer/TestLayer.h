@@ -30,8 +30,12 @@ namespace SANDBOX
 
     Banana::Entity ent[TFT_HEIGHT][TFT_WIDTH];
 
-    Banana::Entity tilemap;
+    Banana::Entity tmap1;
+    Banana::Entity tmap2;
+    Banana::Entity tiles;
 
+    Banana::Entity screen;
+    
     Banana::Entity play;
     Banana::Entity stop;
     Banana::Entity step;

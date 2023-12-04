@@ -182,7 +182,12 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Tiles", nullptr, 0);
-    ImGui::Image((void*)Stats::tiles_id, ImVec2(64*4, 64*8), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Text("Map 1:");
+    ImGui::Image((void*)Stats::tmap1_id, ImVec2(250, 250), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Text("Map 2:");
+    ImGui::Image((void*)Stats::tmap2_id, ImVec2(250, 250), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Text("Tiles:");
+    ImGui::Image((void*)Stats::tiles_id, ImVec2(250, 250), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::End();
 
     ImGui::Begin("Debugger", nullptr, 0);
@@ -329,7 +334,7 @@ namespace Banana
     ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration);
     ImVec2 winsize = ImGui::GetWindowSize();
     
-    ImGui::Image((void*)Application::GetInstance().fb->GetColorAttachmentID(), {winsize.x - 10, winsize.y - 42}, {0, 1}, {1, 0});
+    ImGui::Image((void*)Stats::screen_id, {winsize.x - 10, winsize.y - 42}, {0, 0}, {1, 1});
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

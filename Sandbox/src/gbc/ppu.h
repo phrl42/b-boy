@@ -178,16 +178,15 @@ namespace GBC
 
     Object objects[40] = {0};
 
-    Screen screen;
   public:
-    Tile screen_tiles[360] = {0}; 
-    
     Tile tmap1[32*32] = {0};
     Tile tmap2[32*32] = {0};
 
     Tile tile[384*2] = {0};
 
     Tile OAM_tiles[40] = {0};
+
+    Screen screen;
   private:
     uint8_t LCDC = 16;
     uint8_t STAT = 0;
