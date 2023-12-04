@@ -54,7 +54,7 @@ namespace Banana
       {
 	for(uint8_t x = 0; x <= 7; x++)
 	{
-	  pixels[((y * 8 * cap_n) + x) + ((t % 8) * cap_n) + roffset] = palette[tile->row[y].bpp[7 - x]];
+	  pixels[((y * 8 * cap_n) + x) + ((t % 8) * cap_n) + roffset] = palette[tile->row[y].bpp[x]];
 	}
       }
       tile++;

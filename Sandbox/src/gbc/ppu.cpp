@@ -191,7 +191,7 @@ namespace GBC
  
   void PPU::Render()
   {
-    //UpdateMaps();
+    UpdateMaps();
   }
 
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
@@ -223,7 +223,6 @@ namespace GBC
 	res_bit = higher_bit << 1 | lower_bit;
 	temp.row[row_index].bpp[i] = res_bit;
       }
-
       row_index++;
     }
 
