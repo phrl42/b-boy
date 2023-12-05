@@ -19,12 +19,13 @@ namespace GBC
     }
   }
 
-  Bus::Bus(PPU *ppu, Timer *timer, Interrupt *interrupt, IO *io)
+  Bus::Bus(PPU *ppu, Timer *timer, Interrupt *interrupt, IO *io, ROM *rom)
   {
     this->ppu = ppu;
     this->timer = timer;
     this->interrupt = interrupt;
     this->io = io;
+    this->rom = rom;
   }
 
   uint8_t Bus::Read(uint16_t address, bool emu)
@@ -32,8 +33,8 @@ namespace GBC
     uint8_t value = 0;
     if(address <= 0x7FFF)
     {
-      value = space[address];
       // ROM reading
+      value = rom->Read(address);
     }
     else if(address <= 0x9FFF)
     {
@@ -53,7 +54,7 @@ namespace GBC
     else if(address <= 0xFE9F)
     {
       // OAM reading
-      GBC_LOG("OAM READING NOT IMPLEMENTED");
+      value = ppu->Read(address);
     }
     else if(address <= 0xFEFF)
     {
@@ -97,8 +98,8 @@ namespace GBC
   {
     if(address <= 0x7FFF)
     {
-      space[address] = value;
       // ROM writing
+      rom->Write(address, value);
     }
     else if(address <= 0x9FFF)
     {
@@ -118,7 +119,7 @@ namespace GBC
     else if(address <= 0xFE9F)
     {
       // OAM writing
-      GBC_LOG("OAM WRITING NOT IMPLEMENTED");
+      ppu->Write(address, value);
     }
     else if(address <= 0xFEFF)
     {

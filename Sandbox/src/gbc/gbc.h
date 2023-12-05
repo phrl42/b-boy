@@ -8,11 +8,10 @@
 #include "gbc/interrupt.h"
 #include "gbc/timer.h"
 #include "gbc/io.h"
+#include "gbc/rom.h"
 
 namespace GBC
 {
-  const uint16_t entry = 0x0100;
-
   enum class Debug
   {
     RUN, STOP, STEP
@@ -21,7 +20,7 @@ namespace GBC
   struct Spec
   {
     inline Spec()
-    :interrupt(Interrupt()), ppu(PPU()), io(IO()), timer(Timer(&interrupt)), bus(Bus(&ppu, &timer, &interrupt, &io)), cpu(CPU(&bus))
+      :rom(ROM()), interrupt(Interrupt()), ppu(PPU()), io(IO()), timer(Timer(&interrupt)), bus(Bus(&ppu, &timer, &interrupt, &io, &rom)), cpu(CPU(&bus))
     {
 
     }
@@ -30,6 +29,8 @@ namespace GBC
     Timer timer;
     Interrupt interrupt;
     IO io;
+
+    ROM rom;
     
     Bus bus;
 
@@ -37,7 +38,6 @@ namespace GBC
 
     Debug dstate = Debug::RUN;
     
-    const char* rom;
 
     void Init(const char* rom_path);
     void Update();
@@ -51,14 +51,9 @@ namespace GBC
     int breakaddr = 0xFFFFF;
     bool breakfree = false;
 
-
     int breakop = -1;
     
     void add_address(uint16_t address, std::string mnemonic);
-
-  private:
-    bool Load_Rom(const char* rom_path);
-
   };
  
 };
