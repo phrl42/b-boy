@@ -225,10 +225,8 @@ namespace GBC
   // progresses one dot
   void PPU::Render()
   {
-    printf("LCDC: %x\n", LCDC);
     if(!Get_Bit_N(LCDC, 7)) return;
-    printf("dot: %d LY: %d LCDC: %x\n", rend.dot, LY, LCDC);
-    if(rend.dot == 0) rend.mode = Mode::TWO;
+    if(LY == 0 && rend.mode == Mode::ONE) rend.mode = Mode::TWO;
     
     if(rend.mode == Mode::TWO)
     {
@@ -240,7 +238,7 @@ namespace GBC
       // draw bg
       if(Get_Bit_N(LCDC, 0))
       {
-	uint8_t pixel = TileToScreen(SCX, SCY, false);//Get_bit_N(LCDC, 4));
+	uint8_t pixel = TileToScreen(SCX, SCY, Get_Bit_N(LCDC, 4));
 	screen.line[LY].bpp[rend.x] = pixel;
 	rend.x += 1;
       }
@@ -259,21 +257,23 @@ namespace GBC
     }
     
     rend.dot += 1;
-    if(rend.dot == 80) rend.mode = Mode::THREE;
-    if(rend.x == 172) rend.mode = Mode::ZERO;
+    if(rend.dot == 80 && rend.mode == Mode::TWO) rend.mode = Mode::THREE;
+    if(rend.x == WIDTH) rend.mode = Mode::ZERO;
     if(rend.dot == 456)
     {
       LY += 1;
       rend.x = 0;
       rend.dot = 0;
+      if(LY < HEIGHT) rend.mode = Mode::TWO;
     }
-    if(LY == 144)
+    if(LY == HEIGHT)
     {
       rend.mode = Mode::ONE;
     }
     if(LY == 154)
     {
       LY = 0;
+      rend.mode = Mode::TWO;
     }
   }
 
