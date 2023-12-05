@@ -255,21 +255,23 @@ namespace GBC
     
     if(rend.mode == Mode::THREE)
     {
-      if(rend.dot % 4 == 0)
+      PFIFO fif;
+      //if(rend.dot % 4 == 0)
       {
-	PFIFO fif;
 	// draw bg
 	if(Get_Bit_N(LCDC, 0))
 	{
 	  // map2 bool may cause bugs here
 	  // unclear when to set true
 	  fif.bpp = TileToScreen((SCX + rend.x) % 255, (SCY + LY) % 255, Get_Bit_N(LCDC, 3));
+	  //sfif.bpp = TileToScreen((SCX + rend.x) % 255, (SCY + LY) % 255, Get_Bit_N(LCDC, 3));
 	}
       
 	// draw window
 	if(Get_Bit_N(LCDC, 5) && Get_Bit_N(LCDC, 0))
 	{
 	  fif.bpp = TileToScreen(WX, WY, Get_Bit_N(LCDC, 3));
+	  //sfif.bpp = TileToScreen(WX, WY, Get_Bit_N(LCDC, 3));
 	}
       
 	// draw obj
@@ -279,7 +281,7 @@ namespace GBC
 	}
 
 	screen.line[LY].bpp[rend.x] = fif.bpp;
-	rend.x += 2;
+	rend.x += 1;
       }
     }
     

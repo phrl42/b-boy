@@ -19,7 +19,7 @@ namespace GBC
     void Post_Bios();
   private:
     const char* rom;
-    uint8_t space[32768];
+    uint8_t space[32768 * 100];
 
     uint8_t lower_game[0x0100];
   };

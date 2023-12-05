@@ -27,7 +27,7 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/06-ld.gb");
+    spec.Init("assets/roms/Tetris.gb");
     Stats::spec = &spec;
 
     screen.AddComponent(new Banana::LineComponent(&spec.ppu.screen));
@@ -88,6 +88,7 @@ namespace SANDBOX
 
     spec.ppu.UpdateMaps();
     spec.ppu.UpdateTiles();
+
     
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");
     Banana::TileComponent *tct = (Banana::TileComponent*)tmap2.GetComponent("TileComponent");

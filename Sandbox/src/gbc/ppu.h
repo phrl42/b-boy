@@ -147,8 +147,8 @@ namespace GBC
 
     struct FIFO
     {
-      std::stack<PFIFO> bg[8];
-      std::stack<PFIFO> obj[8];
+      PFIFO bg[8];
+      PFIFO obj[8];
     };
     
     struct Renderer
