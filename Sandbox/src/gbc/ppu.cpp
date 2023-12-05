@@ -202,24 +202,26 @@ namespace GBC
   // todo: fix this
   uint8_t PPU::TileToScreen(uint16_t x, uint16_t y, bool map2)
   {
-    Tile *tile = map2 ? tmap2 : tmap1;
-
+    map2 = false;
+    
     uint32_t nt = 0;
     uint16_t ny = y;
     uint16_t nx = x;
 
-    nx += 8 - (x % 8);
+    nx += (8 - (x % 8))-1;
 
-    ny += 8 - (y % 8);
+    ny += (8 - (y % 8))-1;
 
-    nt = (((ny / 8)-1)*8) + ((nx / 8)-1);
+    nt = (((ny / 8))*32) + ((nx / 8));
 
     nx = x % 8;
     ny = y % 8;
 
-    tile += nt;
+    int index = map2 ? this->map2[nt] : this->map1[nt];
 
-    return tile->row[ny].bpp[nx];
+    Tile tile = IndexToTile(index, false);
+    
+    return tile.row[ny].bpp[nx];
   }
 
   // progresses one dot
@@ -238,7 +240,7 @@ namespace GBC
       // draw bg
       if(Get_Bit_N(LCDC, 0))
       {
-	uint8_t pixel = TileToScreen(SCX, SCY, Get_Bit_N(LCDC, 4));
+	uint8_t pixel = TileToScreen((SCX + rend.x) % 255, (SCY + LY) % 255, Get_Bit_N(LCDC, 4));
 	screen.line[LY].bpp[rend.x] = pixel;
 	rend.x += 1;
       }
@@ -294,6 +296,22 @@ namespace GBC
   
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
+    /*tile_data[0] = 0x3C;
+    tile_data[1] = 0x7E;
+    tile_data[2] = 0x42;
+    tile_data[3] = 0x42;
+    tile_data[4] = 0x42;
+    tile_data[5] = 0x42;
+    tile_data[6] = 0x42;
+    tile_data[7] = 0x42;
+    tile_data[8] = 0x7E;
+    tile_data[9] = 0x5E;
+    tile_data[10] = 0x7E;
+    tile_data[11] = 0x0A;
+    tile_data[12] = 0x7C;
+    tile_data[13] = 0x56;
+    tile_data[14] = 0x38;
+    tile_data[15] = 0x7C;*/
     // 1 tile = 16 byte
     Tile temp = {0};
 
