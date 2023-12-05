@@ -198,12 +198,8 @@ namespace GBC
     
   }
 
-  // this causes a massive issue.
-  // todo: fix this
   uint8_t PPU::TileToScreen(uint16_t x, uint16_t y, bool map2)
   {
-    map2 = false;
-    
     uint32_t nt = 0;
     uint16_t ny = y;
     uint16_t nx = x;
@@ -219,9 +215,22 @@ namespace GBC
 
     int index = map2 ? this->map2[nt] : this->map1[nt];
 
-    Tile tile = IndexToTile(index, false);
+    Tile tile = IndexToTile(index, true);
     
     return tile.row[ny].bpp[nx];
+  }
+
+  Object PPU::OAMToObject(uint8_t index)
+  {
+    Object obj;
+    obj.y = oam[index];
+    obj.x = oam[index+1];
+    obj.index = oam[index+2];
+    obj.flags = oam[index+3];
+
+    obj.height = Get_Bit_N(LCDC, 2) ? 16 : 8;
+
+    return obj;
   }
 
   // progresses one dot
@@ -232,29 +241,45 @@ namespace GBC
     
     if(rend.mode == Mode::TWO)
     {
-      //oam[A_OAM + dot];
+      if(rend.dot % 2 == 0)
+      {
+	Object obj = OAMToObject(rend.dot / 2);
+
+	if(obj.x > 0 && obj.y <= (LY+16) && (LY+16) < (obj.y + obj.height) && rend.buffer_index < 10)
+	{
+	  rend.buffer[rend.buffer_index] = obj;
+	  rend.buffer_index++;
+	}
+      }
     }
     
     if(rend.mode == Mode::THREE)
     {
-      // draw bg
-      if(Get_Bit_N(LCDC, 0))
+      if(rend.dot % 4 == 0)
       {
-	uint8_t pixel = TileToScreen((SCX + rend.x) % 255, (SCY + LY) % 255, Get_Bit_N(LCDC, 4));
-	screen.line[LY].bpp[rend.x] = pixel;
-	rend.x += 1;
-      }
+	PFIFO fif;
+	// draw bg
+	if(Get_Bit_N(LCDC, 0))
+	{
+	  // map2 bool may cause bugs here
+	  // unclear when to set true
+	  fif.bpp = TileToScreen((SCX + rend.x) % 255, (SCY + LY) % 255, Get_Bit_N(LCDC, 3));
+	}
       
-      // draw window
-      if(Get_Bit_N(LCDC, 5) && Get_Bit_N(LCDC, 0))
-      {
-
-      }
+	// draw window
+	if(Get_Bit_N(LCDC, 5) && Get_Bit_N(LCDC, 0))
+	{
+	  fif.bpp = TileToScreen(WX, WY, Get_Bit_N(LCDC, 3));
+	}
       
-      // draw obj
-      if(Get_Bit_N(LCDC, 1))
-      {
+	// draw obj
+	if(Get_Bit_N(LCDC, 1))
+	{
 
+	}
+
+	screen.line[LY].bpp[rend.x] = fif.bpp;
+	rend.x += 2;
       }
     }
     
@@ -266,6 +291,16 @@ namespace GBC
       LY += 1;
       rend.x = 0;
       rend.dot = 0;
+
+      for(uint8_t i = 0; i <= rend.buffer_index; i++)
+      {
+	rend.buffer[i].x = 0;
+	rend.buffer[i].y = 0;
+	rend.buffer[i].index = 0;
+	rend.buffer[i].flags = 0;
+      }
+      rend.buffer_index = 0;
+      
       if(LY < HEIGHT) rend.mode = Mode::TWO;
     }
     if(LY == HEIGHT)
@@ -287,31 +322,31 @@ namespace GBC
   
   void PPU::DMATransfer(uint8_t *chunk)
   {
-    for(uint16_t byte = 0; byte < 0xA0; byte++)
+    for(uint8_t byte = 0; byte < 0xA0; byte++)
     {
       oam[byte] = *chunk;
       chunk++;
     }
   }
-  
+
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
     /*tile_data[0] = 0x3C;
-    tile_data[1] = 0x7E;
-    tile_data[2] = 0x42;
-    tile_data[3] = 0x42;
-    tile_data[4] = 0x42;
-    tile_data[5] = 0x42;
-    tile_data[6] = 0x42;
-    tile_data[7] = 0x42;
-    tile_data[8] = 0x7E;
-    tile_data[9] = 0x5E;
-    tile_data[10] = 0x7E;
-    tile_data[11] = 0x0A;
-    tile_data[12] = 0x7C;
-    tile_data[13] = 0x56;
-    tile_data[14] = 0x38;
-    tile_data[15] = 0x7C;*/
+      tile_data[1] = 0x7E;
+      tile_data[2] = 0x42;
+      tile_data[3] = 0x42;
+      tile_data[4] = 0x42;
+      tile_data[5] = 0x42;
+      tile_data[6] = 0x42;
+      tile_data[7] = 0x42;
+      tile_data[8] = 0x7E;
+      tile_data[9] = 0x5E;
+      tile_data[10] = 0x7E;
+      tile_data[11] = 0x0A;
+      tile_data[12] = 0x7C;
+      tile_data[13] = 0x56;
+      tile_data[14] = 0x38;
+      tile_data[15] = 0x7C;*/
     // 1 tile = 16 byte
     Tile temp = {0};
 
@@ -345,6 +380,8 @@ namespace GBC
     return temp;
   }
 
+  // debugging only
+
   void PPU::UpdateTiles()
   {
     int row_index = 0;
@@ -375,7 +412,7 @@ namespace GBC
       row_index++;
     }
   }
-  
+
   void PPU::UpdateMaps()
   {
     for(uint16_t i = 0; i < 32*32; i++)
@@ -395,7 +432,7 @@ namespace GBC
     {
       OAM_tiles[i] = IndexToTile(objects[i].index, false);
     }
-    
   }
   
+
 };

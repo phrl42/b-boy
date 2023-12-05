@@ -87,7 +87,6 @@ namespace SANDBOX
     }
 
     spec.ppu.UpdateMaps();
-    spec.ppu.UpdateOAM();
     spec.ppu.UpdateTiles();
     
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");

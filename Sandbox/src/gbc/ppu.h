@@ -2,6 +2,8 @@
 #include "Sandbox.h"
 #include "gbc/bitwise.h"
 
+#include <stack>
+
 #define WIDTH 160
 #define HEIGHT 144
 
@@ -79,20 +81,7 @@ namespace GBC
   
   struct Tile
   {
-    // saved with 2bpp
     PixelRow row[8];
-
-  };
-
-  struct Object
-  {
-    bool two_tile;
-
-    uint8_t y;
-    uint8_t x;
-
-    uint8_t index;
-    uint8_t flags;
   };
 
   struct Line
@@ -104,7 +93,18 @@ namespace GBC
   {
     Line line[HEIGHT];
   };
-  
+
+  struct Object
+  {
+    uint8_t y;
+    uint8_t x;
+
+    uint8_t index;
+    uint8_t flags;
+
+    uint8_t height;
+  };
+ 
   struct PPU
   {
     // 15-Bit RGB Color
@@ -115,14 +115,14 @@ namespace GBC
 
     void UpdateSettings();
 
-    // functions called by main thread
     void UpdateMaps();
-    void UpdateTiles(); // debug only
+    void UpdateTiles();
 
     void UpdateOAM();
     void DMATransfer(uint8_t *chunk);
     
     Tile IndexToTile(uint8_t index, bool BGW);
+    Object OAMToObject(uint8_t index);
 
     void Render();
     void Tick();
@@ -136,35 +136,54 @@ namespace GBC
       ZERO=0, ONE, TWO, THREE
     };
 
+    struct PFIFO
+    {
+      uint8_t bpp = 0;
+      uint8_t obp = 0;
+
+      // 7th bit of attribute flag
+      uint8_t priority = 0;
+    };
+
+    struct FIFO
+    {
+      std::stack<PFIFO> bg[8];
+      std::stack<PFIFO> obj[8];
+    };
+    
     struct Renderer
     {
       Mode mode = Mode::TWO;
       uint16_t dot = 0;
 
       uint8_t x = 0;
+
+      Object buffer[10] = {0};
+      uint8_t buffer_index = 0;
+
+      FIFO fifo;
     };
 
     Renderer rend;
-    
-    uint8_t tile_data[0x1800] = {0};
 
+    uint8_t tile_data[0x1800] = {0};
     uint8_t map1[32*32] = {0};
     uint8_t map2[32*32] = {0};
 
     uint8_t oam[0xA0] = {0};
-
     Object objects[40] = {0};
 
   public:
+    // for debug only
+    Tile tile[384*2] = {0};
     Tile tmap1[32*32] = {0};
     Tile tmap2[32*32] = {0};
-
-    Tile tile[384*2] = {0};
 
     Tile OAM_tiles[40] = {0};
 
     Screen screen;
   private:
+    // registers
     uint8_t LCDC = 0;
     uint8_t STAT = 0;
 
