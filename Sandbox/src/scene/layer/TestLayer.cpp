@@ -27,7 +27,7 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/01-special.gb");
+    spec.Init("assets/roms/06-ld.gb");
     Stats::spec = &spec;
 
     screen.AddComponent(new Banana::LineComponent(&spec.ppu.screen));
@@ -86,9 +86,9 @@ namespace SANDBOX
       emu = std::thread(&GBC::Spec::Update, &spec);
     }
 
-    spec.ppu.UpdateMaps();
-    spec.ppu.UpdateOAM();
-    spec.ppu.UpdateTiles();
+    //spec.ppu.UpdateMaps();
+    //spec.ppu.UpdateOAM();
+    //spec.ppu.UpdateTiles();
     
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");
     Banana::TileComponent *tct = (Banana::TileComponent*)tmap2.GetComponent("TileComponent");

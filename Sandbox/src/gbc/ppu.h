@@ -165,7 +165,7 @@ namespace GBC
 
     Screen screen;
   private:
-    uint8_t LCDC = 16;
+    uint8_t LCDC = 0;
     uint8_t STAT = 0;
 
     uint8_t SCX = 0;

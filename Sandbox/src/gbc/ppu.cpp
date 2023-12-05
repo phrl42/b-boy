@@ -138,9 +138,6 @@ namespace GBC
 
     switch(address)
     {
-    case A_OAM:
-      break;
-
     case A_LCDC:
       LCDC = value;
       break;
@@ -200,34 +197,27 @@ namespace GBC
   {
     
   }
-  
+
+  // this causes a massive issue.
+  // todo: fix this
   uint8_t PPU::TileToScreen(uint16_t x, uint16_t y, bool map2)
   {
     Tile *tile = map2 ? tmap2 : tmap1;
-    uint32_t roffset = 0;
-    uint32_t cap_n = 8;
 
     uint32_t nt = 0;
     uint16_t ny = y;
     uint16_t nx = x;
 
-    if(x % 8 != 0)
-    {
-      nx += 8 - (x % 8);
-    }
+    nx += 8 - (x % 8);
 
-    if(y % 8 != 0)
-    {
-      ny += 8 - (y % 8);
-    }
-    
+    ny += 8 - (y % 8);
 
-    nt = ((ny / 8) * 8) + (nx / 8);
+    nt = (((ny / 8)-1)*8) + ((nx / 8)-1);
 
     nx = x % 8;
     ny = y % 8;
 
-    tile += nt-1;
+    tile += nt;
 
     return tile->row[ny].bpp[nx];
   }
@@ -235,8 +225,9 @@ namespace GBC
   // progresses one dot
   void PPU::Render()
   {
+    printf("LCDC: %x\n", LCDC);
     if(!Get_Bit_N(LCDC, 7)) return;
-    printf("dot %d and LY %d\n", rend.dot, LY);
+    printf("dot: %d LY: %d LCDC: %x\n", rend.dot, LY, LCDC);
     if(rend.dot == 0) rend.mode = Mode::TWO;
     
     if(rend.mode == Mode::TWO)

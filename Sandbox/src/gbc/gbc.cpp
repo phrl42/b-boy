@@ -129,7 +129,7 @@ namespace GBC
       if(!adt)
       {
 	adt = true;
-	add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
+	//add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
       }
 
       if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
