@@ -281,12 +281,6 @@ namespace GBC
 	}
       }
      
-      // draw obj
-      if(Get_Bit_N(LCDC, 1))
-      {
-
-      }
-
       screen.line[LY].bpp[rend.x] = fif.bpp;
       rend.x += 1;
       

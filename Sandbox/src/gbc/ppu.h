@@ -136,7 +136,7 @@ namespace GBC
       ZERO=0, ONE, TWO, THREE
     };
 
-    struct PFIFO
+    struct FIFO
     {
       uint8_t bpp = 0;
       uint8_t obp = 0;
@@ -145,62 +145,137 @@ namespace GBC
       uint8_t priority = 0;
     };
 
-    struct FIFO
+    struct Pixel_Fetcher
     {
-      PFIFO bg[8];
-      PFIFO obj[8];
-    };
-    
-    struct Renderer
-    {
-      Mode mode = Mode::TWO;
-      uint16_t dot = 0;
+      std::queue<FIFO> fifo_bg;
+      std::queue<FIFO> fifo_obj;
+
+      uint8_t current_step = 1;
+
+      FIFO buffer[8] = {0};
 
       uint8_t x = 0;
+      uint8_t y = 0;
 
-      Object buffer[10] = {0};
-      uint8_t buffer_index = 0;
+      // always fetch a map[index] row
 
-      FIFO fifo;
-    };
+      // do X,Y logic here
+      inline void Step1()
+	{
+	  // draw bg
+	  if(Get_Bit_N(LCDC, 0))
+	  {
+	    // map2 bool may cause bugs here
+	    // unclear when to set true
+	    x = (SCX + rend.x) % 255;
+	    y = (SCY + LY) % 255;
+	    //sfif.bpp = TileToScreen((SCX + rend.x) % 255, (SCY + LY) % 255, Get_Bit_N(LCDC, 3));
+	  }
 
-    Renderer rend;
+	  // draw window
+	  if(Get_Bit_N(LCDC, 5) && Get_Bit_N(LCDC, 0))
+	  {
+	    x = WX;
+	    y = WY;
+	    //sfif.bpp = TileToScreen(WX, WY, Get_Bit_N(LCDC, 3));
+	  }
 
-    uint8_t tile_data[0x1800] = {0};
-    uint8_t map1[32*32] = {0};
-    uint8_t map2[32*32] = {0};
+	  // draw obj
+	  if(Get_Bit_N(LCDC, 1))
+	  {
 
-    uint8_t oam[0xA0] = {0};
-    Object objects[40] = {0};
+	  }
+	
+	  current_step = 2;
+	}
 
-  public:
-    // for debug only
-    Tile tile[384*2] = {0};
-    Tile tmap1[32*32] = {0};
-    Tile tmap2[32*32] = {0};
+      // do whole loading in step3
+      inline void Step2()
+	{
+	  current_step = 3;
+	}
 
-    Tile OAM_tiles[40] = {0};
+      inline void Step3()
+	{
+	  current_step = 4;
 
-    Screen screen;
-  private:
-    // registers
-    uint8_t LCDC = 0;
-    uint8_t STAT = 0;
+	  for(uint16_t i = 0; i <= 7; i++)
+	  {
+	    FIFO fif;
+	    fif.bpp = TileToScreen(x, y, Get_Bit_N(LCDC, 3));
+	    buffer[i] = fif;
 
-    uint8_t SCX = 0;
-    uint8_t SCY = 0;
-    
-    uint8_t WX = 0;
-    uint8_t WY = 0;
+	  }
 
-    uint8_t LY = 0;
-    uint8_t LYC = 0;
+	  if(fifo_bg.size <= 8)
+	  {
+	    for(uint8_t i = 0; i < 8; i++)
+	    {
+	      fifo_bg.push(buffer[i]);
+	    }
+	  }
 
-    uint8_t DMA = 0;
-    
-    uint8_t BGP = 0;
+	}
 
-    uint8_t OBP0 = 0;
-    uint8_t OBP1 = 0;
+    }
+
+      inline void Step4()
+      {
+	
+	current_step = 1;
+      }
   };
+
+  struct Renderer
+  {
+    Mode mode = Mode::TWO;
+    uint16_t dot = 0;
+
+    uint8_t x = 0;
+
+    Object buffer[10] = {0};
+    uint8_t buffer_index = 0;
+
+    Pixel_Fetcher pixfetcher;
+  };
+
+  Renderer rend;
+
+  uint8_t tile_data[0x1800] = {0};
+  uint8_t map1[32*32] = {0};
+  uint8_t map2[32*32] = {0};
+
+  uint8_t oam[0xA0] = {0};
+  Object objects[40] = {0};
+
+public:
+  // for debug only
+  Tile tile[384*2] = {0};
+  Tile tmap1[32*32] = {0};
+  Tile tmap2[32*32] = {0};
+
+  Tile OAM_tiles[40] = {0};
+
+  Screen screen;
+private:
+  // registers
+  uint8_t LCDC = 0;
+  uint8_t STAT = 0;
+
+  uint8_t SCX = 0;
+  uint8_t SCY = 0;
+    
+  uint8_t WX = 0;
+  uint8_t WY = 0;
+
+  uint8_t LY = 0;
+  uint8_t LYC = 0;
+
+  uint8_t DMA = 0;
+    
+  uint8_t BGP = 0;
+
+  uint8_t OBP0 = 0;
+  uint8_t OBP1 = 0;
+};
 };
