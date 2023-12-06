@@ -272,11 +272,11 @@ namespace GBC
 
   void PPU::Step4()
   {
-    if(rend.pixfetcher.fifo_bg.size() <= 8)
-    {
-      rend.pixfetcher.current_step = 3;
-      return;
-    }
+    //if(rend.pixfetcher.fifo_bg.size() <= 8)
+    //{
+      //rend.pixfetcher.current_step = 3;
+      //return;
+    //}
 
     rend.pixfetcher.current_step = 1;
   }
@@ -289,9 +289,17 @@ namespace GBC
       return;
     }
 
-    printf("dot: %d | %d\n", rend.dot, rend.pixfetcher.fifo_bg.size());
+    //printf("dot: %d | %d\n", rend.dot, rend.pixfetcher.fifo_bg.size());
     screen.line[LY].bpp[rend.x] = rend.pixfetcher.fifo_bg.front().bpp;
-    rend.pixfetcher.fifo_bg.pop();
+    //printf("pop value: %d\n", rend.pixfetcher.fifo_bg.size());
+    try
+    {
+      rend.pixfetcher.fifo_bg.pop();
+    }
+    catch(...)
+    {
+      printf("Could not pop fifo\n");
+    }
   }
   
   // progresses one dot

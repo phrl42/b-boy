@@ -8,6 +8,48 @@
 
 namespace GBC
 {
+  template<typename T>
+    class DIFO
+  {
+  public:
+  
+    DIFO()
+    {
+
+    }
+
+    inline void pop()
+    {
+      if(data.size() != 0)
+      {
+	data.erase(data.begin());
+      }
+    }
+
+    inline T front()
+    {
+      if(data.size() == 0)
+      {
+	std::cout << "What in the fucking hell are you doing" << std::endl;
+	return T();
+      }
+      return data[0];
+    }
+
+    inline void push(T val)
+    {
+      data.push_back(val);
+    }
+
+    inline std::size_t size()
+    {
+      return data.size();
+    }
+
+  private:
+    std::vector<T> data;
+  };
+
   uint16_t Combine(uint8_t first, uint8_t second);
   uint16_t Get_Value_N(uint16_t opcode, uint8_t n);
 

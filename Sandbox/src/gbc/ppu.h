@@ -2,8 +2,6 @@
 #include "Sandbox.h"
 #include "gbc/bitwise.h"
 
-#include <queue>
-
 #define WIDTH 160
 #define HEIGHT 144
 
@@ -154,8 +152,8 @@ namespace GBC
     
     struct Pixel_Fetcher
     {
-      std::queue<FIFO> fifo_bg;
-      std::queue<FIFO> fifo_obj;
+      DIFO<FIFO> fifo_bg;
+      DIFO<FIFO> fifo_obj;
 
       uint8_t current_step = 1;
 
