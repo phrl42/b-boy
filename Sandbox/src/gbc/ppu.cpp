@@ -3,20 +3,6 @@
 
 namespace GBC
 {
-  uint8_t Get_Bit_N(uint8_t src, uint8_t n)
-  {
-    if(n > 8)
-    {
-      GBC_LOG("Could not get bit. n > 8");
-      return 0;
-    }
-
-    src <<= 7 - n;
-    src >>= 7;
-
-    return src;
-  }
-
   PPU::PPU()
   {
 
@@ -233,6 +219,74 @@ namespace GBC
     return obj;
   }
 
+  // do X,Y logic here
+  void PPU::Step1()
+  {
+    // draw bg
+    if(Get_Bit_N(LCDC, 0))
+    {
+      // map2 bool may cause bugs here
+      // unclear when to set true
+      rend.pixfetcher.x = (SCX + rend.x) % 255;
+      rend.pixfetcher.y = (SCY + LY) % 255;
+    }
+
+    // draw window
+    if(Get_Bit_N(LCDC, 5) && Get_Bit_N(LCDC, 0))
+    {
+      rend.pixfetcher.x = WX;
+      rend.pixfetcher.y = WY;
+    }
+
+    // draw obj
+    if(Get_Bit_N(LCDC, 1))
+    {
+
+    }
+	
+    rend.pixfetcher.current_step = 2;
+  }
+
+  void PPU::Step2()
+  {
+    rend.pixfetcher.current_step = 3;
+  }
+
+  void PPU::Step3()
+  {
+    rend.pixfetcher.current_step = 4;
+
+    if(rend.pixfetcher.fifo_bg.size() <= 8)
+    {
+      for(uint8_t i = 0; i < 8; i++)
+      {
+	FIFO fif;
+	fif.bpp = TileToScreen(rend.pixfetcher.x+i, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
+
+	rend.pixfetcher.fifo_bg.push(fif);
+      }
+	    
+    }
+
+  }
+  // todo follow ultimate gameboy talk fifo guide
+  void PPU::Step4()
+  {
+    if(rend.pixfetcher.fifo.bg_size() <= 8)
+    {
+      rend.pixfetcher.current_step = 3;
+      return;
+    }
+
+    rend.pixfetcher.current_step = 1;
+  }
+
+  void PPU::Push()
+  {
+    screen.line[LY].bpp[(rend.x-8) + i] = rend.pixfetcher.fifo_bg.front().bpp;
+    rend.pixfetcher.fifo_bg.pop();
+  }
+  
   // progresses one dot
   void PPU::Render()
   {
@@ -260,19 +314,19 @@ namespace GBC
 	switch(rend.pixfetcher.current_step)
 	{
 	case 1:
-	  rend.pixfetcher.Step1();
+	  Step1();
 	  break;
 
 	case 2:
-	  rend.pixfetcher.Step2();
+	  Step2();
 	  break;
 
 	case 3:
-	  rend.pixfetcher.Step3();
+	  Step3();
 	  break;
 
 	case 4:
-	  rend.pixfetcher.Step4();
+	  Step4();
 	  break;
 
 	default:
@@ -281,15 +335,7 @@ namespace GBC
 	}
       }
      
-      // draw obj
-      if(Get_Bit_N(LCDC, 1))
-      {
-
-      }
-
-      screen.line[LY].bpp[rend.x] = fif.bpp;
       rend.x += 1;
-      
     }
     
     rend.dot += 1;
@@ -363,7 +409,7 @@ namespace GBC
 
     if(!Get_Bit_N(LCDC, 4) && BGW)
     {
-      start = 0x1000 + (int8_t)((int8_t)(index) * 16);
+      //start = 0x1000 + (int8_t)((int8_t)(index) * 16);
     }
 
     int row_index = 0;
@@ -426,12 +472,12 @@ namespace GBC
   {
     for(uint16_t i = 0; i < 32*32; i++)
     {
-      tmap1[i] = IndexToTile(map1[i], true);
+      tmap1[i] = IndexToTile(map1[i], false);
     }
 
     for(uint16_t i = 0; i < 32*32; i++)
     {
-      tmap2[i] = IndexToTile(map2[i], true);
+      tmap2[i] = IndexToTile(map2[i], false);
     }
   }
 
