@@ -150,6 +150,7 @@ namespace GBC
     void Step2();
     void Step3();
     void Step4();
+    void Push();
     
     struct Pixel_Fetcher
     {
@@ -158,6 +159,8 @@ namespace GBC
 
       uint8_t current_step = 1;
 
+      uint8_t skip = 0;
+      
       uint8_t x = 0;
       uint8_t y = 0;
     };

@@ -222,6 +222,7 @@ namespace GBC
   // do X,Y logic here
   void PPU::Step1()
   {
+    //printf("Step: %d\n", rend.dot);
     // draw bg
     if(Get_Bit_N(LCDC, 0))
     {
@@ -265,14 +266,13 @@ namespace GBC
 
 	rend.pixfetcher.fifo_bg.push(fif);
       }
-	    
     }
 
   }
-  // todo follow ultimate gameboy talk fifo guide
+
   void PPU::Step4()
   {
-    if(rend.pixfetcher.fifo.bg_size() <= 8)
+    if(rend.pixfetcher.fifo_bg.size() <= 8)
     {
       rend.pixfetcher.current_step = 3;
       return;
@@ -283,7 +283,14 @@ namespace GBC
 
   void PPU::Push()
   {
-    screen.line[LY].bpp[(rend.x-8) + i] = rend.pixfetcher.fifo_bg.front().bpp;
+    if(rend.pixfetcher.fifo_bg.size() <= 8)
+    {
+      rend.pixfetcher.skip++;
+      return;
+    }
+
+    printf("dot: %d | %d\n", rend.dot, rend.pixfetcher.fifo_bg.size());
+    screen.line[LY].bpp[rend.x] = rend.pixfetcher.fifo_bg.front().bpp;
     rend.pixfetcher.fifo_bg.pop();
   }
   
@@ -334,7 +341,8 @@ namespace GBC
 	  break;
 	}
       }
-     
+      
+      Push();
       rend.x += 1;
     }
     
