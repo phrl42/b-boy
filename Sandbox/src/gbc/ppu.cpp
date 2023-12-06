@@ -3,9 +3,9 @@
 
 namespace GBC
 {
-  PPU::PPU()
+  PPU::PPU(Interrupt *interrupt)
   {
-
+    this->interrupt = interrupt;
   }
   
   uint8_t PPU::Read(uint16_t address)
@@ -186,6 +186,8 @@ namespace GBC
 
   uint8_t PPU::TileToScreen(uint16_t x, uint16_t y, bool map2)
   {
+    if(Get_Bit_N(LCDC, 0)) return 0;
+    
     uint32_t nt = 0;
     uint16_t ny = y;
     uint16_t nx = x;
@@ -219,27 +221,32 @@ namespace GBC
     return obj;
   }
 
-  // do X,Y logic here
   void PPU::Step1()
   {
-    //printf("Step: %d\n", rend.dot);
-    // draw bg
     if(Get_Bit_N(LCDC, 0))
     {
-      // map2 bool may cause bugs here
-      // unclear when to set true
-      rend.pixfetcher.x = (SCX + rend.x) % 255;
+      if(rend.pixfetcher.tt == TT::W)
+      {
+	Discard();
+      }
+      rend.pixfetcher.tt = TT::BG;
+      
+      rend.pixfetcher.x = (SCX + rend.x + 4) % 255;
       rend.pixfetcher.y = (SCY + LY) % 255;
     }
 
-    // draw window
-    if(Get_Bit_N(LCDC, 5) && Get_Bit_N(LCDC, 0))
+    if(Get_Bit_N(LCDC, 5) && rend.window_enable && WX < WIDTH + 7)
     {
-      rend.pixfetcher.x = WX;
-      rend.pixfetcher.y = WY;
+      if(rend.pixfetcher.tt == TT::BG)
+      {
+	Discard();
+      }
+      rend.pixfetcher.tt = TT::W;
+
+      rend.pixfetcher.x = (WX - 7) + rend.x;
+      rend.pixfetcher.y = WY + LY;
     }
 
-    // draw obj
     if(Get_Bit_N(LCDC, 1))
     {
 
@@ -259,10 +266,10 @@ namespace GBC
 
     if(rend.pixfetcher.fifo_bg.size() <= 8)
     {
+      FIFO fif = {0};
       for(uint8_t i = 0; i < 8; i++)
       {
-	FIFO fif;
-	fif.bpp = TileToScreen(rend.pixfetcher.x+i, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
+	fif.bpp = TileToScreen(rend.pixfetcher.x+ i, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
 
 	rend.pixfetcher.fifo_bg.push(fif);
       }
@@ -272,13 +279,20 @@ namespace GBC
 
   void PPU::Step4()
   {
-    //if(rend.pixfetcher.fifo_bg.size() <= 8)
-    //{
-      //rend.pixfetcher.current_step = 3;
-      //return;
-    //}
+    if(rend.pixfetcher.fifo_bg.size() <= 8)
+    {
+      rend.pixfetcher.current_step = 3;
+      return;
+    }
 
     rend.pixfetcher.current_step = 1;
+  }
+
+  void PPU::Discard()
+  {
+    rend.pixfetcher.fifo_bg.clear();
+
+    rend.pixfetcher.fifo_obj.clear();
   }
 
   void PPU::Push()
@@ -289,27 +303,24 @@ namespace GBC
       return;
     }
 
-    //printf("dot: %d | %d\n", rend.dot, rend.pixfetcher.fifo_bg.size());
     screen.line[LY].bpp[rend.x] = rend.pixfetcher.fifo_bg.front().bpp;
-    //printf("pop value: %d\n", rend.pixfetcher.fifo_bg.size());
-    try
-    {
-      rend.pixfetcher.fifo_bg.pop();
-    }
-    catch(...)
-    {
-      printf("Could not pop fifo\n");
-    }
+    rend.pixfetcher.fifo_bg.pop();
+    rend.x += 1;
   }
   
   // progresses one dot
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
+
+    //if(LYC == LY) interrupt->Request(INTERRUPT::LCD);
+
     if(LY == 0 && rend.mode == Mode::ONE) rend.mode = Mode::TWO;
     
     if(rend.mode == Mode::TWO)
     {
+      if(LY == WY) rend.window_enable = true;
+      
       if(rend.dot % 2 == 0)
       {
 	Object obj = OAMToObject(rend.dot / 2);
@@ -351,12 +362,25 @@ namespace GBC
       }
       
       Push();
-      rend.x += 1;
+    }
+
+    if(rend.mode == Mode::ZERO)
+    {
+      // do h-blank stuff
+    }
+
+    if(rend.mode == Mode::ONE)
+    {
+      // do v-blank stuff
     }
     
     rend.dot += 1;
     if(rend.dot == 80 && rend.mode == Mode::TWO) rend.mode = Mode::THREE;
-    if(rend.x == WIDTH) rend.mode = Mode::ZERO;
+    if(rend.x == WIDTH)
+    {
+      Discard();
+      rend.mode = Mode::ZERO;
+    }
     if(rend.dot == 456)
     {
       LY += 1;
@@ -381,6 +405,7 @@ namespace GBC
     if(LY == 154)
     {
       LY = 0;
+      rend.window_enable = false;
       rend.mode = Mode::TWO;
     }
   }
@@ -403,21 +428,21 @@ namespace GBC
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
     /*tile_data[0] = 0x3C;
-      tile_data[1] = 0x7E;
-      tile_data[2] = 0x42;
-      tile_data[3] = 0x42;
-      tile_data[4] = 0x42;
-      tile_data[5] = 0x42;
-      tile_data[6] = 0x42;
-      tile_data[7] = 0x42;
-      tile_data[8] = 0x7E;
-      tile_data[9] = 0x5E;
-      tile_data[10] = 0x7E;
-      tile_data[11] = 0x0A;
-      tile_data[12] = 0x7C;
-      tile_data[13] = 0x56;
-      tile_data[14] = 0x38;
-      tile_data[15] = 0x7C;*/
+    tile_data[1] = 0x7E;
+    tile_data[2] = 0x42;
+    tile_data[3] = 0x42;
+    tile_data[4] = 0x42;
+    tile_data[5] = 0x42;
+    tile_data[6] = 0x42;
+    tile_data[7] = 0x42;
+    tile_data[8] = 0x7E;
+    tile_data[9] = 0x5E;
+    tile_data[10] = 0x7E;
+    tile_data[11] = 0x0A;
+    tile_data[12] = 0x7C;
+    tile_data[13] = 0x56;
+    tile_data[14] = 0x38;
+    tile_data[15] = 0x7C;*/
     // 1 tile = 16 byte
     Tile temp = {0};
 
@@ -425,7 +450,8 @@ namespace GBC
 
     if(!Get_Bit_N(LCDC, 4) && BGW)
     {
-      //start = 0x1000 + (int8_t)((int8_t)(index) * 16);
+      printf("%x\n", start);
+      start = 0x1000 + (int8_t)(index * 16);
     }
 
     int row_index = 0;

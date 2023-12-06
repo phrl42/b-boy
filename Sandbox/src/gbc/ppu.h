@@ -1,6 +1,7 @@
 #pragma once
 #include "Sandbox.h"
 #include "gbc/bitwise.h"
+#include "gbc/interrupt.h"
 
 #define WIDTH 160
 #define HEIGHT 144
@@ -106,7 +107,7 @@ namespace GBC
   struct PPU
   {
     // 15-Bit RGB Color
-    PPU();
+    PPU(Interrupt *interrupt);
 
     uint8_t Read(uint16_t address);
     void Write(uint16_t address, uint8_t value);
@@ -129,9 +130,16 @@ namespace GBC
     
   private:
 
+    Interrupt *interrupt;
+
     enum class Mode
     {
       ZERO=0, ONE, TWO, THREE
+    };
+
+    enum class TT
+    {
+      NONE=0, BG, W
     };
 
     struct FIFO
@@ -148,7 +156,9 @@ namespace GBC
     void Step2();
     void Step3();
     void Step4();
+
     void Push();
+    void Discard();
     
     struct Pixel_Fetcher
     {
@@ -156,6 +166,8 @@ namespace GBC
       DIFO<FIFO> fifo_obj;
 
       uint8_t current_step = 1;
+
+      TT tt = TT::NONE;
 
       uint8_t skip = 0;
       
@@ -167,6 +179,8 @@ namespace GBC
     {
       Mode mode = Mode::TWO;
       uint16_t dot = 0;
+
+      bool window_enable = false;
 
       uint8_t x = 0;
 

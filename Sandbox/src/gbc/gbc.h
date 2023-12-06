@@ -20,7 +20,7 @@ namespace GBC
   struct Spec
   {
     inline Spec()
-      :rom(ROM()), interrupt(Interrupt()), ppu(PPU()), io(IO()), timer(Timer(&interrupt)), bus(Bus(&ppu, &timer, &interrupt, &io, &rom)), cpu(CPU(&bus))
+      :rom(ROM()), interrupt(Interrupt()), ppu(PPU(&interrupt)), io(IO()), timer(Timer(&interrupt)), bus(Bus(&ppu, &timer, &interrupt, &io, &rom)), cpu(CPU(&bus))
     {
 
     }

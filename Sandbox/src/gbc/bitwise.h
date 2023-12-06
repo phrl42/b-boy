@@ -20,25 +20,46 @@ namespace GBC
 
     inline void pop()
     {
-      if(data.size() != 0)
+      if(data.size() == 0)
+      {
+	std::cout << "[DIFO][pop] size == 0" << std::endl;
+	return;
+      }
+      try
       {
 	data.erase(data.begin());
       }
+      catch(...)
+      {
+
+      }      
     }
 
     inline T front()
     {
       if(data.size() == 0)
       {
-	std::cout << "What in the fucking hell are you doing" << std::endl;
+	std::cout << "[DIFO][front] size == 0" << std::endl;
 	return T();
       }
       return data[0];
     }
 
+    inline void clear()
+    {
+      data.clear();
+    }
+    
     inline void push(T val)
     {
-      data.push_back(val);
+      try
+      {
+	data.push_back(val);
+      }
+      catch(...)
+      {
+
+      }
     }
 
     inline std::size_t size()
