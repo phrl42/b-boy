@@ -105,6 +105,46 @@ namespace GBC
 
     uint8_t height;
   };
+
+  struct Fetcher
+  {
+    uint8_t Push();
+    void Fetch();
+
+  private:
+    void Read_Tile();
+    
+    void Read_Data0();
+    void Read_Data1();
+    
+    void Idle();
+    
+    enum class Mode
+    {
+      READ_TILE=0, READ_DATA0, READ_DATA1, IDLE
+    };
+
+    std::queue<int> fifo_bg;
+
+    Mode state = Mode::READ_TILE;
+
+    uint8_t x = 0;
+    uint8_t y = 0;
+
+  public:
+    uint8_t *LCDC;
+
+    uint8_t *SCX;
+    uint8_t *SCY;
+    
+    uint8_t *WX;
+    uint8_t *WY;
+
+    uint8_t *LY;
+
+    Screen *screen;
+  };
+
  
   struct PPU
   {
@@ -135,65 +175,20 @@ namespace GBC
     Interrupt *interrupt;
 
     enum class Mode
-    {
-      ZERO=0, ONE, TWO, THREE
-    };
-
-    enum class TT
-    {
-      NONE=0, BG, W
-    };
-
-    struct FIFO
-    {
-      uint8_t bpp = 0;
-      //uint8_t obp = 0;
-
-      // 7th bit of attribute flag
-      //uint8_t priority = 0;
-    };
- 
-    // always fetch a map[index] row
-    void Step1();
-    void Step2();
-    void Step3();
-    void Step4();
-
-    void Push();
-    void Discard();
-    
-    struct Pixel_Fetcher
-    {
-      std::queue<FIFO> fifo_bg = std::queue<FIFO>();
-      std::queue<FIFO> fifo_obj = std::queue<FIFO>();
-
-      uint8_t current_step = 1;
-
-      TT tt = TT::NONE;
-
-      uint8_t skip = 0;
-      
-      uint8_t x = 0;
-      uint8_t y = 0;
-
-    };
+      {
+	OAM_SCAN=0, DRAWING_PIXELS, HBLANK, VBLANK
+      };
 
     struct Renderer
     {
-      Mode mode = Mode::TWO;
+      Mode mode = Mode::OAM_SCAN;
       uint16_t dot = 0;
 
-      bool window_enable = false;
-
       uint8_t x = 0;
-
-      //Object buffer[10] = {0};
-      //uint8_t buffer_index = 0;
-
-      Pixel_Fetcher pixfetcher;
     };
 
     Renderer rend;
+    Fetcher fetch;
 
     uint8_t tile_data[0x1800] = {0};
     uint8_t map1[32*32] = {0};

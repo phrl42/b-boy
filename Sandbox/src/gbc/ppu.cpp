@@ -6,25 +6,36 @@ namespace GBC
   PPU::PPU(Interrupt *interrupt)
   {
     this->interrupt = interrupt;
+
+    this->fetch.SCX = &SCX;
+    this->fetch.SCY = &SCY;
+    
+    this->fetch.WX = &WX;
+    this->fetch.WY = &WY;
+
+    this->fetch.LCDC = &LCDC;
+    this->fetch.LY = &LY;
+
+    this->fetch.screen = &screen;
   }
   
   uint8_t PPU::Read(uint16_t address)
   {
     if(address <= A_TileDataEND && address >= A_TileData)
     {
-      if(rend.mode == Mode::THREE) return 0xFF;
+      if(rend.mode == Mode::DRAWING_PIXELS) return 0xFF;
       return tile_data[address - A_TileData];
     }
     
     if(address <= A_TileMap1END && address >= A_TileMap1)
     {
-      if(rend.mode == Mode::THREE) return 0xFF;
+      if(rend.mode == Mode::DRAWING_PIXELS) return 0xFF;
       return map1[address - A_TileMap1];
     }
 
     if(address <= A_TileMap2END && address >= A_TileMap2)
     {
-      if(rend.mode == Mode::THREE) return 0xFF;
+      if(rend.mode == Mode::DRAWING_PIXELS) return 0xFF;
       return map2[address - A_TileMap2]; 
     }
 
@@ -97,21 +108,21 @@ namespace GBC
   {
     if(address <= A_TileDataEND && address >= A_TileData)
     {
-      if(rend.mode == Mode::THREE) return;
+      if(rend.mode == Mode::DRAWING_PIXELS) return;
       tile_data[address - A_TileData] = value;
       return;
     }
 
     if(address <= A_TileMap1END && address >= A_TileMap1)
     {
-      if(rend.mode == Mode::THREE) return;
+      if(rend.mode == Mode::DRAWING_PIXELS) return;
       map1[address - A_TileMap1] = value;
       return;
     }
 
     if(address <= A_TileMap2END && address >= A_TileMap2)
     {
-      if(rend.mode == Mode::THREE) return;
+      if(rend.mode == Mode::DRAWING_PIXELS) return;
       map2[address - A_TileMap2] = value;
       return;
     }
@@ -221,224 +232,136 @@ namespace GBC
     return obj;
   }
 
-  void PPU::Step1()
+  // Fetcher
+
+  uint8_t Fetcher::Push()
   {
-    printf("step 1: getting coordinates\n");
-    if(Get_Bit_N(LCDC, 0))
-    {
-      if(rend.pixfetcher.tt == TT::W && rend.x != 0)
-      {
-	//Discard();
-      }
-      rend.pixfetcher.tt = TT::BG;
-      
-      rend.pixfetcher.x = (SCX + rend.pixfetcher.x) % 255;
-      rend.pixfetcher.y = (SCY + LY) % 255;
-    }
-
-    /*if(Get_Bit_N(LCDC, 5) && rend.window_enable && WX < WIDTH + 7 && false)
-    {
-      if(rend.pixfetcher.tt == TT::BG && rend.x != 0)
-      {
-	//Discard();
-      }
-      rend.pixfetcher.tt = TT::W;
-
-      rend.pixfetcher.x = (WX - 7) + rend.x;
-      rend.pixfetcher.y = WY + LY;
-    }
-    */
-    if(Get_Bit_N(LCDC, 1))
-    {
-
-    }
-
-    
-    rend.pixfetcher.current_step = 2;
+    return 1;
   }
 
-  void PPU::Step2()
+  void Fetcher::Read_Tile()
   {
-    printf("step2\n");
-    rend.pixfetcher.current_step = 3;
+    //x = (SCX + x) % 255;
   }
 
-  void PPU::Step3()
+  void Fetcher::Read_Data0()
   {
-    rend.pixfetcher.current_step = 4;
-
-    if(rend.x == WIDTH)
-    {
-      printf("step3 skipping\n");
-      rend.pixfetcher.current_step = 1;
-      Discard();
-      return;
-    }
-
-    uint8_t size = rend.pixfetcher.fifo_bg.size();
-    
-    if(size <= 8)
-    {
-      printf("step3: putting 8 fifos in queue\n");
-      for(uint8_t i = 0; i < 8; i++)
-      {
-	FIFO fif = FIFO();
-	fif.bpp = TileToScreen((rend.pixfetcher.x + i) % WIDTH, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
-	// this is where random shit happens
-	rend.pixfetcher.fifo_bg.push(fif);
-      }
-      rend.pixfetcher.x = (rend.pixfetcher.x + 8) % WIDTH;
-    }
 
   }
 
-  void PPU::Step4()
+  void Fetcher::Read_Data1()
   {
-    printf("step4\n");
-    rend.pixfetcher.current_step = 1;
+
   }
 
-  void PPU::Discard()
+  void Fetcher::Idle()
   {
-    if(rend.pixfetcher.fifo_bg.empty() || rend.pixfetcher.fifo_bg.size() <= 0)
-    {
-      printf("discard: queue empty\n");
-      return;
-    }
-    printf("discard: removing %d elements from queue where x: %d and dot: %d with LY: %d\n", rend.pixfetcher.fifo_bg.size(), rend.x, rend.dot, LY);
 
-    uint8_t bg_size = rend.pixfetcher.fifo_bg.size();
-    uint8_t obj_size = rend.pixfetcher.fifo_obj.size();
-    
-    for(uint8_t i = 0; i < bg_size; i++)
-    {
-      rend.pixfetcher.fifo_bg.pop();
-    }
-
-    for(uint8_t i = 0; i < obj_size; i++)
-    {
-      //rend.pixfetcher.fifo_obj.pop();
-    }
-
-    printf("discard size: %d\n", rend.pixfetcher.fifo_bg.size());
-  }
-
-  void PPU::Push()
-  {
-    if(rend.pixfetcher.fifo_bg.size() <= 8 || rend.pixfetcher.fifo_bg.empty())
-    {
-      printf("push: skipping pixel %d\n", rend.x);
-      rend.pixfetcher.skip++;
-      return;
-    }
-    printf("push: pixel\n");
-    uint8_t val = rend.pixfetcher.fifo_bg.front().bpp;
-    if(val > 3) printf("push: y: %d x: %d and value: %d\n", LY, rend.x, val);
-
-    screen.line[LY].bpp[rend.x] = val; 
-    rend.pixfetcher.fifo_bg.pop();
-    rend.x += 1;
   }
   
-  // progresses one dot
+  void Fetcher::Fetch()
+  {
+    Push();
+
+    switch(state)
+    {
+    case Mode::READ_TILE:
+    {
+      Read_Tile();
+      break;
+    }
+    
+    case Mode::READ_DATA0:
+    {
+      Read_Data0();
+      break;
+    }
+
+    case Mode::READ_DATA1:
+    {
+      Read_Data1();
+      break;
+    }
+
+    case Mode::IDLE:
+    {
+      Idle();
+      break;
+    }
+
+    default:
+      GBC_LOG("[PPU] [Fetcher] Invalid State");
+      break;
+    }
+
+  }
+
+
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
 
-    //if(LYC == LY) interrupt->Request(INTERRUPT::LCD);
-
-    if(LY == 0 && rend.mode == Mode::ONE) rend.mode = Mode::TWO;
-    
-    if(rend.mode == Mode::TWO)
+    switch(rend.mode)
     {
-      /*if(LY == WY) rend.window_enable = true;
-      
-	if(rend.dot % 2 == 0)
-	{
-	Object obj = OAMToObject(rend.dot / 2);
-
-	if(obj.x > 0 && obj.y <= (LY+16) && (LY+16) < (obj.y + obj.height) && rend.buffer_index < 10)
-	{
-	rend.buffer[rend.buffer_index] = obj;
-	rend.buffer_index++;
-	}
-	}*/
-    }
-    
-    if(rend.mode == Mode::THREE)
+    case Mode::OAM_SCAN:
     {
-      Push();
-      if(rend.dot % 2 == 0)
+      // no oam search for now
+      if(rend.dot == 80)
       {
-	switch(rend.pixfetcher.current_step)
+	rend.mode = Mode::DRAWING_PIXELS;
+      }
+      break;
+    }
+
+    case Mode::DRAWING_PIXELS:
+    {
+      rend.x += fetch.Push();
+      fetch.Fetch();
+      if(rend.x == WIDTH)
+      {
+	rend.mode = Mode::HBLANK;
+      }
+      break;
+    }
+
+    case Mode::HBLANK:
+    {
+      if(rend.dot == 456)
+      {
+	LY += 1;
+
+	rend.dot = 0;
+	rend.x = 0;
+
+	rend.mode = Mode::OAM_SCAN;
+	if(LY == HEIGHT)
 	{
-	case 1:
-	  Step1();
-	  break;
-
-	case 2:
-	  Step2();
-	  break;
-
-	case 3:
-	  Step3();
-	  break;
-
-	case 4:
-	  Step4();
-	  break;
-
-	default:
-	  GBC_LOG("[PPU] Step Invalid");
-	  break;
+	  rend.mode = Mode::VBLANK;
 	}
       }
+      break;
     }
 
-    if(rend.mode == Mode::ZERO)
+    case Mode::VBLANK:
     {
-      // do h-blank stuff
+      if(rend.dot == 456)
+      {
+	LY += 1;
+      }
+      
+      if(LY == 153)
+      {
+	rend.mode = Mode::OAM_SCAN;
+      }
+      break;
     }
 
-    if(rend.mode == Mode::ONE)
-    {
-      // do v-blank stuff
+    default:
+      GBC_LOG("[PPU] Rendering Mode invalid");
+      break;
     }
-    
-    rend.dot += 1;
-    if(rend.dot == 80 && rend.mode == Mode::TWO) rend.mode = Mode::THREE;
-    if(rend.x == WIDTH)
-    {
-      rend.mode = Mode::ZERO;
-    }
-    if(rend.dot == 456)
-    {
-      LY += 1;
-      rend.x = 0;
-      rend.pixfetcher.x = 0;
-      rend.dot = 0;
 
-      /*for(uint8_t i = 0; i <= rend.buffer_index; i++)
-	{
-	rend.buffer[i].x = 0;
-	rend.buffer[i].y = 0;
-	rend.buffer[i].index = 0;
-	rend.buffer[i].flags = 0;
-	}
-	rend.buffer_index = 0;
-      */
-      if(LY < HEIGHT) rend.mode = Mode::TWO;
-    }
-    if(LY == HEIGHT)
-    {
-      rend.mode = Mode::ONE;
-    }
-    if(LY == 154)
-    {
-      LY = 0;
-      rend.window_enable = false;
-      rend.mode = Mode::TWO;
-    }
+    rend.dot++;
   }
 
   // called every t-cycle
