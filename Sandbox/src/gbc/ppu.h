@@ -108,9 +108,15 @@ namespace GBC
 
   struct Fetcher
   {
-    uint8_t Push();
-    void Fetch();
+    uint8_t Push(uint8_t rend_x);
 
+    void Fetch();
+    void Discard();
+
+    Tile IndexToTile(uint8_t index, bool BGW);
+
+    Object OAMToObject(uint8_t index);
+    uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2);
   private:
     void Read_Tile();
     
@@ -130,7 +136,6 @@ namespace GBC
 
     uint8_t x = 0;
     uint8_t y = 0;
-
   public:
     uint8_t *LCDC;
 
@@ -143,6 +148,12 @@ namespace GBC
     uint8_t *LY;
 
     Screen *screen;
+
+    uint8_t *tile_data;
+    
+    uint8_t *map1;
+    uint8_t *map2;
+    uint8_t *oam;
   };
 
  
@@ -162,16 +173,10 @@ namespace GBC
     void UpdateOAM();
     void DMATransfer(uint8_t *chunk);
     
-    Tile IndexToTile(uint8_t index, bool BGW);
-    Object OAMToObject(uint8_t index);
-
     void Render();
     void Tick();
-
-    uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2);
-    
+ 
   private:
-
     Interrupt *interrupt;
 
     enum class Mode

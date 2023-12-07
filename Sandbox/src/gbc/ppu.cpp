@@ -17,6 +17,13 @@ namespace GBC
     this->fetch.LY = &LY;
 
     this->fetch.screen = &screen;
+
+    this->fetch.tile_data = tile_data;
+    
+    this->fetch.map1 = map1;
+    this->fetch.map2 = map2;
+
+    this->fetch.oam = oam;
   }
   
   uint8_t PPU::Read(uint16_t address)
@@ -195,9 +202,61 @@ namespace GBC
     
   }
 
-  uint8_t PPU::TileToScreen(uint16_t x, uint16_t y, bool map2)
+  Tile Fetcher::IndexToTile(uint8_t index, bool BGW)
   {
-    if(!Get_Bit_N(LCDC, 0)) return 3;
+    tile_data[0] = 0x3C;
+    tile_data[1] = 0x7E;
+    tile_data[2] = 0x42;
+    tile_data[3] = 0x42;
+    tile_data[4] = 0x42;
+    tile_data[5] = 0x42;
+    tile_data[6] = 0x42;
+    tile_data[7] = 0x42;
+    tile_data[8] = 0x7E;
+    tile_data[9] = 0x5E;
+    tile_data[10] = 0x7E;
+    tile_data[11] = 0x0A;
+    tile_data[12] = 0x7C;
+    tile_data[13] = 0x56;
+    tile_data[14] = 0x38;
+    tile_data[15] = 0x7C;
+    // 1 tile = 16 byte
+    Tile temp = {0};
+
+    uint16_t start = index * 16;
+
+    if(!Get_Bit_N(*LCDC, 4) && BGW)
+    {
+      printf("%x\n", start);
+      //start = 0x1000 + (int8_t)(index * 16);
+    }
+
+    int row_index = 0;
+    for(uint16_t pos = start; pos <= start+15; pos += 2)
+    {
+      uint16_t lower_row = tile_data[pos];
+      uint16_t higher_row = tile_data[pos+1];
+      
+      for(uint8_t i = 0; i <= 7; i++)
+      {
+	uint8_t res_bit = 0;
+
+	uint8_t lower_bit = Get_Bit_N(lower_row, 7 - i);
+	uint8_t higher_bit = Get_Bit_N(higher_row, 7 - i);
+
+	// reverse order is required by gpu
+	res_bit = higher_bit << 1 | lower_bit;
+	temp.row[row_index].bpp[i] = res_bit;
+      }
+      row_index++;
+    }
+
+    return temp;
+  }
+
+  uint8_t Fetcher::TileToScreen(uint16_t x, uint16_t y, bool map2)
+  {
+    if(!Get_Bit_N(*LCDC, 0)) return 3;
     
     uint32_t nt = 0;
     uint16_t ny = y;
@@ -219,7 +278,7 @@ namespace GBC
     return tile.row[ny].bpp[nx];
   }
 
-  Object PPU::OAMToObject(uint8_t index)
+  Object Fetcher::OAMToObject(uint8_t index)
   {
     Object obj;
     obj.y = oam[index];
@@ -227,42 +286,78 @@ namespace GBC
     obj.index = oam[index+2];
     obj.flags = oam[index+3];
 
-    obj.height = Get_Bit_N(LCDC, 2) ? 16 : 8;
+    obj.height = Get_Bit_N(*LCDC, 2) ? 16 : 8;
 
     return obj;
   }
 
   // Fetcher
 
-  uint8_t Fetcher::Push()
+  uint8_t Fetcher::Push(uint8_t rend_x)
   {
+    //printf("[X: %d] [Y: %d] size: %d\n", rend_x, *LY, fifo_bg.size());
+    if(fifo_bg.size() <= 8) return 0;
+
+    screen->line[*LY].bpp[rend_x] = fifo_bg.front();
+
+    fifo_bg.pop();
+    
     return 1;
   }
 
   void Fetcher::Read_Tile()
   {
-    //x = (SCX + x) % 255;
+    if(Get_Bit_N(*LCDC, 0))
+    {
+      x = (*SCX + x) % 255;
+      y = (*SCY + *LY) % 255;
+    }   
+    state = Mode::READ_DATA0;
   }
 
   void Fetcher::Read_Data0()
   {
-
+    state = Mode::READ_DATA1;
   }
 
   void Fetcher::Read_Data1()
   {
+    state = Mode::IDLE;
 
+    if(x == WIDTH+8)
+    {
+      state = Mode::READ_TILE;
+      return;
+    }
+
+    if(fifo_bg.size() > 8) return;
+    
+    for(uint8_t i = 0; i < 8; i++)
+    {
+      uint8_t val = TileToScreen(x + i, y, Get_Bit_N(*LCDC, 3));
+      fifo_bg.push(val);
+    }
+    x += 8;
+  }
+
+  void Fetcher::Discard()
+  {
+    if(fifo_bg.size() < 0 || fifo_bg.empty()) return;
+
+    uint8_t size = fifo_bg.size();
+    for(uint8_t i = 0; i < size; i++)
+    {
+      fifo_bg.pop();
+    }
   }
 
   void Fetcher::Idle()
   {
-
+    state = Mode::READ_TILE;
   }
   
   void Fetcher::Fetch()
   {
-    Push();
-
     switch(state)
     {
     case Mode::READ_TILE:
@@ -296,7 +391,6 @@ namespace GBC
 
   }
 
-
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
@@ -315,10 +409,16 @@ namespace GBC
 
     case Mode::DRAWING_PIXELS:
     {
-      rend.x += fetch.Push();
-      fetch.Fetch();
+      rend.x += fetch.Push(rend.x);
+
+      if(rend.dot % 2 == 0)
+      {
+	fetch.Fetch();
+      }
+      
       if(rend.x == WIDTH)
       {
+	fetch.Discard();
 	rend.mode = Mode::HBLANK;
       }
       break;
@@ -332,7 +432,7 @@ namespace GBC
 
 	rend.dot = 0;
 	rend.x = 0;
-
+	
 	rend.mode = Mode::OAM_SCAN;
 	if(LY == HEIGHT)
 	{
@@ -351,6 +451,7 @@ namespace GBC
       
       if(LY == 153)
       {
+	LY = 0;
 	rend.mode = Mode::OAM_SCAN;
       }
       break;
@@ -379,60 +480,7 @@ namespace GBC
     }
   }
 
-  Tile PPU::IndexToTile(uint8_t index, bool BGW)
-  {
-    tile_data[0] = 0x3C;
-    tile_data[1] = 0x7E;
-    tile_data[2] = 0x42;
-    tile_data[3] = 0x42;
-    tile_data[4] = 0x42;
-    tile_data[5] = 0x42;
-    tile_data[6] = 0x42;
-    tile_data[7] = 0x42;
-    tile_data[8] = 0x7E;
-    tile_data[9] = 0x5E;
-    tile_data[10] = 0x7E;
-    tile_data[11] = 0x0A;
-    tile_data[12] = 0x7C;
-    tile_data[13] = 0x56;
-    tile_data[14] = 0x38;
-    tile_data[15] = 0x7C;
-    // 1 tile = 16 byte
-    Tile temp = {0};
-
-    uint16_t start = index * 16;
-
-    if(!Get_Bit_N(LCDC, 4) && BGW)
-    {
-      printf("%x\n", start);
-      //start = 0x1000 + (int8_t)(index * 16);
-    }
-
-    int row_index = 0;
-    for(uint16_t pos = start; pos <= start+15; pos += 2)
-    {
-      uint16_t lower_row = tile_data[pos];
-      uint16_t higher_row = tile_data[pos+1];
-      
-      for(uint8_t i = 0; i <= 7; i++)
-      {
-	uint8_t res_bit = 0;
-
-	uint8_t lower_bit = Get_Bit_N(lower_row, 7 - i);
-	uint8_t higher_bit = Get_Bit_N(higher_row, 7 - i);
-
-	// reverse order is required by gpu
-	res_bit = higher_bit << 1 | lower_bit;
-	temp.row[row_index].bpp[i] = res_bit;
-      }
-      row_index++;
-    }
-
-    return temp;
-  }
-
   // debugging only
-
   void PPU::UpdateTiles()
   {
     int row_index = 0;
@@ -468,12 +516,12 @@ namespace GBC
   {
     for(uint16_t i = 0; i < 32*32; i++)
     {
-      tmap1[i] = IndexToTile(map1[i], false);
+      tmap1[i] = fetch.IndexToTile(map1[i], false);
     }
 
     for(uint16_t i = 0; i < 32*32; i++)
     {
-      tmap2[i] = IndexToTile(map2[i], false);
+      tmap2[i] = fetch.IndexToTile(map2[i], false);
     }
   }
 
@@ -481,7 +529,7 @@ namespace GBC
   {
     for(uint8_t i = 0; i < 40; i++)
     {
-      OAM_tiles[i] = IndexToTile(objects[i].index, false);
+      OAM_tiles[i] = fetch.IndexToTile(objects[i].index, false);
     }
   }
   
