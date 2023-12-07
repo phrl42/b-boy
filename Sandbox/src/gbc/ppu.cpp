@@ -196,7 +196,7 @@ namespace GBC
 
     ny += (8 - (y % 8))-1;
 
-    nt = (((ny / 8))*32) + ((nx / 8));
+    nt = ((((ny / 8))*32) + ((nx / 8))) % 1024;
 
     nx = x % 8;
     ny = y % 8;
@@ -223,7 +223,7 @@ namespace GBC
 
   void PPU::Step1()
   {
-    printf("getting coordinates\n");
+    printf("step 1: getting coordinates\n");
     if(Get_Bit_N(LCDC, 0))
     {
       if(rend.pixfetcher.tt == TT::W && rend.x != 0)
@@ -232,11 +232,11 @@ namespace GBC
       }
       rend.pixfetcher.tt = TT::BG;
       
-      rend.pixfetcher.x = (SCX + rend.x) % 255;
+      rend.pixfetcher.x = (SCX + rend.pixfetcher.x) % 255;
       rend.pixfetcher.y = (SCY + LY) % 255;
     }
 
-    if(Get_Bit_N(LCDC, 5) && rend.window_enable && WX < WIDTH + 7)
+    if(Get_Bit_N(LCDC, 5) && rend.window_enable && WX < WIDTH + 7 && false)
     {
       if(rend.pixfetcher.tt == TT::BG && rend.x != 0)
       {
@@ -259,6 +259,7 @@ namespace GBC
 
   void PPU::Step2()
   {
+    printf("step2\n");
     rend.pixfetcher.current_step = 3;
   }
 
@@ -266,22 +267,32 @@ namespace GBC
   {
     rend.pixfetcher.current_step = 4;
 
-    if(rend.pixfetcher.fifo_bg.size() <= 8)
+    // this should not happen
+    if(rend.pixfetcher.x == WIDTH+8)
     {
-      printf("putting 8 fifos in queue\n");
+      return;
+    }
+    
+    uint8_t size = rend.pixfetcher.fifo_bg.size();
+    
+    if(size <= 8)
+    {
+      printf("step3: putting 8 fifos in queue\n");
       for(uint8_t i = 0; i < 8; i++)
       {
 	FIFO fif = FIFO();
-	fif.bpp = TileToScreen(rend.pixfetcher.x+ i, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
+	fif.bpp = TileToScreen(rend.pixfetcher.x + i, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
 	// this is where random shit happens
 	rend.pixfetcher.fifo_bg.push(fif);
       }
+      rend.pixfetcher.x = (rend.pixfetcher.x + 8) % WIDTH;
     }
 
   }
 
   void PPU::Step4()
   {
+    printf("step4\n");
     rend.pixfetcher.current_step = 1;
   }
 
@@ -289,10 +300,10 @@ namespace GBC
   {
     if(rend.pixfetcher.fifo_bg.empty() || rend.pixfetcher.fifo_bg.size() <= 0)
     {
-      printf("[discard]: queue empty\n");
+      printf("discard: queue empty\n");
       return;
     }
-    printf("removing %d elements from queue where x: %d and dot: %d\n", rend.pixfetcher.fifo_bg.size(), rend.x, rend.dot);
+    printf("discard: removing %d elements from queue where x: %d and dot: %d with LY: %d\n", rend.pixfetcher.fifo_bg.size(), rend.x, rend.dot, LY);
 
     uint8_t bg_size = rend.pixfetcher.fifo_bg.size();
     uint8_t obj_size = rend.pixfetcher.fifo_obj.size();
@@ -304,25 +315,28 @@ namespace GBC
 
     for(uint8_t i = 0; i < obj_size; i++)
     {
-      rend.pixfetcher.fifo_obj.pop();
+      //rend.pixfetcher.fifo_obj.pop();
     }
 
   }
 
   void PPU::Push()
   {
-    if(rend.pixfetcher.fifo_bg.size() <= 8 && rend.pixfetcher.fifo_bg.empty())
+    if(rend.pixfetcher.fifo_bg.size() <= 8 || rend.pixfetcher.fifo_bg.empty())
     {
-      printf("skipping pixel\n");
+      printf("push: skipping pixel %d\n", rend.x);
       rend.pixfetcher.skip++;
       return;
     }
+    printf("push: pixel\n");
     uint8_t val = rend.pixfetcher.fifo_bg.front().bpp;
-    if(val > 3) printf("pushing pixel y: %d x: %d and value: %d\n", LY, rend.x, val);
+    if(val > 3) printf("push: y: %d x: %d and value: %d\n", LY, rend.x, val);
 
     screen.line[LY].bpp[rend.x] = val; 
     rend.pixfetcher.fifo_bg.pop();
     rend.x += 1;
+
+    if(rend.x == WIDTH) rend.pixfetcher.current_step = 1;
   }
   
   // progresses one dot
@@ -336,18 +350,18 @@ namespace GBC
     
     if(rend.mode == Mode::TWO)
     {
-      if(LY == WY) rend.window_enable = true;
+      /*if(LY == WY) rend.window_enable = true;
       
-      if(rend.dot % 2 == 0)
-      {
+	if(rend.dot % 2 == 0)
+	{
 	Object obj = OAMToObject(rend.dot / 2);
 
 	if(obj.x > 0 && obj.y <= (LY+16) && (LY+16) < (obj.y + obj.height) && rend.buffer_index < 10)
 	{
-	  rend.buffer[rend.buffer_index] = obj;
-	  rend.buffer_index++;
+	rend.buffer[rend.buffer_index] = obj;
+	rend.buffer_index++;
 	}
-      }
+	}*/
     }
     
     if(rend.mode == Mode::THREE)
@@ -394,7 +408,11 @@ namespace GBC
     if(rend.dot == 80 && rend.mode == Mode::TWO) rend.mode = Mode::THREE;
     if(rend.x == WIDTH)
     {
-      if(rend.mode == Mode::THREE) Discard();
+      if(rend.mode == Mode::THREE)
+      {
+	Discard();
+	rend.pixfetcher.current_step = 1;
+      }
       rend.mode = Mode::ZERO;
     }
     if(rend.dot == 456)
@@ -403,15 +421,15 @@ namespace GBC
       rend.x = 0;
       rend.dot = 0;
 
-      for(uint8_t i = 0; i <= rend.buffer_index; i++)
-      {
+      /*for(uint8_t i = 0; i <= rend.buffer_index; i++)
+	{
 	rend.buffer[i].x = 0;
 	rend.buffer[i].y = 0;
 	rend.buffer[i].index = 0;
 	rend.buffer[i].flags = 0;
-      }
-      rend.buffer_index = 0;
-      
+	}
+	rend.buffer_index = 0;
+      */
       if(LY < HEIGHT) rend.mode = Mode::TWO;
     }
     if(LY == HEIGHT)
@@ -444,21 +462,21 @@ namespace GBC
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
     tile_data[0] = 0x3C;
-      tile_data[1] = 0x7E;
-      tile_data[2] = 0x42;
-      tile_data[3] = 0x42;
-      tile_data[4] = 0x42;
-      tile_data[5] = 0x42;
-      tile_data[6] = 0x42;
-      tile_data[7] = 0x42;
-      tile_data[8] = 0x7E;
-      tile_data[9] = 0x5E;
-      tile_data[10] = 0x7E;
-      tile_data[11] = 0x0A;
-      tile_data[12] = 0x7C;
-      tile_data[13] = 0x56;
-      tile_data[14] = 0x38;
-      tile_data[15] = 0x7C;
+    tile_data[1] = 0x7E;
+    tile_data[2] = 0x42;
+    tile_data[3] = 0x42;
+    tile_data[4] = 0x42;
+    tile_data[5] = 0x42;
+    tile_data[6] = 0x42;
+    tile_data[7] = 0x42;
+    tile_data[8] = 0x7E;
+    tile_data[9] = 0x5E;
+    tile_data[10] = 0x7E;
+    tile_data[11] = 0x0A;
+    tile_data[12] = 0x7C;
+    tile_data[13] = 0x56;
+    tile_data[14] = 0x38;
+    tile_data[15] = 0x7C;
     // 1 tile = 16 byte
     Tile temp = {0};
 
@@ -467,7 +485,7 @@ namespace GBC
     if(!Get_Bit_N(LCDC, 4) && BGW)
     {
       printf("%x\n", start);
-      start = 0x1000 + (int8_t)(index * 16);
+      //start = 0x1000 + (int8_t)(index * 16);
     }
 
     int row_index = 0;

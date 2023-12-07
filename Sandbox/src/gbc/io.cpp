@@ -27,6 +27,7 @@ namespace GBC
       GBC_LOG("[IO]: READ FAILED");
       break;
     }
+    return 0;
   }
 
   void IO::Write(uint16_t address, uint8_t value)

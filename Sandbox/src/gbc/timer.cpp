@@ -32,6 +32,7 @@ namespace GBC
       GBC_LOG("[Timer]: Invalid Read");
       break;
     }
+    return 0;
   }
 
   void Timer::Write(uint16_t address, uint8_t value)
