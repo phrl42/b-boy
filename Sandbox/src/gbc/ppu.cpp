@@ -186,7 +186,7 @@ namespace GBC
 
   uint8_t PPU::TileToScreen(uint16_t x, uint16_t y, bool map2)
   {
-    if(Get_Bit_N(LCDC, 0)) return 0;
+    if(!Get_Bit_N(LCDC, 0)) return 3;
     
     uint32_t nt = 0;
     uint16_t ny = y;
@@ -204,7 +204,7 @@ namespace GBC
     int index = map2 ? this->map2[nt] : this->map1[nt];
 
     Tile tile = IndexToTile(index, true);
-    
+
     return tile.row[ny].bpp[nx];
   }
 
@@ -223,23 +223,24 @@ namespace GBC
 
   void PPU::Step1()
   {
+    printf("getting coordinates\n");
     if(Get_Bit_N(LCDC, 0))
     {
-      if(rend.pixfetcher.tt == TT::W)
+      if(rend.pixfetcher.tt == TT::W && rend.x != 0)
       {
-	Discard();
+	//Discard();
       }
       rend.pixfetcher.tt = TT::BG;
       
-      rend.pixfetcher.x = (SCX + rend.x + 4) % 255;
+      rend.pixfetcher.x = (SCX + rend.x) % 255;
       rend.pixfetcher.y = (SCY + LY) % 255;
     }
 
     if(Get_Bit_N(LCDC, 5) && rend.window_enable && WX < WIDTH + 7)
     {
-      if(rend.pixfetcher.tt == TT::BG)
+      if(rend.pixfetcher.tt == TT::BG && rend.x != 0)
       {
-	Discard();
+	//Discard();
       }
       rend.pixfetcher.tt = TT::W;
 
@@ -251,7 +252,8 @@ namespace GBC
     {
 
     }
-	
+
+    
     rend.pixfetcher.current_step = 2;
   }
 
@@ -266,11 +268,12 @@ namespace GBC
 
     if(rend.pixfetcher.fifo_bg.size() <= 8)
     {
-      FIFO fif = {0};
+      printf("putting 8 fifos in queue\n");
       for(uint8_t i = 0; i < 8; i++)
       {
+	FIFO fif = FIFO();
 	fif.bpp = TileToScreen(rend.pixfetcher.x+ i, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
-
+	// this is where random shit happens
 	rend.pixfetcher.fifo_bg.push(fif);
       }
     }
@@ -279,29 +282,36 @@ namespace GBC
 
   void PPU::Step4()
   {
-    if(rend.pixfetcher.fifo_bg.size() <= 8)
-    {
-      rend.pixfetcher.current_step = 3;
-      return;
-    }
-
     rend.pixfetcher.current_step = 1;
   }
 
   void PPU::Discard()
   {
-    rend.pixfetcher.fifo_bg.clear();
+    printf("removing %d elements from queue\n", rend.pixfetcher.fifo_bg.size());
 
-    rend.pixfetcher.fifo_obj.clear();
+    if(rend.pixfetcher.fifo_bg.size() == 0) return;
+    
+    for(uint8_t i = 0; i < rend.pixfetcher.fifo_bg.size(); i++)
+    {
+      printf("r\n");
+      rend.pixfetcher.fifo_bg.pop();
+    }
+    for(uint8_t i = 0; i < rend.pixfetcher.fifo_obj.size(); i++)
+    {
+      rend.pixfetcher.fifo_obj.pop();
+    }
+
   }
 
   void PPU::Push()
   {
     if(rend.pixfetcher.fifo_bg.size() <= 8)
     {
+      printf("skipping pixel\n");
       rend.pixfetcher.skip++;
       return;
     }
+    printf("pushing pixel\n");
 
     screen.line[LY].bpp[rend.x] = rend.pixfetcher.fifo_bg.front().bpp;
     rend.pixfetcher.fifo_bg.pop();
@@ -428,21 +438,21 @@ namespace GBC
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
     /*tile_data[0] = 0x3C;
-    tile_data[1] = 0x7E;
-    tile_data[2] = 0x42;
-    tile_data[3] = 0x42;
-    tile_data[4] = 0x42;
-    tile_data[5] = 0x42;
-    tile_data[6] = 0x42;
-    tile_data[7] = 0x42;
-    tile_data[8] = 0x7E;
-    tile_data[9] = 0x5E;
-    tile_data[10] = 0x7E;
-    tile_data[11] = 0x0A;
-    tile_data[12] = 0x7C;
-    tile_data[13] = 0x56;
-    tile_data[14] = 0x38;
-    tile_data[15] = 0x7C;*/
+      tile_data[1] = 0x7E;
+      tile_data[2] = 0x42;
+      tile_data[3] = 0x42;
+      tile_data[4] = 0x42;
+      tile_data[5] = 0x42;
+      tile_data[6] = 0x42;
+      tile_data[7] = 0x42;
+      tile_data[8] = 0x7E;
+      tile_data[9] = 0x5E;
+      tile_data[10] = 0x7E;
+      tile_data[11] = 0x0A;
+      tile_data[12] = 0x7C;
+      tile_data[13] = 0x56;
+      tile_data[14] = 0x38;
+      tile_data[15] = 0x7C;*/
     // 1 tile = 16 byte
     Tile temp = {0};
 

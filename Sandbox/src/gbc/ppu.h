@@ -3,6 +3,8 @@
 #include "gbc/bitwise.h"
 #include "gbc/interrupt.h"
 
+#include <queue>
+
 #define WIDTH 160
 #define HEIGHT 144
 
@@ -145,12 +147,12 @@ namespace GBC
     struct FIFO
     {
       uint8_t bpp = 0;
-      uint8_t obp = 0;
+      //uint8_t obp = 0;
 
       // 7th bit of attribute flag
-      uint8_t priority = 0;
+      //uint8_t priority = 0;
     };
-
+ 
     // always fetch a map[index] row
     void Step1();
     void Step2();
@@ -162,8 +164,8 @@ namespace GBC
     
     struct Pixel_Fetcher
     {
-      DIFO<FIFO> fifo_bg;
-      DIFO<FIFO> fifo_obj;
+      std::queue<FIFO> fifo_bg = std::queue<FIFO>();
+      std::queue<FIFO> fifo_obj = std::queue<FIFO>();
 
       uint8_t current_step = 1;
 

@@ -9,15 +9,7 @@
 namespace GBC
 {
 
-  struct FIFO
-  {
-    uint8_t bpp = 0;
-    uint8_t obp = 0;
-
-    // 7th bit of attribute flag
-    uint8_t priority = 0;
-  };
-  
+ 
   class DIFO
   {
   public:
