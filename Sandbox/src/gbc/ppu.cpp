@@ -287,16 +287,22 @@ namespace GBC
 
   void PPU::Discard()
   {
-    printf("removing %d elements from queue\n", rend.pixfetcher.fifo_bg.size());
-
-    if(rend.pixfetcher.fifo_bg.size() == 0) return;
-    
-    for(uint8_t i = 0; i < rend.pixfetcher.fifo_bg.size(); i++)
+    if(rend.pixfetcher.fifo_bg.empty() || rend.pixfetcher.fifo_bg.size() <= 0)
     {
-      printf("r\n");
+      printf("[discard]: queue empty\n");
+      return;
+    }
+    printf("removing %d elements from queue where x: %d and dot: %d\n", rend.pixfetcher.fifo_bg.size(), rend.x, rend.dot);
+
+    uint8_t bg_size = rend.pixfetcher.fifo_bg.size();
+    uint8_t obj_size = rend.pixfetcher.fifo_obj.size();
+    
+    for(uint8_t i = 0; i < bg_size; i++)
+    {
       rend.pixfetcher.fifo_bg.pop();
     }
-    for(uint8_t i = 0; i < rend.pixfetcher.fifo_obj.size(); i++)
+
+    for(uint8_t i = 0; i < obj_size; i++)
     {
       rend.pixfetcher.fifo_obj.pop();
     }
@@ -305,15 +311,16 @@ namespace GBC
 
   void PPU::Push()
   {
-    if(rend.pixfetcher.fifo_bg.size() <= 8)
+    if(rend.pixfetcher.fifo_bg.size() <= 8 && rend.pixfetcher.fifo_bg.empty())
     {
       printf("skipping pixel\n");
       rend.pixfetcher.skip++;
       return;
     }
-    printf("pushing pixel\n");
+    uint8_t val = rend.pixfetcher.fifo_bg.front().bpp;
+    if(val > 3) printf("pushing pixel y: %d x: %d and value: %d\n", LY, rend.x, val);
 
-    screen.line[LY].bpp[rend.x] = rend.pixfetcher.fifo_bg.front().bpp;
+    screen.line[LY].bpp[rend.x] = val; 
     rend.pixfetcher.fifo_bg.pop();
     rend.x += 1;
   }
@@ -345,6 +352,7 @@ namespace GBC
     
     if(rend.mode == Mode::THREE)
     {
+      Push();
       if(rend.dot % 2 == 0)
       {
 	switch(rend.pixfetcher.current_step)
@@ -370,8 +378,6 @@ namespace GBC
 	  break;
 	}
       }
-      
-      Push();
     }
 
     if(rend.mode == Mode::ZERO)
@@ -388,7 +394,7 @@ namespace GBC
     if(rend.dot == 80 && rend.mode == Mode::TWO) rend.mode = Mode::THREE;
     if(rend.x == WIDTH)
     {
-      Discard();
+      if(rend.mode == Mode::THREE) Discard();
       rend.mode = Mode::ZERO;
     }
     if(rend.dot == 456)
@@ -437,7 +443,7 @@ namespace GBC
 
   Tile PPU::IndexToTile(uint8_t index, bool BGW)
   {
-    /*tile_data[0] = 0x3C;
+    tile_data[0] = 0x3C;
       tile_data[1] = 0x7E;
       tile_data[2] = 0x42;
       tile_data[3] = 0x42;
@@ -452,7 +458,7 @@ namespace GBC
       tile_data[12] = 0x7C;
       tile_data[13] = 0x56;
       tile_data[14] = 0x38;
-      tile_data[15] = 0x7C;*/
+      tile_data[15] = 0x7C;
     // 1 tile = 16 byte
     Tile temp = {0};
 
