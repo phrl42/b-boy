@@ -236,7 +236,7 @@ namespace GBC
       rend.pixfetcher.y = (SCY + LY) % 255;
     }
 
-    if(Get_Bit_N(LCDC, 5) && rend.window_enable && WX < WIDTH + 7 && false)
+    /*if(Get_Bit_N(LCDC, 5) && rend.window_enable && WX < WIDTH + 7 && false)
     {
       if(rend.pixfetcher.tt == TT::BG && rend.x != 0)
       {
@@ -247,7 +247,7 @@ namespace GBC
       rend.pixfetcher.x = (WX - 7) + rend.x;
       rend.pixfetcher.y = WY + LY;
     }
-
+    */
     if(Get_Bit_N(LCDC, 1))
     {
 
@@ -267,12 +267,14 @@ namespace GBC
   {
     rend.pixfetcher.current_step = 4;
 
-    // this should not happen
-    if(rend.pixfetcher.x == WIDTH+8)
+    if(rend.x == WIDTH)
     {
+      printf("step3 skipping\n");
+      rend.pixfetcher.current_step = 1;
+      Discard();
       return;
     }
-    
+
     uint8_t size = rend.pixfetcher.fifo_bg.size();
     
     if(size <= 8)
@@ -281,7 +283,7 @@ namespace GBC
       for(uint8_t i = 0; i < 8; i++)
       {
 	FIFO fif = FIFO();
-	fif.bpp = TileToScreen(rend.pixfetcher.x + i, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
+	fif.bpp = TileToScreen((rend.pixfetcher.x + i) % WIDTH, rend.pixfetcher.y, Get_Bit_N(LCDC, 3));
 	// this is where random shit happens
 	rend.pixfetcher.fifo_bg.push(fif);
       }
@@ -318,6 +320,7 @@ namespace GBC
       //rend.pixfetcher.fifo_obj.pop();
     }
 
+    printf("discard size: %d\n", rend.pixfetcher.fifo_bg.size());
   }
 
   void PPU::Push()
@@ -335,8 +338,6 @@ namespace GBC
     screen.line[LY].bpp[rend.x] = val; 
     rend.pixfetcher.fifo_bg.pop();
     rend.x += 1;
-
-    if(rend.x == WIDTH) rend.pixfetcher.current_step = 1;
   }
   
   // progresses one dot
@@ -408,17 +409,13 @@ namespace GBC
     if(rend.dot == 80 && rend.mode == Mode::TWO) rend.mode = Mode::THREE;
     if(rend.x == WIDTH)
     {
-      if(rend.mode == Mode::THREE)
-      {
-	Discard();
-	rend.pixfetcher.current_step = 1;
-      }
       rend.mode = Mode::ZERO;
     }
     if(rend.dot == 456)
     {
       LY += 1;
       rend.x = 0;
+      rend.pixfetcher.x = 0;
       rend.dot = 0;
 
       /*for(uint8_t i = 0; i <= rend.buffer_index; i++)

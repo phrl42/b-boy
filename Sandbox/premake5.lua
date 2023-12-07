@@ -41,7 +41,9 @@ project "Sandbox"
   filter "configurations:Debug"
     defines "BUILD_DEBUG"
     symbols "On"
+    buildoptions { "-fstack-protector" }
 
   filter "configurations:Release"
     defines "BUILD_RELEASE"
+    buildoptions { "-fstack-protector" }
     optimize "On"
