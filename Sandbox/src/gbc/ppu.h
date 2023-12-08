@@ -8,6 +8,11 @@
 #define WIDTH 160
 #define HEIGHT 144
 
+#define P_OAM_END 79
+#define P_DRAW_END 160
+#define P_HBLANK_END 455
+#define P_VBLANK_END 153
+
 // PPU Registers are located in RAM
 // Tile Data Location
 #define A_TileData 0x8000
@@ -117,6 +122,15 @@ namespace GBC
 
     Object OAMToObject(uint8_t index);
     uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2);
+    
+    std::queue<int> fifo_bg;
+    
+    enum class Mode
+    {
+	READ_TILE=0, READ_DATA0, READ_DATA1, IDLE, NONE
+    };
+    Mode state = Mode::READ_TILE;
+
   private:
     void Read_Tile();
     
@@ -125,15 +139,6 @@ namespace GBC
     
     void Idle();
     
-    enum class Mode
-    {
-      READ_TILE=0, READ_DATA0, READ_DATA1, IDLE
-    };
-
-    std::queue<int> fifo_bg;
-
-    Mode state = Mode::READ_TILE;
-
     uint8_t x = 0;
     uint8_t y = 0;
   public:
@@ -182,7 +187,7 @@ namespace GBC
     enum class Mode
       {
 	OAM_SCAN=0, DRAWING_PIXELS, HBLANK, VBLANK
-      };
+	  };
 
     struct Renderer
     {

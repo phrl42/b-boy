@@ -1,6 +1,8 @@
 #include "gbc/ppu.h"
 #include "gbc/bus.h"
 
+static int frame = 0;
+
 namespace GBC
 {
   PPU::PPU(Interrupt *interrupt)
@@ -204,7 +206,7 @@ namespace GBC
 
   Tile Fetcher::IndexToTile(uint8_t index, bool BGW)
   {
-    tile_data[0] = 0x3C;
+    /*tile_data[0] = 0x3C;
     tile_data[1] = 0x7E;
     tile_data[2] = 0x42;
     tile_data[3] = 0x42;
@@ -219,7 +221,7 @@ namespace GBC
     tile_data[12] = 0x7C;
     tile_data[13] = 0x56;
     tile_data[14] = 0x38;
-    tile_data[15] = 0x7C;
+    tile_data[15] = 0x7C;*/
     // 1 tile = 16 byte
     Tile temp = {0};
 
@@ -227,7 +229,7 @@ namespace GBC
 
     if(!Get_Bit_N(*LCDC, 4) && BGW)
     {
-      printf("%x\n", start);
+      //printf("%x\n", start);
       //start = 0x1000 + (int8_t)(index * 16);
     }
 
@@ -295,13 +297,17 @@ namespace GBC
 
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
-    //printf("[X: %d] [Y: %d] size: %d\n", rend_x, *LY, fifo_bg.size());
     if(fifo_bg.size() <= 8) return 0;
 
-    screen->line[*LY].bpp[rend_x] = fifo_bg.front();
-
-    fifo_bg.pop();
+    uint8_t val = fifo_bg.front();
     
+    if(val == 2) printf("something bad happened %d {%d : %d}\n", frame, rend_x, *LY);
+    
+    screen->line[(*LY) % HEIGHT].bpp[rend_x % WIDTH] = val;
+    if(!fifo_bg.empty())
+    {
+      fifo_bg.pop();
+    }
     return 1;
   }
 
@@ -309,8 +315,8 @@ namespace GBC
   {
     if(Get_Bit_N(*LCDC, 0))
     {
-      x = (*SCX + x) % 255;
-      y = (*SCY + *LY) % 255;
+      x = (x) % 255;
+      y = (*LY) % 255;
     }   
     state = Mode::READ_DATA0;
   }
@@ -323,19 +329,22 @@ namespace GBC
   void Fetcher::Read_Data1()
   {
     state = Mode::IDLE;
+    if(fifo_bg.size() > 8) return;
 
-    if(x == WIDTH+8)
+    if(x == WIDTH)
     {
       state = Mode::READ_TILE;
       x = 0;
+      for(uint8_t i = 0; i < 8; i++)
+      {
+	fifo_bg.push(2);
+      }
       return;
     }
-
-    if(fifo_bg.size() > 8) return;
-    
+ 
     for(uint8_t i = 0; i < 8; i++)
     {
-      uint8_t val = TileToScreen(x + i, y, Get_Bit_N(*LCDC, 3));
+      uint8_t val = 1;//TileToScreen(x + i, y, Get_Bit_N(*LCDC, 3));
       fifo_bg.push(val);
     }
     x += 8;
@@ -343,13 +352,12 @@ namespace GBC
 
   void Fetcher::Discard()
   {
-    if(fifo_bg.size() < 0 || fifo_bg.empty()) return;
+    if(fifo_bg.size() <= 0 || fifo_bg.empty()) return;
 
-    uint8_t size = fifo_bg.size();
-    for(uint8_t i = 0; i < size; i++)
-    {
-      fifo_bg.pop();
-    }
+    std::queue<int> empty = std::queue<int>();
+    std::swap(fifo_bg, empty);
+    
+    state = Mode::READ_TILE;
   }
 
   void Fetcher::Idle()
@@ -401,7 +409,7 @@ namespace GBC
     case Mode::OAM_SCAN:
     {
       // no oam search for now
-      if(rend.dot == 80)
+      if(rend.dot == P_OAM_END)
       {
 	rend.mode = Mode::DRAWING_PIXELS;
       }
@@ -410,15 +418,16 @@ namespace GBC
 
     case Mode::DRAWING_PIXELS:
     {
-      rend.x += fetch.Push(rend.x);
-
       if(rend.dot % 2 == 0)
       {
 	fetch.Fetch();
       }
+
+      rend.x += fetch.Push(rend.x);
       
-      if(rend.x == WIDTH)
+      if(rend.dot == 251)
       {
+	printf("in frame: %d line has %d dots with element size: %d and x: %d\n", frame, rend.dot, fetch.fifo_bg.size(), rend.x);
 	fetch.Discard();
 	rend.mode = Mode::HBLANK;
       }
@@ -427,7 +436,7 @@ namespace GBC
 
     case Mode::HBLANK:
     {
-      if(rend.dot == 456)
+      if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
 
@@ -445,15 +454,17 @@ namespace GBC
 
     case Mode::VBLANK:
     {
-      if(rend.dot == 456)
+      if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
       }
       
-      if(LY == 153)
+      if(LY == P_VBLANK_END)
       {
 	LY = 0;
+	//fetch.state = Fetcher::Mode::NONE;
 	rend.mode = Mode::OAM_SCAN;
+	frame += 1;
       }
       break;
     }

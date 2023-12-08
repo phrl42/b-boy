@@ -9,15 +9,6 @@
 namespace GBC
 {
 
-  struct FIFO
-  {
-    uint8_t bpp = 0;
-    uint8_t obp = 0;
-
-    // 7th bit of attribute flag
-    uint8_t priority = 0;
-  };
-  
   class DIFO
   {
   public:
@@ -44,12 +35,12 @@ namespace GBC
 	}      
       }
 
-    inline FIFO front()
+    inline int front()
       {
 	if(data.size() == 0)
 	{
 	  std::cout << "[DIFO][front] size == 0" << std::endl;
-	  return FIFO();
+	  return 0;
 	}
 	return data[0];
       }
@@ -59,7 +50,7 @@ namespace GBC
 	data.clear();
       }
     
-    inline void push(FIFO val)
+    inline void push(int val)
       {
 	try
 	{
@@ -77,7 +68,7 @@ namespace GBC
       }
 
   private:
-    std::vector<FIFO> data;
+    std::vector<int> data;
   };
 
   uint16_t Combine(uint8_t first, uint8_t second);
