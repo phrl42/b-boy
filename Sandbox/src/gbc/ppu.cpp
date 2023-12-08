@@ -327,6 +327,7 @@ namespace GBC
     if(x == WIDTH+8)
     {
       state = Mode::READ_TILE;
+      x = 0;
       return;
     }
 
