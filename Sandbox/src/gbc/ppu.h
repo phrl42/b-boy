@@ -122,11 +122,11 @@ namespace GBC
 
     Object OAMToObject(uint8_t index);
     uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2);
-    std::queue<int> fifo_bg;
+
   private:
     enum class Mode
     {
-	READ_TILE=0, READ_DATA0, READ_DATA1, IDLE, NONE
+	READ_TILE=0, READ_DATA0, READ_DATA1, PUSH_FIFO, NONE
     };
     Mode state = Mode::READ_TILE;
 
@@ -135,13 +135,17 @@ namespace GBC
     void Read_Data0();
     void Read_Data1();
     
-    void Idle();
-    
+    void Push_FIFO();
+
+    bool start = true;
     
     uint8_t x = 0;
     uint8_t y = 0;
 
-    uint8_t fetch[8] = {0};
+    uint8_t fetch[8];
+
+    uint8_t fifo_bg[8];
+    uint8_t bg_size = 0;
   public:
     uint8_t *LCDC;
 
@@ -208,6 +212,7 @@ namespace GBC
     uint8_t oam[0xA0] = {0};
     Object objects[40] = {0};
 
+    void Draw_Pixel();
   public:
     // for debug only
     Tile tile[384*2] = {0};

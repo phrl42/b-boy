@@ -86,8 +86,8 @@ namespace SANDBOX
       emu = std::thread(&GBC::Spec::Update, &spec);
     }
 
-    //spec.ppu.UpdateMaps();
-    //spec.ppu.UpdateTiles();
+    spec.ppu.UpdateMaps();
+    spec.ppu.UpdateTiles();
 
     
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");

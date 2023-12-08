@@ -230,7 +230,7 @@ namespace GBC
     if(!Get_Bit_N(*LCDC, 4) && BGW)
     {
       //printf("%x\n", start);
-      //start = 0x1000 + (int8_t)(index * 16);
+      start = 0x1000 + (int8_t)(index * 16);
     }
 
     int row_index = 0;
@@ -297,7 +297,15 @@ namespace GBC
 
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
-    screen->line[(*LY) % HEIGHT].bpp[rend_x % WIDTH] = TileToScreen(rend_x, *LY, false);
+    if(bg_size == 0) return 0;
+    
+    screen->line[(*LY) % HEIGHT].bpp[rend_x % WIDTH] = fifo_bg[0];//rend_x % 2 + *LY % 2;
+
+    for(uint8_t i = 0; i < 7; i++)
+    {
+      fifo_bg[i] = fifo_bg[i+1];
+    }
+
     return 1;
   }
 
@@ -305,8 +313,8 @@ namespace GBC
   {
     if(Get_Bit_N(*LCDC, 0))
     {
-      x = (x) % 255;
-      y = (*LY) % 255;
+      x = (*SCX + x) % 256;
+      y = (*SCY + *LY) % 256;
     }   
     state = Mode::READ_DATA0;
   }
@@ -318,15 +326,42 @@ namespace GBC
 
   void Fetcher::Read_Data1()
   {
-    state = Mode::READ_TILE;
+    if(start)
+    {
+      start = false;
+      state = Mode::READ_TILE;
+      return;
+    }
+    
+    for(uint8_t i = 0; i < 8; i++)
+    {
+      fetch[i] = TileToScreen(x+i, y, false);
+    }
+    x += 8;
+    
+    state = Mode::PUSH_FIFO;
   }
 
-  void Fetcher::Idle()
+  void Fetcher::Push_FIFO()
   {
+    for(uint8_t i = 0; i < 8; i++)
+    {
+      fifo_bg[i] = fetch[i];
+    }
+
+    bg_size = 8;
+    
+    state = Mode::READ_TILE;
   }
 
   void Fetcher::Discard()
   {
+    for(uint8_t i = 0; i < 8; i++)
+    {
+      fifo_bg[i] = 0;
+    }
+    x = 0;
+    bg_size = 0;
   }
   
   void Fetcher::Fetch()
@@ -351,9 +386,9 @@ namespace GBC
       break;
     }
 
-    case Mode::IDLE:
+    case Mode::PUSH_FIFO:
     {
-      Idle();
+      Push_FIFO();
       break;
     }
 
@@ -362,6 +397,18 @@ namespace GBC
       break;
     }
 
+  }
+
+  void PPU::Draw_Pixel()
+  {
+    if(rend.x == P_DRAW_END) return;
+    
+    if(rend.dot % 2 == 0 && rend.dot != 80)
+    {
+      fetch.Fetch();
+    }
+
+    rend.x += fetch.Push(rend.x);
   }
 
   void PPU::Render()
@@ -382,18 +429,10 @@ namespace GBC
 
     case Mode::DRAWING_PIXELS:
     {
-      /*if(rend.dot % 2 == 0)
-      {
-	fetch.Fetch();
-	}*/
-
-      rend.x += fetch.Push(rend.x);
-      
+      Draw_Pixel();
       if(rend.x == P_DRAW_END)
       {
-	//printf("in frame: %d line has %d dots with element size: %d and x: %d\n", frame, rend.dot, fetch.fifo_bg.size(), rend.x);
-	//fetch.Discard();
-	rend.x = 0;
+	fetch.Discard();
 	rend.mode = Mode::HBLANK;
       }
       break;
