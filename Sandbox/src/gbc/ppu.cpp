@@ -298,13 +298,14 @@ namespace GBC
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
     if(bg_size == 0) return 0;
-    
-    screen->line[(*LY) % HEIGHT].bpp[rend_x % WIDTH] = fifo_bg[0];//rend_x % 2 + *LY % 2;
+    screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0];
 
     for(uint8_t i = 0; i < 7; i++)
     {
       fifo_bg[i] = fifo_bg[i+1];
     }
+
+    bg_size--;
 
     return 1;
   }
@@ -332,18 +333,20 @@ namespace GBC
       state = Mode::READ_TILE;
       return;
     }
-    
+
     for(uint8_t i = 0; i < 8; i++)
     {
-      fetch[i] = TileToScreen(x+i, y, false);
+      fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
     }
-    x += 8;
+    x = (x + 8) % 256;
     
     state = Mode::PUSH_FIFO;
   }
 
   void Fetcher::Push_FIFO()
   {
+    if(bg_size != 0) return;
+    
     for(uint8_t i = 0; i < 8; i++)
     {
       fifo_bg[i] = fetch[i];
@@ -359,9 +362,13 @@ namespace GBC
     for(uint8_t i = 0; i < 8; i++)
     {
       fifo_bg[i] = 0;
+      fetch[i] = 0;
     }
     x = 0;
+    y = 0;
+    start = true;
     bg_size = 0;
+    state = Mode::READ_TILE;
   }
   
   void Fetcher::Fetch()
@@ -401,9 +408,9 @@ namespace GBC
 
   void PPU::Draw_Pixel()
   {
-    if(rend.x == P_DRAW_END) return;
+    if(rend.x == P_DRAW_END || rend.dot == 80) return;
     
-    if(rend.dot % 2 == 0 && rend.dot != 80)
+    if(rend.dot % 2 == 0)
     {
       fetch.Fetch();
     }

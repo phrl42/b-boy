@@ -83,8 +83,6 @@ namespace GBC
 	
 	cpu.Validate_Opcode();
 
-	ppu.UpdateSettings();
-
 	if(dstate == Debug::STEP)
 	{
 	  dstate = Debug::STOP;
