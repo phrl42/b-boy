@@ -297,17 +297,7 @@ namespace GBC
 
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
-    if(fifo_bg.size() <= 8) return 0;
-
-    uint8_t val = fifo_bg.front();
-    
-    if(val == 2) printf("something bad happened %d {%d : %d}\n", frame, rend_x, *LY);
-    
-    screen->line[(*LY) % HEIGHT].bpp[rend_x % WIDTH] = val;
-    if(!fifo_bg.empty())
-    {
-      fifo_bg.pop();
-    }
+    screen->line[(*LY) % HEIGHT].bpp[rend_x % WIDTH] = TileToScreen(rend_x, *LY, false);
     return 1;
   }
 
@@ -328,41 +318,15 @@ namespace GBC
 
   void Fetcher::Read_Data1()
   {
-    state = Mode::IDLE;
-    if(fifo_bg.size() > 8) return;
-
-    if(x == WIDTH)
-    {
-      state = Mode::READ_TILE;
-      x = 0;
-      for(uint8_t i = 0; i < 8; i++)
-      {
-	fifo_bg.push(2);
-      }
-      return;
-    }
- 
-    for(uint8_t i = 0; i < 8; i++)
-    {
-      uint8_t val = 1;//TileToScreen(x + i, y, Get_Bit_N(*LCDC, 3));
-      fifo_bg.push(val);
-    }
-    x += 8;
-  }
-
-  void Fetcher::Discard()
-  {
-    if(fifo_bg.size() <= 0 || fifo_bg.empty()) return;
-
-    std::queue<int> empty = std::queue<int>();
-    std::swap(fifo_bg, empty);
-    
     state = Mode::READ_TILE;
   }
 
   void Fetcher::Idle()
   {
-    state = Mode::READ_TILE;
+  }
+
+  void Fetcher::Discard()
+  {
   }
   
   void Fetcher::Fetch()
@@ -418,17 +382,18 @@ namespace GBC
 
     case Mode::DRAWING_PIXELS:
     {
-      if(rend.dot % 2 == 0)
+      /*if(rend.dot % 2 == 0)
       {
 	fetch.Fetch();
-      }
+	}*/
 
       rend.x += fetch.Push(rend.x);
       
-      if(rend.dot == 251)
+      if(rend.x == P_DRAW_END)
       {
-	printf("in frame: %d line has %d dots with element size: %d and x: %d\n", frame, rend.dot, fetch.fifo_bg.size(), rend.x);
-	fetch.Discard();
+	//printf("in frame: %d line has %d dots with element size: %d and x: %d\n", frame, rend.dot, fetch.fifo_bg.size(), rend.x);
+	//fetch.Discard();
+	rend.x = 0;
 	rend.mode = Mode::HBLANK;
       }
       break;
@@ -462,7 +427,6 @@ namespace GBC
       if(LY == P_VBLANK_END)
       {
 	LY = 0;
-	//fetch.state = Fetcher::Mode::NONE;
 	rend.mode = Mode::OAM_SCAN;
 	frame += 1;
       }
