@@ -30,31 +30,32 @@ namespace GBC
     return ret;
   }
 
-  void Spec::add_address(uint16_t address, std::string mnemonic)
+  void Spec::add_address(int &address)
   {
-    for(auto pair : instructions)
-    {
-      if(address == pair.first)
-      {
-	return;
-      }
-    }
+    std::string mnemonic = cpu.lookup[bus.Read(address, false)].mnemonic;
+    replace_first(mnemonic, "PREFIX", cpu.lookup_cb[bus.Read(address+1, false)].mnemonic);
+    replace_first(mnemonic, "e8", std::string(Hex_To_String(bus.Read(address+1, false), "$(") + ")"));
+    replace_first(mnemonic, "n8", std::string(Hex_To_String(bus.Read(address+1, false), "$(") + ")"));
+    replace_first(mnemonic, "a8", std::string(Hex_To_String(bus.Read(address+1, false), "$(") + ")"));
 
-    replace_first(mnemonic, "PREFIX", cpu.lookup_cb[bus.Read(cpu.PC+1)].mnemonic);
-    replace_first(mnemonic, "e8", std::string(Hex_To_String(bus.Read(address+1), "$(") + ")"));
-    replace_first(mnemonic, "n8", std::string(Hex_To_String(bus.Read(address+1), "$(") + ")"));
-    replace_first(mnemonic, "a8", std::string(Hex_To_String(bus.Read(address+1), "$(") + ")"));
+    replace_first(mnemonic, "a16", std::string(Hex_To_String(bus.Read(address+2, false) << 8 | bus.Read(address+1, false), "$(") + ")"));
 
-    replace_first(mnemonic, "a16", std::string(Hex_To_String(bus.Read(address+2) << 8 | bus.Read(address+1), "$(") + ")"));
+    replace_first(mnemonic, "n16", std::string(Hex_To_String(bus.Read(address+2, false) << 8 | bus.Read(address+1, false) , "$(") + ")"));
 
-    replace_first(mnemonic, "n16", std::string(Hex_To_String(bus.Read(address+2) << 8 | bus.Read(address+1) , "$(") + ")"));
     instructions.push_back(std::pair<uint16_t, std::string>(address, mnemonic));
+    address++;
   }
   
   void Spec::Init(const char* rom_path)
   {
     rom.Init(rom_path);
-    
+
+    // imgui preparation
+    int address = 0;
+    while(address != 0x10000)
+    {
+      add_address(address);
+    }
     cpu.state = State::RUN;
   }
 
@@ -65,18 +66,12 @@ namespace GBC
     {
       if(cpu.PC == 0x0100) rom.Post_Bios();
       
-      //if(breakop == bus.Read(cpu.PC))
-      {
-	//dstate = Debug::STOP;
-      }
-      
       if(!adt)
       {
-	//adt = true;
-	//add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
+	adt = true;
       }
 
-      if(cpu.state == State::RUN) //&& breakaddr != cpu.PC && dstate != Debug::STOP)
+      if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
       {
 	adt = false;
 	cpu.Validate_Opcode();

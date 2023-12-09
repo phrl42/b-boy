@@ -16,17 +16,17 @@
 #include "../Sandbox/src/gbc/info.h"
 
 #include <sstream>
+#include <bitset>
 
 namespace Banana
 {
-  const char* Hex_To_CString(const uint16_t val, const char* prefix)
+  const char* Hex_To_CString(const uint16_t val, const char* prefix, bool dbin = false)
   {
     std::string ret;
     std::stringstream hex;
-    
+
     hex << std::hex << val;
     ret = std::string(prefix) + hex.str();
-
     return ret.c_str();
   }
 
@@ -110,7 +110,7 @@ namespace Banana
     //fonts
     ImFontAtlas* fontAtlas = io.Fonts;
     ImFontConfig fontConfig = ImFontConfig();
-    //set default range (uft-8)
+    //set default range (utf-8)
     fontConfig.GlyphRanges = fontAtlas->GetGlyphRangesDefault();
     fontAtlas->AddFontFromFileTTF("assets/fonts/mononoki.ttf", 20, &fontConfig);
     //any new fonts were added to the font pool
@@ -172,10 +172,13 @@ namespace Banana
 	 
       ImGui::DockBuilderDockWindow("Scene", dock_main_id);
       ImGui::DockBuilderDockWindow("Tiles", dock_right_id);
-      ImGui::DockBuilderDockWindow("Disassembler", dock_right_id);
+      ImGui::DockBuilderDockWindow("CPU", dock_right_id);
       ImGui::DockBuilderDockWindow("MEM", dock_main_id);
       ImGui::DockBuilderDockWindow("Debugger", dock_down_id);
-      ImGui::DockBuilderDockWindow("Registers", dock_down_right_id);
+      ImGui::DockBuilderDockWindow("PPU", dock_right_id);
+      ImGui::DockBuilderDockWindow("Interrupt", dock_right_id);
+      ImGui::DockBuilderDockWindow("Timer", dock_right_id);
+      ImGui::DockBuilderDockWindow("ROM", dock_right_id);
     }
 
     ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), dockflags);
@@ -183,9 +186,9 @@ namespace Banana
 
     ImGui::Begin("Tiles", nullptr, 0);
     ImGui::Text("Map 1:");
-    ImGui::Image((void*)Stats::tmap1_id, ImVec2(250, 250), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image((void*)Stats::tmap1_id, ImVec2(32*8*2, 32*8*8), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Text("Map 2:");
-    ImGui::Image((void*)Stats::tmap2_id, ImVec2(250, 250), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image((void*)Stats::tmap2_id, ImVec2(32*8*2, 32*8*8), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Text("Tiles:");
     ImGui::Image((void*)Stats::tiles_id, ImVec2(250, 250), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::End();
@@ -244,6 +247,7 @@ namespace Banana
     }
     auto red = ImVec4(1, 0, 0, 1);
     auto green = ImVec4(0, 1, 0, 1);
+    auto blue = ImVec4(0, 0, 1, 1);
     
     ImGui::Text("Step Mode:");
     ImGui::SameLine();
@@ -258,39 +262,38 @@ namespace Banana
     
     ImGui::End();
 
-    ImGui::Begin("Disassembler", nullptr, 0);
-    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC), "$"));
-    ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
-    ImGui::SameLine();
-    switch(Stats::spec->dstate)
-    {
-    case GBC::Debug::STOP:
-    {
-      ImGui::TextColored(red, "[ STOP ]");
-      break;
-    }
+    ImGui::Begin("Interrupt", nullptr, 0);
+    ImGui::Text(Hex_To_CString(Stats::spec->interrupt.IE, "[FFFF] IE: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->interrupt.IF, "[FF0F] IF: "));
+    ImGui::End();
 
-    default:
-    {
-      ImGui::TextColored(green, "[ RUN ]");
-      break;
-    }
-    }
+    ImGui::Begin("Timer", nullptr, 0);
+    ImGui::Text(Hex_To_CString(Stats::spec->timer.DIV, "DIV: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->timer.TIMA, "[FF05] TIMA: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->timer.TMA, "[FF06] TMA: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->timer.TAC, "[FF07] TAC: "));
+    ImGui::End();
 
-    ImGui::BeginChild("Scrolling");
-    for (int32_t n = Stats::spec->instructions.size()-1; n >= 0; n--)
-    {
-      auto chose = red;
-      if(Stats::spec->instructions[n].first == Stats::spec->cpu.PC) chose = green;
-      ImGui::TextColored(chose, "[%x]: %s", Stats::spec->instructions[n].first, Stats::spec->instructions[n].second.c_str());
-    }
-    ImGui::EndChild(); 
+    ImGui::Begin("ROM", nullptr, 0);
+    ImGui::Text((std::string("Loaded: ") + std::string(Stats::spec->rom.rom)).c_str());
     ImGui::End();
     
-    static MemoryEditor mem_edit;
-    mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
-
-    ImGui::Begin("Registers", nullptr, 0);
+    ImGui::Begin("PPU", nullptr, 0);
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LCDC, "[FF40] LCDC: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.STAT, "[FF41] STAT: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCX, "[FF42] SCX: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCY, "[FF43] SCY: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WX, "[FF4B] WX: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WY, "[FF4A] WY: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LY, "[FF44] LY: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LYC, "[FF45] LYC: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.DMA, "[FF46] DMA: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.BGP, "[FF47] BGP: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP0, "[FF48] OBP0: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP1, "[FF49] OBP1: ", true));
+    ImGui::End();
+    
+    ImGui::Begin("CPU", nullptr, 0);
 
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF >> 8, "A: "));
     ImGui::Text(Hex_To_CString((uint8_t)Stats::spec->cpu.AF, "F: "));
@@ -329,7 +332,74 @@ namespace Banana
     ImGui::Text(Stats::spec->io.serial);
     // maybe put rom name here
     // maybe but restart buttons and stuff in here
+
+    switch(Stats::spec->dstate)
+    {
+    case GBC::Debug::STOP:
+    {
+      ImGui::TextColored(red, "[ DEBUG STOP ]");
+      break;
+    }
+
+    case GBC::Debug::RUN:
+    {
+      ImGui::TextColored(green, "[ DEBUG RUN ]");
+      break;
+    }
+
+    case GBC::Debug::STEP:
+    {
+      ImGui::TextColored(blue, "[ DEBUG STEP ]");
+    }
+
+    default:
+    {
+      break;
+    }
+    }
+
+    ImGui::Text("");
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC), "$"));
+ 
+    ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
+    ImGui::SameLine();
+    switch(Stats::spec->cpu.state)
+    {
+    case GBC::State::STOP:
+    {
+      ImGui::TextColored(red, "[ STOP ]");
+      break;
+    }
+    case GBC::State::HALT:
+    {
+      ImGui::TextColored(red, "[ HALT ]");
+      break;
+    }
+    case GBC::State::RUN:
+    {
+      ImGui::TextColored(green, "[ RUN ]");
+      break;
+    }
+    default:
+    {
+      break;
+    }
+    
+    }
+
+    ImGui::BeginChild("Scrolling");
+    for (int32_t n = Stats::spec->instructions.size()-1; n >= 0; n--)
+    {
+      auto chose = red;
+      if(Stats::spec->instructions[n].first == Stats::spec->cpu.PC) chose = green;
+      ImGui::TextColored(chose, "[%x]: %s", Stats::spec->instructions[n].first, Stats::spec->instructions[n].second.c_str());
+    }
+    ImGui::EndChild(); 
     ImGui::End();
+    
+    static MemoryEditor mem_edit;
+    mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
+
     
     ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration);
     ImVec2 winsize = ImGui::GetWindowSize();

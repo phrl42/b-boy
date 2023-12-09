@@ -18,7 +18,7 @@ namespace GBC
 
     void Tick();
 
-  private:
+    //private:
     Interrupt *interrupt;
 
     uint16_t DIV = 0;

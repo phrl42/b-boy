@@ -29,16 +29,12 @@ namespace GBC
     Timer timer;
     Interrupt interrupt;
     IO io;
-
     ROM rom;
-    
     Bus bus;
-
     CPU cpu;
 
     Debug dstate = Debug::RUN;
     
-
     void Init(const char* rom_path);
     void Update();
 
@@ -46,6 +42,7 @@ namespace GBC
     bool kill = false;
     
     // used for imgui debug
+    void add_address(int &address);
     std::vector<std::pair<uint16_t, std::string>> instructions;
 
     int breakaddr = 0xFFFFF;

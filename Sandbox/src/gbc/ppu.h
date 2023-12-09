@@ -117,7 +117,8 @@ namespace GBC
 
     void Fetch();
     void Discard();
-
+    void Reset();
+    
     Tile IndexToTile(uint8_t index, bool BGW);
 
     Object OAMToObject(uint8_t index);
@@ -190,9 +191,9 @@ namespace GBC
     Interrupt *interrupt;
 
     enum class Mode
-      {
-	OAM_SCAN=0, DRAWING_PIXELS, HBLANK, VBLANK
-	  };
+    {
+      HBLANK=0, VBLANK, OAM_SCAN, DRAWING_PIXELS
+    };
 
     struct Renderer
     {
@@ -222,7 +223,7 @@ namespace GBC
     Tile OAM_tiles[40] = {0};
 
     Screen screen;
-  private:
+    //private:
     // registers
     uint8_t LCDC = 0;
     uint8_t STAT = 0;

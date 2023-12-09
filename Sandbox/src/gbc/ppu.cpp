@@ -258,8 +258,6 @@ namespace GBC
 
   uint8_t Fetcher::TileToScreen(uint16_t x, uint16_t y, bool map2)
   {
-    if(!Get_Bit_N(*LCDC, 0)) return 3;
-    
     uint32_t nt = 0;
     uint16_t ny = y;
     uint16_t nx = x;
@@ -312,11 +310,12 @@ namespace GBC
 
   void Fetcher::Read_Tile()
   {
+    // bg
     if(Get_Bit_N(*LCDC, 0))
     {
       x = (*SCX + x) % 256;
       y = (*SCY + *LY) % 256;
-    }   
+    }
     state = Mode::READ_DATA0;
   }
 
@@ -364,11 +363,16 @@ namespace GBC
       fifo_bg[i] = 0;
       fetch[i] = 0;
     }
+    bg_size = 0;
+    state = Mode::READ_TILE;
+  }
+
+  void Fetcher::Reset()
+  {
+    Discard();
     x = 0;
     y = 0;
     start = true;
-    bg_size = 0;
-    state = Mode::READ_TILE;
   }
   
   void Fetcher::Fetch()
@@ -421,12 +425,20 @@ namespace GBC
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
-
+    
     switch(rend.mode)
     {
     case Mode::OAM_SCAN:
     {
-      // no oam search for now
+       // set PPU Mode
+      Set_Bit_N(&STAT, 0, 0);
+      Set_Bit_N(&STAT, 1, 1);
+
+      if(Get_Bit_N(STAT, 5))
+      {
+	//interrupt->Request(INTERRUPT::LCD);
+      }
+ 
       if(rend.dot == P_OAM_END)
       {
 	rend.mode = Mode::DRAWING_PIXELS;
@@ -436,10 +448,14 @@ namespace GBC
 
     case Mode::DRAWING_PIXELS:
     {
+      // set PPU Mode
+      Set_Bit_N(&STAT, 0, 1);
+      Set_Bit_N(&STAT, 1, 1);
+
       Draw_Pixel();
       if(rend.x == P_DRAW_END)
       {
-	fetch.Discard();
+	fetch.Reset();
 	rend.mode = Mode::HBLANK;
       }
       break;
@@ -447,9 +463,19 @@ namespace GBC
 
     case Mode::HBLANK:
     {
+      // set PPU Mode
+      Set_Bit_N(&STAT, 0, 0);
+      Set_Bit_N(&STAT, 1, 0);
+
+      if(Get_Bit_N(STAT, 3))
+      {
+	//interrupt->Request(INTERRUPT::LCD);
+      }
+
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
+	Set_Bit_N(&STAT, 2, LYC == LY);
 
 	rend.dot = 0;
 	rend.x = 0;
@@ -465,9 +491,19 @@ namespace GBC
 
     case Mode::VBLANK:
     {
+      // set PPU Mode
+      Set_Bit_N(&STAT, 0, 1);
+      Set_Bit_N(&STAT, 1, 0);
+
+      if(Get_Bit_N(STAT, 4))
+      {
+	//interrupt->Request(INTERRUPT::LCD);
+      }
+      
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
+	Set_Bit_N(&STAT, 2, LYC == LY);
       }
       
       if(LY == P_VBLANK_END)
@@ -482,6 +518,11 @@ namespace GBC
     default:
       GBC_LOG("[PPU] Rendering Mode invalid");
       break;
+    }
+
+    if(Get_Bit_N(STAT, 6))
+    {
+      // interrupt->Request(INTERRUPT::LCD);
     }
 
     rend.dot++;
