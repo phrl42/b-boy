@@ -60,7 +60,7 @@ namespace SANDBOX
     {
       for(size_t x = 0; x < TFT_WIDTH; x++)
       {
-	ent[y][x].AddComponent(new Banana::QuadComponent());
+	//ent[y][x].AddComponent(new Banana::QuadComponent());
       }
     }
 

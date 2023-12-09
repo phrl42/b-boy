@@ -18,23 +18,16 @@ namespace GBC
       return;
     }
 
-    uint16_t n_val = *reg;
-    n_val <<= 15 - n;
-    n_val >>= 15;
+    uint16_t vals = 1 << n;
 
-    if(val == n_val)
+    if(val)
     {
-      return;
+      *reg |= vals;
     }
-    
-    n_val = val;
-    n_val <<= n;
-    
-    uint16_t s_reg = *reg;
-    s_reg &= ~((uint16_t)std::pow(2, n));
-    s_reg |= n_val;
-    *reg = s_reg;
-
+    else
+    {
+      *reg &= ~(vals);
+    }
     return;
   }
 
@@ -67,23 +60,17 @@ namespace GBC
       return;
     }
 
-    uint8_t n_val = *reg;
-    n_val <<= 7 - n;
-    n_val >>= 7;
-
-    if(val == n_val)
+    uint8_t vals = 1 << n;
+    
+    if(val)
     {
-      return;
+      *reg |= vals;
+    }
+    else
+    {
+      *reg &= ~(vals);
     }
     
-    n_val = val;
-    n_val <<= n;
-    
-    uint8_t s_reg = *reg;
-    s_reg &= ~((uint8_t)std::pow(2, n));
-    s_reg |= n_val;
-    *reg = s_reg;
-
     return;
   }
  
@@ -97,19 +84,6 @@ namespace GBC
     uint16_t val = first_16 | second_16;
 
     return val;
-  }
-
-  uint16_t Get_Value_N(uint16_t opcode, uint8_t n)
-  {
-    if(n > 3)
-    {
-      GBC_LOG("Cannot get " + std::to_string(n) + ". Opcode is 16-bit only: 0-3 MAX");
-      return 0;
-    }
-    opcode = opcode << (n * 4);
-    opcode = opcode >> 12;
-
-    return opcode;
   }
 
 };  

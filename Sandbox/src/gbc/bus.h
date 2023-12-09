@@ -38,7 +38,6 @@ namespace GBC
     IO *io;
     ROM *rom;
   public:
-    uint16_t PC = 0;
     uint8_t space[GBC_RAM_SIZE] = {0};
   };
   

@@ -65,22 +65,20 @@ namespace GBC
     {
       if(cpu.PC == 0x0100) rom.Post_Bios();
       
-      if(breakop == bus.Read(cpu.PC))
+      //if(breakop == bus.Read(cpu.PC))
       {
-	dstate = Debug::STOP;
+	//dstate = Debug::STOP;
       }
       
       if(!adt)
       {
-	adt = true;
+	//adt = true;
 	//add_address(cpu.PC, std::string(cpu.lookup[bus.Read(cpu.PC)].mnemonic));
       }
 
-      if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
+      if(cpu.state == State::RUN) //&& breakaddr != cpu.PC && dstate != Debug::STOP)
       {
 	adt = false;
-	bus.PC = cpu.PC;
-	
 	cpu.Validate_Opcode();
 
 	if(dstate == Debug::STEP)
