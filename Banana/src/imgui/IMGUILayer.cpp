@@ -359,7 +359,7 @@ namespace Banana
     }
 
     ImGui::Text("");
-    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC), "$"));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(Stats::spec->cpu.PC, false), "$"));
  
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.PC, "PC: 0x"));
     ImGui::SameLine();

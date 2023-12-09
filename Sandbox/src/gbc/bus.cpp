@@ -49,7 +49,7 @@ namespace GBC
     else if(address <= 0xFDFF)
     {
       // echo ram
-      //if(emu) GBC_LOG("ECHO RAM READ UNSUPPORTED");
+      if(emu) GBC_LOG("ECHO RAM READ UNSUPPORTED");
     }
     else if(address <= 0xFE9F)
     {
@@ -59,7 +59,7 @@ namespace GBC
     else if(address <= 0xFEFF)
     {
       // no use
-      //if(emu) GBC_LOG("ILLEGAL READ");
+      if(emu) GBC_LOG("ILLEGAL READ");
     }
     else if(address <= 0xFFFF)
     {

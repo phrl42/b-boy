@@ -69,7 +69,7 @@ namespace GBC
 
     bool timer_update = false;
     
-    switch(TAC & 0x11)
+    switch(TAC & 0b11)
     {
     case 0x00:
       timer_update = (Get_Bit_N(prev_div, 9) && !Get_Bit_N(DIV, 9));
@@ -87,8 +87,7 @@ namespace GBC
       timer_update = (Get_Bit_N(prev_div, 7) && !Get_Bit_N(DIV, 7));
       break;
     }
-
-    if(timer_update && Get_Bit_N(TAC, 2))
+    if(timer_update && TAC & 1 << 2)
     {
       TIMA++;
 
