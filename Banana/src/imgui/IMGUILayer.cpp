@@ -388,12 +388,14 @@ namespace Banana
     }
 
     ImGui::BeginChild("Scrolling");
-    for (int32_t n = Stats::spec->instructions.size()-1; n >= 0; n--)
+    auto char_height = ImGui::CalcTextSize("NIGG").y;
+    for (int n = 0; n < Stats::spec->instructions.size(); n++)
     {
       auto chose = red;
       if(Stats::spec->instructions[n].first == Stats::spec->cpu.PC) chose = green;
       ImGui::TextColored(chose, "[%x]: %s", Stats::spec->instructions[n].first, Stats::spec->instructions[n].second.c_str());
     }
+    if(Stats::spec->dstate != GBC::Debug::STOP) ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (Stats::spec->cpu.PC * char_height) + char_height * 25);
     ImGui::EndChild(); 
     ImGui::End();
     
