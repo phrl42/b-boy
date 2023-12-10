@@ -1,4 +1,4 @@
-#include "scene/EntryScene.h"
+ #include "scene/EntryScene.h"
 #include "scene/layer/TestLayer.h"
 #include "layer/Layer.h"
 
