@@ -1,4 +1,5 @@
 #include "ecs/components/LineComponent.h"
+#include "imgui_debug.h"
 
 namespace Banana
 {
@@ -39,6 +40,7 @@ namespace Banana
       for(uint8_t x = 0; x <= WIDTH; x++)
       {
 	pixels[(y * WIDTH) + x] = palette[screen->line[y].bpp[x]];
+	if(y == Stats::spec->ppu.LY) pixels[(y * WIDTH) + x] = {225, 0, 0, 255};
       }
     }
 

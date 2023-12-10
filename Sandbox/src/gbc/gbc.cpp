@@ -9,14 +9,15 @@
 
 namespace GBC 
 {
-  static void replace_first(
+  static int replace_first(
     std::string& s,
     std::string const& toReplace,
     std::string const& replaceWith
     ) {
     std::size_t pos = s.find(toReplace);
-    if (pos == std::string::npos) return;
+    if (pos == std::string::npos) return 0;
     s.replace(pos, toReplace.length(), replaceWith);
+    return 1;
   }
 
   static std::string Hex_To_String(uint16_t val, const char* prefix)
@@ -42,7 +43,7 @@ namespace GBC
 
     replace_first(mnemonic, "n16", std::string(Hex_To_String(bus.Read(address+2, false) << 8 | bus.Read(address+1, false) , "$(") + ")"));
 
-    instructions.push_back(std::pair<uint16_t, std::string>(address, mnemonic));
+    instructions[address] = std::pair<uint16_t, std::string>(address, mnemonic);
     address++;
   }
   
@@ -62,9 +63,21 @@ namespace GBC
   void Spec::Update()
   {
     bool adt = false;
+    bool post_bios = false;
     while(!kill)
     {
-      if(cpu.PC == 0x0100) rom.Post_Bios();
+      if(cpu.PC == 0x0100 && !post_bios)
+      {
+	post_bios = true;
+	
+	rom.Post_Bios();
+	int i = 0;
+	while(i != 0x0100)
+	{
+	  add_address(i);
+	}
+	
+      }
       
       if(!adt)
       {
@@ -90,7 +103,7 @@ namespace GBC
 	  cpu.state = State::RUN;
 	}
       }
-    
+
       if(cpu.IME)
       {
 	interrupt.Handle(&cpu);

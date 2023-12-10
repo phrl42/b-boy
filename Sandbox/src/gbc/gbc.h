@@ -22,7 +22,10 @@ namespace GBC
     inline Spec()
       :rom(ROM()), interrupt(Interrupt()), ppu(PPU(&interrupt)), io(IO()), timer(Timer(&interrupt)), bus(Bus(&ppu, &timer, &interrupt, &io, &rom)), cpu(CPU(&bus))
     {
-
+      for(int i = 0; i < 0x10000; i++)
+      {
+	instructions.push_back(std::pair<uint16_t, std::string>(0, "NONE"));
+      }
     }
     
     PPU ppu;

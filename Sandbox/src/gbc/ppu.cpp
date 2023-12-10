@@ -436,7 +436,7 @@ namespace GBC
 
       if(Get_Bit_N(STAT, 5))
       {
-	//interrupt->Request(INTERRUPT::LCD);
+	interrupt->Request(INTERRUPT::LCD);
       }
  
       if(rend.dot == P_OAM_END)
@@ -469,13 +469,12 @@ namespace GBC
 
       if(Get_Bit_N(STAT, 3))
       {
-	//interrupt->Request(INTERRUPT::LCD);
+	interrupt->Request(INTERRUPT::LCD);
       }
 
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
-	Set_Bit_N(&STAT, 2, LYC == LY);
 
 	rend.dot = 0;
 	rend.x = 0;
@@ -497,18 +496,18 @@ namespace GBC
 
       if(Get_Bit_N(STAT, 4))
       {
-	//interrupt->Request(INTERRUPT::LCD);
+	interrupt->Request(INTERRUPT::LCD);
       }
       
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
-	Set_Bit_N(&STAT, 2, LYC == LY);
       }
       
       if(LY == P_VBLANK_END)
       {
 	LY = 0;
+	frames++;
 	rend.mode = Mode::OAM_SCAN;
 	frame += 1;
       }
@@ -519,10 +518,11 @@ namespace GBC
       GBC_LOG("[PPU] Rendering Mode invalid");
       break;
     }
-
-    if(Get_Bit_N(STAT, 6))
+    
+    Set_Bit_N(&STAT, 2, LYC == LY);
+    if(Get_Bit_N(STAT, 6) && Get_Bit_N(STAT, 2))
     {
-      // interrupt->Request(INTERRUPT::LCD);
+      interrupt->Request(INTERRUPT::LCD);
     }
 
     rend.dot++;

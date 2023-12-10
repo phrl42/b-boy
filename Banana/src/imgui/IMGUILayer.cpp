@@ -25,8 +25,12 @@ namespace Banana
     std::string ret;
     std::stringstream hex;
 
+    std::string binary = std::bitset<8>((uint8_t)val).to_string();
     hex << std::hex << val;
     ret = std::string(prefix) + hex.str();
+
+    if(dbin) return binary.c_str();
+
     return ret.c_str();
   }
 
@@ -279,22 +283,23 @@ namespace Banana
     ImGui::End();
     
     ImGui::Begin("PPU", nullptr, 0);
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LCDC, "[FF40] LCDC: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.STAT, "[FF41] STAT: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCX, "[FF42] SCX: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCY, "[FF43] SCY: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WX, "[FF4B] WX: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WY, "[FF4A] WY: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LY, "[FF44] LY: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LYC, "[FF45] LYC: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.DMA, "[FF46] DMA: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.BGP, "[FF47] BGP: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP0, "[FF48] OBP0: ", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP1, "[FF49] OBP1: ", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LCDC, "", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.STAT, "", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCX, "[FF42] SCX: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCY, "[FF43] SCY: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WX, "[FF4B] WX: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WY, "[FF4A] WY: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LY, "[FF44] LY: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LYC, "[FF45] LYC: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.DMA, "[FF46] DMA: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.BGP, "[FF47] BGP: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP0, "[FF48] OBP0: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP1, "[FF49] OBP1: ", false));
     ImGui::End();
     
     ImGui::Begin("CPU", nullptr, 0);
-
+    ImGui::Text(std::string("Frames: " + std::to_string(Stats::spec->ppu.frames)).c_str());
+    ImGui::Text(std::string("Cycles: " + std::to_string(Stats::spec->bus.cycles)).c_str());
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF >> 8, "A: "));
     ImGui::Text(Hex_To_CString((uint8_t)Stats::spec->cpu.AF, "F: "));
     ImGui::SameLine();
@@ -400,7 +405,7 @@ namespace Banana
     ImGui::End();
     
     static MemoryEditor mem_edit;
-    mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
+    //mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
 
     
     ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration);

@@ -39,6 +39,7 @@ namespace GBC
     ROM *rom;
   public:
     uint8_t space[GBC_RAM_SIZE] = {0};
+    int cycles = 0;
   };
   
 };

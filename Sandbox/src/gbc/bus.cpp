@@ -16,6 +16,7 @@ namespace GBC
     {
       timer->Tick();
       ppu->Tick();
+      cycles++;
     }
   }
 

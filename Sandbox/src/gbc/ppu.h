@@ -216,6 +216,7 @@ namespace GBC
     void Draw_Pixel();
   public:
     // for debug only
+    int frames = 0;
     Tile tile[384*2] = {0};
     Tile tmap1[32*32] = {0};
     Tile tmap2[32*32] = {0};

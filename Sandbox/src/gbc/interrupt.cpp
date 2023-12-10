@@ -50,7 +50,6 @@ namespace GBC
   
   void Interrupt::Handle_Type(INTERRUPT isr, uint16_t address)
   {
-    printf("calling interrupt: %d\n", (int)isr);
     cpu->PUSH(&cpu->PC, IMode::NONE, nullptr, IMode::NONE);
 
     cpu->PC = address;

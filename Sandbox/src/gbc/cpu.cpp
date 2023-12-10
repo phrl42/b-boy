@@ -192,8 +192,8 @@ namespace GBC
 
   uint8_t CPU::EI(uint16_t *dest_register, IMode w, uint16_t *src_value, IMode r)
   {
-    IME = true;
-
+    eIME = true;
+    
     return 0;
   }
 
