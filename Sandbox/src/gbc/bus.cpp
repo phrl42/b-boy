@@ -18,7 +18,6 @@ namespace GBC
       ppu->Tick();
       cycles++;
     }
-    //if(interrupt->Read(A_IF) != 0) printf("IF after tick %x\n", interrupt->Read(A_IF));
   }
 
   Bus::Bus(PPU *ppu, Timer *timer, Interrupt *interrupt, IO *io, ROM *rom)
@@ -90,7 +89,7 @@ namespace GBC
 
     if(emu)
     {
-      Emulate_Cycle(4, true);
+      //Emulate_Cycle(4, true);
     }
 
     return value;
@@ -164,7 +163,7 @@ namespace GBC
 
     if(emu)
     {
-      Emulate_Cycle(4, true);
+      //Emulate_Cycle(4, true);
     }
   }
   

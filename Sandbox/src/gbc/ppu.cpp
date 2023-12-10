@@ -419,7 +419,7 @@ namespace GBC
 
     rend.x += fetch.Push(rend.x);
   }
-
+  int actual_dot = 0;
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
@@ -458,7 +458,7 @@ namespace GBC
 
     case Mode::HBLANK:
     {
-      frame_done = false;
+      frame_done = true;
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 0);
       Set_Bit_N(&STAT, 1, 0);
@@ -472,7 +472,6 @@ namespace GBC
 
 	rend.dot = 0;
 	rend.x = 0;
-	
 	rend.mode = Mode::OAM_SCAN;
 	if(LY == HEIGHT)
 	{
@@ -492,6 +491,8 @@ namespace GBC
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
+	rend.dot = 0;
+	rend.x = 0;
       	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0);
       }
@@ -499,12 +500,15 @@ namespace GBC
       if(LY == P_VBLANK_END)
       {
 	LY = 0;
+	rend.dot = 0;
+	rend.x = 0;
       	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0);
 
  	rend.mode = Mode::OAM_SCAN;
 
 	frames++;
+	actual_dot = 0;
       }
       break;
     }
@@ -516,13 +520,14 @@ namespace GBC
     
     if(Get_Bit_N(STAT, 6) && !Get_Bit_N(STAT, 2) && LYC == LY && line_interrupt_done == false)
     {
-      printf("%d %d in mode : %d in frame %d\n", LY, LYC, (int)rend.mode, frames);
+      //printf("%d %d in mode : %d in frame %d\n", LY, LYC, (int)rend.mode, frames);
       Set_Bit_N(&STAT, 2, 1);
       line_interrupt_done = true;
       interrupt->Request(INTERRUPT::LCD);
     }
 
     rend.dot++;
+    actual_dot++;
   }
 
   // called every t-cycle

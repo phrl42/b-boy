@@ -10,8 +10,8 @@
 
 #define P_OAM_END 79
 #define P_DRAW_END 160
-#define P_HBLANK_END 455
-#define P_VBLANK_END 153
+#define P_HBLANK_END 456
+#define P_VBLANK_END 154
 
 // PPU Registers are located in RAM
 // Tile Data Location

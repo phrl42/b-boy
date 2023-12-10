@@ -36,7 +36,6 @@ namespace GBC
     switch(address)
     {
     case A_IF:
-      printf("writing %x to IF\n", value);
       IF = value;
       break;
 
