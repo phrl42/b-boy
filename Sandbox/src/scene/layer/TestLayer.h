@@ -23,7 +23,8 @@ namespace SANDBOX
     virtual void OnEvent(Banana::Event& event) override;
 
     virtual inline std::string& GetName() override { return name; }
-  
+
+    void UpdateEmu();
   private:
     std::string name;
     Banana::Sound sound;
@@ -43,6 +44,7 @@ namespace SANDBOX
     GBC::Spec spec;
 
     std::thread emu;
+    bool emu_kill = false;
   };
 
 };

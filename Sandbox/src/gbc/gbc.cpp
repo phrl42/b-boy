@@ -60,57 +60,54 @@ namespace GBC
     cpu.state = State::RUN;
   }
 
+  bool adt = false;
+  bool post_bios = false;
+
   void Spec::Update()
   {
-    bool adt = false;
-    bool post_bios = false;
-    while(!kill)
+    if(cpu.PC == 0x0100 && !post_bios)
     {
-      if(cpu.PC == 0x0100 && !post_bios)
-      {
-	post_bios = true;
+      post_bios = true;
 	
-	rom.Post_Bios();
-	int i = 0;
-	while(i != 0x0100)
-	{
-	  add_address(i);
-	}
-	
-      }
-      
-      if(!adt)
+      rom.Post_Bios();
+      int i = 0;
+      while(i != 0x0100)
       {
-	adt = true;
+	add_address(i);
       }
-
-      if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
-      {
-	adt = false;
-	cpu.Validate_Opcode();
-
-	if(dstate == Debug::STEP)
-	{
-	  dstate = Debug::STOP;
-	}
-      }
-
-      if(cpu.state == State::HALT)
-      {
-	bus.Emulate_Cycle(4, true);
-	if(bus.Read(A_IF) & bus.Read(A_IE))
-	{
-	  cpu.state = State::RUN;
-	}
-      }
-
-      if(cpu.IME)
-      {
-	interrupt.Handle(&cpu);
-      }
-
-      io.Serial_Update();
     }
+	  
+    if(!adt)
+    {
+      adt = true;
+    }
+
+    if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
+    {
+      adt = false;
+      cpu.Validate_Opcode();
+
+      if(dstate == Debug::STEP)
+      {
+	dstate = Debug::STOP;
+      }
+    }
+
+    if(cpu.state == State::HALT)
+    {
+      bus.Emulate_Cycle(4, true);
+      if(bus.Read(A_IF) & bus.Read(A_IE))
+      {
+	cpu.state = State::RUN;
+      }
+    }
+
+    if(cpu.IME)
+    {
+      interrupt.Handle(&cpu);
+    }
+
+    io.Serial_Update();
   }
   
 };

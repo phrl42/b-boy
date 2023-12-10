@@ -1,8 +1,6 @@
 #include "gbc/ppu.h"
 #include "gbc/bus.h"
 
-static int frame = 0;
-
 namespace GBC
 {
   PPU::PPU(Interrupt *interrupt)
@@ -430,15 +428,11 @@ namespace GBC
     {
     case Mode::OAM_SCAN:
     {
-       // set PPU Mode
+      frame_done = false;
+      // set PPU Mode
       Set_Bit_N(&STAT, 0, 0);
       Set_Bit_N(&STAT, 1, 1);
 
-      if(Get_Bit_N(STAT, 5))
-      {
-	interrupt->Request(INTERRUPT::LCD);
-      }
- 
       if(rend.dot == P_OAM_END)
       {
 	rend.mode = Mode::DRAWING_PIXELS;
@@ -448,6 +442,7 @@ namespace GBC
 
     case Mode::DRAWING_PIXELS:
     {
+      frame_done = false;
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 1);
       Set_Bit_N(&STAT, 1, 1);
@@ -463,18 +458,17 @@ namespace GBC
 
     case Mode::HBLANK:
     {
+      frame_done = false;
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 0);
       Set_Bit_N(&STAT, 1, 0);
 
-      if(Get_Bit_N(STAT, 3))
-      {
-	interrupt->Request(INTERRUPT::LCD);
-      }
-
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
+	
+      	line_interrupt_done = false;
+	Set_Bit_N(&STAT, 2, 0); 
 
 	rend.dot = 0;
 	rend.x = 0;
@@ -490,26 +484,27 @@ namespace GBC
 
     case Mode::VBLANK:
     {
+      frame_done = true;
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 1);
       Set_Bit_N(&STAT, 1, 0);
 
-      if(Get_Bit_N(STAT, 4))
-      {
-	interrupt->Request(INTERRUPT::LCD);
-      }
-      
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
+      	line_interrupt_done = false;
+	Set_Bit_N(&STAT, 2, 0);
       }
       
       if(LY == P_VBLANK_END)
       {
 	LY = 0;
+      	line_interrupt_done = false;
+	Set_Bit_N(&STAT, 2, 0);
+
+ 	rend.mode = Mode::OAM_SCAN;
+
 	frames++;
-	rend.mode = Mode::OAM_SCAN;
-	frame += 1;
       }
       break;
     }
@@ -519,9 +514,11 @@ namespace GBC
       break;
     }
     
-    Set_Bit_N(&STAT, 2, LYC == LY);
-    if(Get_Bit_N(STAT, 6) && Get_Bit_N(STAT, 2))
+    if(Get_Bit_N(STAT, 6) && !Get_Bit_N(STAT, 2) && LYC == LY && line_interrupt_done == false)
     {
+      printf("%d %d in mode : %d in frame %d\n", LY, LYC, (int)rend.mode, frames);
+      Set_Bit_N(&STAT, 2, 1);
+      line_interrupt_done = true;
       interrupt->Request(INTERRUPT::LCD);
     }
 

@@ -217,6 +217,8 @@ namespace GBC
   public:
     // for debug only
     int frames = 0;
+    bool frame_done = false;
+    
     Tile tile[384*2] = {0};
     Tile tmap1[32*32] = {0};
     Tile tmap2[32*32] = {0};
@@ -224,8 +226,8 @@ namespace GBC
     Tile OAM_tiles[40] = {0};
 
     Screen screen;
-    //private:
-    // registers
+    private:
+    bool line_interrupt_done = false;
     uint8_t LCDC = 0;
     uint8_t STAT = 0;
 

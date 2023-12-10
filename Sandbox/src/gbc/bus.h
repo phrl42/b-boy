@@ -37,8 +37,9 @@ namespace GBC
     Interrupt *interrupt;
     IO *io;
     ROM *rom;
-  public:
+
     uint8_t space[GBC_RAM_SIZE] = {0};
+  public:
     int cycles = 0;
   };
   

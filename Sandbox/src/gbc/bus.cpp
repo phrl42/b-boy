@@ -18,6 +18,7 @@ namespace GBC
       ppu->Tick();
       cycles++;
     }
+    //if(interrupt->Read(A_IF) != 0) printf("IF after tick %x\n", interrupt->Read(A_IF));
   }
 
   Bus::Bus(PPU *ppu, Timer *timer, Interrupt *interrupt, IO *io, ROM *rom)

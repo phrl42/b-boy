@@ -17,7 +17,9 @@ namespace GBC
     void Write(uint16_t address, uint8_t value);
 
     void Post_Bios();
-    //private:
+
+    inline const char* Get_Rom_Name() { return rom; }
+  private:
     const char* rom;
     uint8_t space[32768 * 100];
 

@@ -41,9 +41,6 @@ namespace GBC
     void Init(const char* rom_path);
     void Update();
 
-    // used to terminate thread
-    bool kill = false;
-    
     // used for imgui debug
     void add_address(int &address);
     std::vector<std::pair<uint16_t, std::string>> instructions;

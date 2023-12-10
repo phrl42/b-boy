@@ -267,38 +267,38 @@ namespace Banana
     ImGui::End();
 
     ImGui::Begin("Interrupt", nullptr, 0);
-    ImGui::Text(Hex_To_CString(Stats::spec->interrupt.IE, "[FFFF] IE: "));
-    ImGui::Text(Hex_To_CString(Stats::spec->interrupt.IF, "[FF0F] IF: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_IE, false), "[FFFF] IE: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_IF, false), "[FF0F] IF: "));
     ImGui::End();
 
     ImGui::Begin("Timer", nullptr, 0);
-    ImGui::Text(Hex_To_CString(Stats::spec->timer.DIV, "DIV: "));
-    ImGui::Text(Hex_To_CString(Stats::spec->timer.TIMA, "[FF05] TIMA: "));
-    ImGui::Text(Hex_To_CString(Stats::spec->timer.TMA, "[FF06] TMA: "));
-    ImGui::Text(Hex_To_CString(Stats::spec->timer.TAC, "[FF07] TAC: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_DIV, false), "DIV: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_TIMA, false), "[FF05] TIMA: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_TMA, false), "[FF06] TMA: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_TAC, false), "[FF07] TAC: "));
     ImGui::End();
 
     ImGui::Begin("ROM", nullptr, 0);
-    ImGui::Text((std::string("Loaded: ") + std::string(Stats::spec->rom.rom)).c_str());
+    ImGui::Text((std::string("Loaded: ") + std::string(Stats::spec->rom.Get_Rom_Name())).c_str());
     ImGui::End();
     
     ImGui::Begin("PPU", nullptr, 0);
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LCDC, "", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.STAT, "", true));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCX, "[FF42] SCX: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.SCY, "[FF43] SCY: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WX, "[FF4B] WX: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.WY, "[FF4A] WY: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LY, "[FF44] LY: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.LYC, "[FF45] LYC: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.DMA, "[FF46] DMA: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.BGP, "[FF47] BGP: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP0, "[FF48] OBP0: ", false));
-    ImGui::Text(Hex_To_CString(Stats::spec->ppu.OBP1, "[FF49] OBP1: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_LCDC, false), "", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_STAT, false), "", true));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_SCX, false), "[FF42] SCX: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_SCY, false), "[FF43] SCY: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_WX, false), "[FF4B] WX: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_WY, false), "[FF4A] WY: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_LY, false), "[FF44] LY: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_LYC, false), "[FF45] LYC: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_DMA, false), "[FF46] DMA: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_BGP, false), "[FF47] BGP: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_OBP0, false), "[FF48] OBP0: ", false));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_OBP1, false), "[FF49] OBP1: ", false));
     ImGui::End();
     
     ImGui::Begin("CPU", nullptr, 0);
-    ImGui::Text(std::string("Frames: " + std::to_string(Stats::spec->ppu.frames)).c_str());
+    ImGui::Text((std::string("Frames: ") + std::to_string(Stats::spec->ppu.frames)).c_str());
     ImGui::Text(std::string("Cycles: " + std::to_string(Stats::spec->bus.cycles)).c_str());
     ImGui::Text(Hex_To_CString(Stats::spec->cpu.AF >> 8, "A: "));
     ImGui::Text(Hex_To_CString((uint8_t)Stats::spec->cpu.AF, "F: "));
@@ -401,7 +401,8 @@ namespace Banana
       ImGui::TextColored(chose, "[%x]: %s", Stats::spec->instructions[n].first, Stats::spec->instructions[n].second.c_str());
     }
     if(Stats::spec->dstate != GBC::Debug::STOP) ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (Stats::spec->cpu.PC * char_height) + char_height * 25);
-    ImGui::EndChild(); 
+    ImGui::EndChild();
+    
     ImGui::End();
     
     static MemoryEditor mem_edit;

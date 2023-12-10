@@ -50,7 +50,7 @@ namespace SANDBOX
 
   TestLayer::~TestLayer()
   {
-    spec.kill = true;
+    emu_kill = true;
     emu.join();
   }
 
@@ -83,21 +83,28 @@ namespace SANDBOX
     if(first)
     {
       first = false;
-      emu = std::thread(&GBC::Spec::Update, &spec);
+      emu = std::thread(&TestLayer::UpdateEmu, this);
     }
 
-    spec.ppu.UpdateMaps();
-    spec.ppu.UpdateTiles();
-
-    
+    Banana::LineComponent *screent = (Banana::LineComponent*)screen.GetComponent("LineComponent");
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");
     Banana::TileComponent *tct = (Banana::TileComponent*)tmap2.GetComponent("TileComponent");
     Banana::TileComponent *tctiles = (Banana::TileComponent*)tiles.GetComponent("TileComponent");
-    Banana::LineComponent *screent = (Banana::LineComponent*)screen.GetComponent("LineComponent");
     
     tc->UpdateTileData();
     tct->UpdateTileData();
     tctiles->UpdateTileData();
     screent->UpdateTileData();
+
+    spec.ppu.UpdateMaps();
+    spec.ppu.UpdateTiles();
+  }
+
+  void TestLayer::UpdateEmu()
+  {
+    while(!emu_kill)
+    {
+      spec.Update();
+    } 
   }
 };

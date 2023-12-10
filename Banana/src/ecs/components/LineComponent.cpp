@@ -35,12 +35,14 @@ namespace Banana
   {
     Pixel palette[4] = {{224, 248, 208, 255}, {136, 192, 112, 255}, {52, 104, 86, 255}, {8, 24, 32, 255}};
 
+    if(!Stats::spec->ppu.frame_done) return;
     for(uint8_t y = 0; y < HEIGHT; y++)
     {
       for(uint8_t x = 0; x <= WIDTH; x++)
       {
 	pixels[(y * WIDTH) + x] = palette[screen->line[y].bpp[x]];
-	if(y == Stats::spec->ppu.LY) pixels[(y * WIDTH) + x] = {225, 0, 0, 255};
+	if(y == Stats::spec->bus.Read(A_LY, false)) pixels[(y * WIDTH) + x] = {225, 0, 0, 255};
+	if(y == Stats::spec->bus.Read(A_LYC, false)) pixels[(y * WIDTH) + x] = {0, 0, 255, 255};
       }
     }
 
