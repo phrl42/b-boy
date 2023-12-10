@@ -190,9 +190,9 @@ namespace Banana
 
     ImGui::Begin("Tiles", nullptr, 0);
     ImGui::Text("Map 1:");
-    ImGui::Image((void*)Stats::tmap1_id, ImVec2(32*8*2, 32*8*8), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image((void*)Stats::tmap1_id, ImVec2(250*2, 800*2), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Text("Map 2:");
-    ImGui::Image((void*)Stats::tmap2_id, ImVec2(32*8*2, 32*8*8), ImVec2(0, 0), ImVec2(1, 1));
+    ImGui::Image((void*)Stats::tmap2_id, ImVec2(250*2, 800*2), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::Text("Tiles:");
     ImGui::Image((void*)Stats::tiles_id, ImVec2(250, 250), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::End();
@@ -406,7 +406,12 @@ namespace Banana
     ImGui::End();
     
     static MemoryEditor mem_edit;
-    //mem_edit.DrawWindow("MEM", Stats::spec->bus.space, sizeof(uint8_t) * GBC_RAM_SIZE); 
+    uint8_t ram[0x10000];
+    for(int i = 0; i <= 0xFFFF; i++)
+    {
+      ram[i] = Stats::spec->bus.Read(i, false);
+    }
+    mem_edit.DrawWindow("MEM", ram, sizeof(uint8_t) * GBC_RAM_SIZE); 
 
     
     ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration);

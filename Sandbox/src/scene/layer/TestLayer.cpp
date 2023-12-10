@@ -27,19 +27,19 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/dmg-acid2.gb");
+    spec.Init("assets/roms/Dr.Mario.gb");
     Stats::spec = &spec;
 
     screen.AddComponent(new Banana::LineComponent(&spec.ppu.screen));
     Banana::LineComponent *lc = (Banana::LineComponent*)screen.GetComponent("LineComponent");
     
-    tmap1.AddComponent(new Banana::TileComponent(spec.ppu.tmap1, 32*32));
+    tmap1.AddComponent(new Banana::TileComponent(spec.ppu.tmap1, 1024));
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");
 
-    tmap2.AddComponent(new Banana::TileComponent(spec.ppu.tmap2, 32*32));
+    tmap2.AddComponent(new Banana::TileComponent(spec.ppu.tmap2, 1024));
     Banana::TileComponent *tct = (Banana::TileComponent*)tmap2.GetComponent("TileComponent");
     
-    tiles.AddComponent(new Banana::TileComponent(spec.ppu.tile, 200));
+    tiles.AddComponent(new Banana::TileComponent(spec.ppu.tile, 384));
     Banana::TileComponent *tilest = (Banana::TileComponent*)tiles.GetComponent("TileComponent");
 
     Stats::tmap1_id = tc->GetTextureID();
@@ -104,6 +104,46 @@ namespace SANDBOX
   {
     while(!emu_kill)
     {
+      if(Banana::Input::IsKeyPressed(KEY_A))
+      {
+	spec.io.Press(GBC::IO::KEY::A);
+      }
+      
+      if(Banana::Input::IsKeyPressed(KEY_B))
+      {
+	spec.io.Press(GBC::IO::KEY::B);
+      }
+
+      if(Banana::Input::IsKeyPressed(KEY_LEFT))
+      {
+	spec.io.Press(GBC::IO::KEY::LEFT);
+      }
+ 
+      if(Banana::Input::IsKeyPressed(KEY_RIGHT))
+      {
+	spec.io.Press(GBC::IO::KEY::RIGHT);
+      }
+
+      if(Banana::Input::IsKeyPressed(KEY_UP))
+      {
+	spec.io.Press(GBC::IO::KEY::UP);
+      }
+      
+      if(Banana::Input::IsKeyPressed(KEY_DOWN))
+      {
+	spec.io.Press(GBC::IO::KEY::DOWN);
+      }
+
+      if(Banana::Input::IsKeyPressed(KEY_ENTER))
+      {
+	spec.io.Press(GBC::IO::KEY::START);
+      }
+
+      if(Banana::Input::IsKeyPressed(KEY_BACKSPACE))
+      {
+	spec.io.Press(GBC::IO::KEY::SELECT);
+      }
+
       spec.Update();
     } 
   }

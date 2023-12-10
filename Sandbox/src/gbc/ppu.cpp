@@ -227,8 +227,7 @@ namespace GBC
 
     if(!Get_Bit_N(*LCDC, 4) && BGW)
     {
-      //printf("%x\n", start);
-      start = 0x1000 + (int8_t)(index * 16);
+      start = 0x1000 + (int8_t)(index) * 16;
     }
 
     int row_index = 0;
@@ -268,9 +267,7 @@ namespace GBC
 
     nx = x % 8;
     ny = y % 8;
-
     int index = map2 ? this->map2[nt] : this->map1[nt];
-
     Tile tile = IndexToTile(index, true);
 
     return tile.row[ny].bpp[nx];
@@ -291,17 +288,31 @@ namespace GBC
 
   // Fetcher
 
-  uint8_t Fetcher::Push(uint8_t rend_x)
+  void Fetcher::Pop()
   {
-    if(bg_size == 0) return 0;
-    screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0];
-
     for(uint8_t i = 0; i < 7; i++)
     {
       fifo_bg[i] = fifo_bg[i+1];
     }
 
     bg_size--;
+
+  }
+
+  uint8_t Fetcher::Push(uint8_t rend_x)
+  {
+    if(bg_size == 0) return 0;
+    if(!scx_done)
+    {
+      for(uint8_t i = 0; i < (*SCX % 8); i++)
+      {
+	Pop();
+      }
+      scx_done = true;
+    }
+    screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0];
+    
+    Pop();
 
     return 1;
   }
@@ -311,8 +322,13 @@ namespace GBC
     // bg
     if(Get_Bit_N(*LCDC, 0))
     {
-      x = (*SCX + x) % 256;
+      x = ((8 * ((*SCX / 8) & 0x1f)) + x) % 256;
       y = (*SCY + *LY) % 256;
+    }
+    else
+    {
+      x = 0;
+      y = 0;
     }
     state = Mode::READ_DATA0;
   }
@@ -371,6 +387,7 @@ namespace GBC
     x = 0;
     y = 0;
     start = true;
+    scx_done = false;
   }
   
   void Fetcher::Fetch()
@@ -419,7 +436,7 @@ namespace GBC
 
     rend.x += fetch.Push(rend.x);
   }
-  int actual_dot = 0;
+
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
@@ -476,6 +493,7 @@ namespace GBC
 	if(LY == HEIGHT)
 	{
 	  rend.mode = Mode::VBLANK;
+	  interrupt->Request(INTERRUPT::VBLANK);
 	}
       }
       break;
@@ -488,6 +506,12 @@ namespace GBC
       Set_Bit_N(&STAT, 0, 1);
       Set_Bit_N(&STAT, 1, 0);
 
+      if(Get_Bit_N(STAT, 4) && line_interrupt_done == false)
+      {
+	line_interrupt_done = true;
+	interrupt->Request(INTERRUPT::LCD);
+      }
+      
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
@@ -508,7 +532,6 @@ namespace GBC
  	rend.mode = Mode::OAM_SCAN;
 
 	frames++;
-	actual_dot = 0;
       }
       break;
     }
@@ -520,14 +543,12 @@ namespace GBC
     
     if(Get_Bit_N(STAT, 6) && !Get_Bit_N(STAT, 2) && LYC == LY && line_interrupt_done == false)
     {
-      //printf("%d %d in mode : %d in frame %d\n", LY, LYC, (int)rend.mode, frames);
       Set_Bit_N(&STAT, 2, 1);
       line_interrupt_done = true;
       interrupt->Request(INTERRUPT::LCD);
     }
 
     rend.dot++;
-    actual_dot++;
   }
 
   // called every t-cycle

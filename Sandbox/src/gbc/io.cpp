@@ -2,9 +2,20 @@
 
 namespace GBC
 {
-  IO::IO()
+  IO::IO(Interrupt *interrupt)
   {
+    this->interrupt = interrupt;
+  }
 
+  void IO::Press(KEY key)
+  {
+    JOYPAD = (uint8_t)key;
+    interrupt->Request(INTERRUPT::JOYPAD);
+  }
+
+  void IO::Release()
+  {
+    JOYPAD = 0x0F;
   }
 
   uint8_t IO::Read(uint16_t address)
@@ -12,6 +23,7 @@ namespace GBC
     switch(address)
     {
     case A_JOYPAD:
+      if((JOYPAD & 0xF0) == 0x30) return 0xFF;
       return JOYPAD;
       break;
 
@@ -35,7 +47,8 @@ namespace GBC
     switch(address)
     {
     case A_JOYPAD:
-      JOYPAD = value;
+      JOYPAD &= 0x0F;
+      JOYPAD |= value & 0xF0;
       break;
 
     case A_SB:

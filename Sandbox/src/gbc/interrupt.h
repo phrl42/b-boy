@@ -23,7 +23,6 @@ namespace GBC
     void Handle(CPU *cpu);
 
     void Request(INTERRUPT isr);
-
   private:
     uint8_t IE = 0x00;
     uint8_t IF = 0x00;

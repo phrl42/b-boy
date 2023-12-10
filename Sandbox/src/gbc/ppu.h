@@ -138,7 +138,10 @@ namespace GBC
     
     void Push_FIFO();
 
+    void Pop();
+
     bool start = true;
+    bool scx_done = false;
     
     uint8_t x = 0;
     uint8_t y = 0;
