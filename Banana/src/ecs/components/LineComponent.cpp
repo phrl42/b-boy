@@ -41,8 +41,8 @@ namespace Banana
       for(uint8_t x = 0; x <= WIDTH; x++)
       {
 	pixels[(y * WIDTH) + x] = palette[screen->line[y].bpp[x]];
-	if(y == Stats::spec->bus.Read(A_LY, false)) pixels[(y * WIDTH) + x] = {225, 0, 0, 255};
-	if(y == Stats::spec->bus.Read(A_LYC, false)) pixels[(y * WIDTH) + x] = {0, 0, 255, 255};
+	//if(y == Stats::spec->bus.Read(A_LY, false)) pixels[(y * WIDTH) + x] = {225, 0, 0, 255};
+	//if(y == Stats::spec->bus.Read(A_LYC, false)) pixels[(y * WIDTH) + x] = {0, 0, 255, 255};
       }
     }
 

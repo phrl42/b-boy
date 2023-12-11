@@ -153,6 +153,7 @@ namespace GBC
     uint8_t y = 0;
 
     uint8_t fetch[8];
+    uint8_t fetch_obj[8];
 
     uint8_t fifo_bg[8];
     uint8_t bg_size = 0;

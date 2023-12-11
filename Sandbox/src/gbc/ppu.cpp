@@ -248,8 +248,6 @@ namespace GBC
     int index = map2 ? this->map2[nt] : this->map1[nt];
     Tile tile = IndexToTile(index, tile_mode == TileMode::OBJ ? false : true);
 
-    printf("LY: %x X: %x map2: %d index : %x\n", *LY, this->x, map2, index);
-
     return tile.row[ny].bpp[nx];
   }
 
@@ -270,18 +268,37 @@ namespace GBC
 
   void Fetcher::Pop()
   {
-    for(uint8_t i = 0; i < 7; i++)
+    if(tile_mode != TileMode::OBJ)
     {
-      fifo_bg[i] = fifo_bg[i+1];
+      for(uint8_t i = 0; i < 7; i++)
+      {
+	fifo_bg[i] = fifo_bg[i+1];
+      }
+      bg_size--;
     }
-    bg_size--;
+    else if(tile_mode == TileMode::OBJ)
+    {
+      for(uint8_t i = 0; i < 7; i++)
+      {
+	fifo_obj[i] = fifo_obj[i+1];
+      }
+      obj_size--;
+    }
   }
 
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
-    if(bg_size == 0) return 0;
-
-    screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0];
+    if(tile_mode != TileMode::OBJ)
+    {
+      if(bg_size == 0) return 0;
+      screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0];
+    }
+    else if(tile_mode == TileMode::OBJ)
+    {
+      if(obj_size == 0) return 0;
+      screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_obj[0];
+    }
+    
     Pop();
 
     return 1;
@@ -289,15 +306,48 @@ namespace GBC
 
   void Fetcher::Read_Tile()
   {
-    // bg
-    if(Get_Bit_N(*LCDC, 0))
+    bool sprite_check = false;
+
+    for(uint8_t i = 0; i < 8; i++)
     {
-      x = (x + *SCX) % 256;
+      if(buffer[i].x <= (x + 8) && buffer[i].x != 0)
+      {
+	sprite_check = true;
+      }
+    }
+    
+    if(sprite_check)
+    {
+      x = x;
+      y = *LY;
+      tile_mode = TileMode::OBJ;
+    }
+    else if(Get_Bit_N(*LCDC, 5) && window_trigger && x >= (*WX - 7))
+    {
+      static bool first = false;
+
+      if(first)
+      {
+	for(uint8_t i = 0; i < 8; i++)
+	{
+	  fifo_bg[i] = 0;
+	  fetch[i] = 0;
+	}
+	bg_size = 0;
+	x = 0;
+	first = true;
+      }
+      x = x + *WX;
+      y = *LY;
+      tile_mode = TileMode::W;
+    }
+    else if(Get_Bit_N(*LCDC, 0))
+    {
+      x = (x + ((*SCX%8) / 2)) % 256;
       y = (*SCY + *LY) % 256;
 
       tile_mode = TileMode::BG;
     }
-    
     state = Mode::READ_DATA0;
   }
 
@@ -317,7 +367,9 @@ namespace GBC
     
     for(uint8_t i = 0; i < 8; i++)
     {
-      fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
+      if(tile_mode == TileMode::OBJ) fetch_obj[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
+      if(tile_mode == TileMode::BG) fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
+      if(tile_mode == TileMode::W) fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 6));
     }
     x = (x + 8) % 256;
     
@@ -326,13 +378,22 @@ namespace GBC
 
   void Fetcher::Push_FIFO()
   {
-    if(bg_size == 0)
+    if(bg_size == 0 && tile_mode != TileMode::OBJ)
     {
       for(uint8_t i = 0; i < 8; i++)
       {
 	fifo_bg[i] = fetch[i];
       }
       bg_size = 8;
+      state = Mode::READ_TILE;
+    }
+    else if(obj_size == 0 && tile_mode == TileMode::OBJ)
+    {
+      for(uint8_t i = 0; i < 8; i++)
+      {
+	fifo_obj[i] = fetch_obj[i];
+      }
+      obj_size = 8;
       state = Mode::READ_TILE;
     }
   }
@@ -343,6 +404,9 @@ namespace GBC
     {
       fifo_bg[i] = 0;
       fetch[i] = 0;
+      
+      fetch_obj[i] = 0;
+      fifo_obj[i] = 0;
     }
     bg_size = 0;
     obj_size = 0;
@@ -357,6 +421,7 @@ namespace GBC
     y = 0;
     start = true;
     scx_done = false;
+    tile_mode = TileMode::NONE;
   }
   
   void Fetcher::Fetch()
@@ -409,16 +474,16 @@ namespace GBC
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
-
-    if(!fetch.window_trigger)
-    {
-      fetch.window_trigger = (bool)(LY == WY);
-    }
     
     switch(rend.mode)
     {
     case Mode::OAM_SCAN:
     {
+      
+      if(!fetch.window_trigger)
+      {
+	fetch.window_trigger = (bool)(LY == WY);
+      }
       frame_done = false;
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 0);
@@ -471,7 +536,7 @@ namespace GBC
       {
 	LY += 1;
 	
-      	line_interrupt_done = false;
+	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0); 
 
 	rend.dot = 0;
@@ -506,7 +571,7 @@ namespace GBC
 	LY += 1;
 	rend.dot = 0;
 	rend.x = 0;
-      	line_interrupt_done = false;
+	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0);
       }
       
@@ -515,10 +580,10 @@ namespace GBC
 	LY = 0;
 	rend.dot = 0;
 	rend.x = 0;
-      	line_interrupt_done = false;
+	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0);
 
- 	rend.mode = Mode::OAM_SCAN;
+	rend.mode = Mode::OAM_SCAN;
 
 	frames++;
 	fetch.window_trigger = false;
