@@ -3,7 +3,6 @@
 
 namespace GBC
 {
-  static bool timer_trigger = false;
   Interrupt::Interrupt()
   {
 
@@ -11,7 +10,6 @@ namespace GBC
 
   void Interrupt::Request(INTERRUPT isr)
   {
-    if(isr == INTERRUPT::TIMER) timer_trigger = true;
     Set_Bit_N(&IF, isr, 1);
   }
 
@@ -59,9 +57,8 @@ namespace GBC
 
   bool Interrupt::Check_Type(INTERRUPT isr, uint16_t address)
   {
-    if(Get_Bit_N(IF, isr) && Get_Bit_N(IE, isr) || (isr == INTERRUPT::TIMER && timer_trigger == true))
+    if(Get_Bit_N(IF, isr) && Get_Bit_N(IE, isr))
     {
-      if(timer_trigger) timer_trigger = false;
       Handle_Type(isr, address);
       Set_Bit_N(&IF, isr, 0);
       cpu->IME = false;
