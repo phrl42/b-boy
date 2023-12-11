@@ -23,7 +23,7 @@ namespace GBC
     switch(address)
     {
     case A_JOYPAD:
-      if((JOYPAD & 0xF0) == 0x30) return 0xFF;
+      return 0xFF;
       return JOYPAD;
       break;
 

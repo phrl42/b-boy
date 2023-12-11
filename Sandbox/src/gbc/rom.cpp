@@ -91,7 +91,7 @@ namespace GBC
       return;
     }
 
-    space[address] = value;
+    //space[address] = value;
     return;
   }
 };
