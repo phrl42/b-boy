@@ -79,7 +79,6 @@
  
 namespace GBC
 {
-
   struct PixelRow
   {
     uint8_t bpp[8];
@@ -129,8 +128,15 @@ namespace GBC
     {
 	READ_TILE=0, READ_DATA0, READ_DATA1, PUSH_FIFO, NONE
     };
-    Mode state = Mode::READ_TILE;
 
+    enum class TileMode
+      {
+	BG=0, W, OBJ, NONE
+      };
+    
+    Mode state = Mode::READ_TILE;
+    TileMode tile_mode = TileMode::NONE;
+    
     void Read_Tile();
 
     void Read_Data0();
@@ -150,7 +156,17 @@ namespace GBC
 
     uint8_t fifo_bg[8];
     uint8_t bg_size = 0;
+
+    uint8_t fifo_obj[8];
+    uint8_t obj_size = 0;
+
   public:
+    uint8_t window_line_counter = 0;
+    bool window_trigger = false;
+    
+    Object buffer[10];
+    uint8_t sprite_size = 0;
+    
     uint8_t *LCDC;
 
     uint8_t *SCX;
@@ -229,7 +245,7 @@ namespace GBC
     Tile OAM_tiles[40] = {0};
 
     Screen screen;
-    private:
+  private:
     bool line_interrupt_done = false;
     uint8_t LCDC = 0;
     uint8_t STAT = 0;

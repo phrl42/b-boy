@@ -204,22 +204,6 @@ namespace GBC
 
   Tile Fetcher::IndexToTile(uint8_t index, bool BGW)
   {
-    /*tile_data[0] = 0x3C;
-    tile_data[1] = 0x7E;
-    tile_data[2] = 0x42;
-    tile_data[3] = 0x42;
-    tile_data[4] = 0x42;
-    tile_data[5] = 0x42;
-    tile_data[6] = 0x42;
-    tile_data[7] = 0x42;
-    tile_data[8] = 0x7E;
-    tile_data[9] = 0x5E;
-    tile_data[10] = 0x7E;
-    tile_data[11] = 0x0A;
-    tile_data[12] = 0x7C;
-    tile_data[13] = 0x56;
-    tile_data[14] = 0x38;
-    tile_data[15] = 0x7C;*/
     // 1 tile = 16 byte
     Tile temp = {0};
 
@@ -256,19 +240,15 @@ namespace GBC
   uint8_t Fetcher::TileToScreen(uint16_t x, uint16_t y, bool map2)
   {
     uint32_t nt = 0;
-    uint16_t ny = y;
-    uint16_t nx = x;
+    uint16_t ny = y % 8;
+    uint16_t nx = x % 8;
 
-    nx += (8 - (x % 8))-1;
+    nt = (x / 8) + ((y / 8) * 32) % 1024;
 
-    ny += (8 - (y % 8))-1;
-
-    nt = ((((ny / 8))*32) + ((nx / 8))) % 1024;
-
-    nx = x % 8;
-    ny = y % 8;
     int index = map2 ? this->map2[nt] : this->map1[nt];
-    Tile tile = IndexToTile(index, true);
+    Tile tile = IndexToTile(index, tile_mode == TileMode::OBJ ? false : true);
+
+    printf("LY: %x X: %x map2: %d index : %x\n", *LY, this->x, map2, index);
 
     return tile.row[ny].bpp[nx];
   }
@@ -294,24 +274,14 @@ namespace GBC
     {
       fifo_bg[i] = fifo_bg[i+1];
     }
-
     bg_size--;
-
   }
 
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
     if(bg_size == 0) return 0;
-    if(!scx_done)
-    {
-      for(uint8_t i = 0; i < (*SCX % 8); i++)
-      {
-	Pop();
-      }
-      scx_done = true;
-    }
+
     screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0];
-    
     Pop();
 
     return 1;
@@ -322,14 +292,12 @@ namespace GBC
     // bg
     if(Get_Bit_N(*LCDC, 0))
     {
-      x = ((8 * ((*SCX / 8) & 0x1f)) + x) % 256;
+      x = (x + *SCX) % 256;
       y = (*SCY + *LY) % 256;
+
+      tile_mode = TileMode::BG;
     }
-    else
-    {
-      x = 0;
-      y = 0;
-    }
+    
     state = Mode::READ_DATA0;
   }
 
@@ -346,7 +314,7 @@ namespace GBC
       state = Mode::READ_TILE;
       return;
     }
-
+    
     for(uint8_t i = 0; i < 8; i++)
     {
       fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
@@ -358,16 +326,15 @@ namespace GBC
 
   void Fetcher::Push_FIFO()
   {
-    if(bg_size != 0) return;
-    
-    for(uint8_t i = 0; i < 8; i++)
+    if(bg_size == 0)
     {
-      fifo_bg[i] = fetch[i];
+      for(uint8_t i = 0; i < 8; i++)
+      {
+	fifo_bg[i] = fetch[i];
+      }
+      bg_size = 8;
+      state = Mode::READ_TILE;
     }
-
-    bg_size = 8;
-    
-    state = Mode::READ_TILE;
   }
 
   void Fetcher::Discard()
@@ -378,7 +345,9 @@ namespace GBC
       fetch[i] = 0;
     }
     bg_size = 0;
+    obj_size = 0;
     state = Mode::READ_TILE;
+    tile_mode = TileMode::NONE;
   }
 
   void Fetcher::Reset()
@@ -440,6 +409,11 @@ namespace GBC
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7)) return;
+
+    if(!fetch.window_trigger)
+    {
+      fetch.window_trigger = (bool)(LY == WY);
+    }
     
     switch(rend.mode)
     {
@@ -449,6 +423,19 @@ namespace GBC
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 0);
       Set_Bit_N(&STAT, 1, 1);
+
+      if(rend.dot % 2 == 0)
+      {
+	uint8_t index = rend.dot / 2;
+
+	fetch.OAMToObject(rend.dot * 2);
+	
+	if(objects[index].x > 0 && (LY + 16) >= objects[index].y && (LY + 16) < (objects[index].height + objects[index].y) && fetch.sprite_size < 10)
+	{
+	  fetch.buffer[fetch.sprite_size] = objects[index];
+	  fetch.sprite_size++;
+	}
+      }
 
       if(rend.dot == P_OAM_END)
       {
@@ -502,6 +489,8 @@ namespace GBC
     case Mode::VBLANK:
     {
       frame_done = true;
+      fetch.window_line_counter = 0;
+      
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 1);
       Set_Bit_N(&STAT, 1, 0);
@@ -532,6 +521,7 @@ namespace GBC
  	rend.mode = Mode::OAM_SCAN;
 
 	frames++;
+	fetch.window_trigger = false;
       }
       break;
     }
@@ -540,14 +530,13 @@ namespace GBC
       GBC_LOG("[PPU] Rendering Mode invalid");
       break;
     }
-    
+
     if(Get_Bit_N(STAT, 6) && !Get_Bit_N(STAT, 2) && LYC == LY && line_interrupt_done == false)
     {
       Set_Bit_N(&STAT, 2, 1);
       line_interrupt_done = true;
       interrupt->Request(INTERRUPT::LCD);
     }
-
     rend.dot++;
   }
 

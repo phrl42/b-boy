@@ -67,6 +67,7 @@ namespace GBC
 
   void ROM::Post_Bios()
   {
+    printf("post bios\n");
     for(uint16_t i = 0; i < entry; i++)
     {
       space[i] = lower_game[i];

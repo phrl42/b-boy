@@ -27,7 +27,7 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/Dr.Mario.gb");
+    spec.Init("assets/roms/dmg-acid2.gb");
     Stats::spec = &spec;
 
     screen.AddComponent(new Banana::LineComponent(&spec.ppu.screen));
@@ -86,6 +86,46 @@ namespace SANDBOX
       emu = std::thread(&TestLayer::UpdateEmu, this);
     }
 
+    if(Banana::Input::IsKeyPressed(KEY_A))
+    {
+      spec.io.Press(GBC::IO::KEY::A);
+    }
+      
+    if(Banana::Input::IsKeyPressed(KEY_B))
+    {
+      spec.io.Press(GBC::IO::KEY::B);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_LEFT))
+    {
+      spec.io.Press(GBC::IO::KEY::LEFT);
+    }
+ 
+    if(Banana::Input::IsKeyPressed(KEY_RIGHT))
+    {
+      spec.io.Press(GBC::IO::KEY::RIGHT);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_UP))
+    {
+      spec.io.Press(GBC::IO::KEY::UP);
+    }
+      
+    if(Banana::Input::IsKeyPressed(KEY_DOWN))
+    {
+      spec.io.Press(GBC::IO::KEY::DOWN);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_ENTER))
+    {
+      spec.io.Press(GBC::IO::KEY::START);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_BACKSPACE))
+    {
+      spec.io.Press(GBC::IO::KEY::SELECT);
+    }
+
     Banana::LineComponent *screent = (Banana::LineComponent*)screen.GetComponent("LineComponent");
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");
     Banana::TileComponent *tct = (Banana::TileComponent*)tmap2.GetComponent("TileComponent");
@@ -104,46 +144,6 @@ namespace SANDBOX
   {
     while(!emu_kill)
     {
-      if(Banana::Input::IsKeyPressed(KEY_A))
-      {
-	spec.io.Press(GBC::IO::KEY::A);
-      }
-      
-      if(Banana::Input::IsKeyPressed(KEY_B))
-      {
-	spec.io.Press(GBC::IO::KEY::B);
-      }
-
-      if(Banana::Input::IsKeyPressed(KEY_LEFT))
-      {
-	spec.io.Press(GBC::IO::KEY::LEFT);
-      }
- 
-      if(Banana::Input::IsKeyPressed(KEY_RIGHT))
-      {
-	spec.io.Press(GBC::IO::KEY::RIGHT);
-      }
-
-      if(Banana::Input::IsKeyPressed(KEY_UP))
-      {
-	spec.io.Press(GBC::IO::KEY::UP);
-      }
-      
-      if(Banana::Input::IsKeyPressed(KEY_DOWN))
-      {
-	spec.io.Press(GBC::IO::KEY::DOWN);
-      }
-
-      if(Banana::Input::IsKeyPressed(KEY_ENTER))
-      {
-	spec.io.Press(GBC::IO::KEY::START);
-      }
-
-      if(Banana::Input::IsKeyPressed(KEY_BACKSPACE))
-      {
-	spec.io.Press(GBC::IO::KEY::SELECT);
-      }
-
       spec.Update();
     } 
   }
