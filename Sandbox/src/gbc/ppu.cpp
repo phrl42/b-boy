@@ -322,26 +322,22 @@ namespace GBC
       y = *LY;
       tile_mode = TileMode::OBJ;
       }*/
-    /*else if(Get_Bit_N(*LCDC, 5) && window_trigger && x >= (*WX - 7))
+    if(Get_Bit_N(*LCDC, 5) && window_trigger && (x + 7) >= (*WX) || tile_mode == TileMode::W)
     {
-      static bool first = false;
-
-      if(first)
+      if(window_begin)
       {
-	for(uint8_t i = 0; i < 8; i++)
+	for(uint8_t i = 0; i < 8; i ++)
 	{
-	  fifo_bg[i] = 0;
 	  fetch[i] = 0;
 	}
-	bg_size = 0;
 	x = 0;
-	first = true;
+	y = window_line_counter;
+	window_begin = false;
       }
-      x = x + *WX;
-      y = *LY;
+
       tile_mode = TileMode::W;
-      }*/
-    if(Get_Bit_N(*LCDC, 0))
+    }
+    else if(Get_Bit_N(*LCDC, 0))
     {
       if(line_begin)
       {
@@ -369,15 +365,16 @@ namespace GBC
       state = Mode::READ_TILE;
       return;
     }
-    
+
     for(uint8_t i = 0; i < 8; i++)
     {
       if(tile_mode == TileMode::OBJ) fetch_obj[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
       if(tile_mode == TileMode::BG) fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
       if(tile_mode == TileMode::W) fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 6));
     }
-    x += 8; 
-    
+
+    x += 8;
+  
     state = Mode::PUSH_FIFO;
   }
 
@@ -416,8 +413,12 @@ namespace GBC
     bg_size = 0;
     obj_size = 0;
     state = Mode::READ_TILE;
+
+    if(tile_mode == TileMode::W) window_line_counter++;
+
     tile_mode = TileMode::NONE;
 
+    window_begin = true;
     line_begin = true;
   }
 
@@ -486,7 +487,6 @@ namespace GBC
     {
     case Mode::OAM_SCAN:
     {
-      
       if(!fetch.window_trigger)
       {
 	fetch.window_trigger = (bool)(LY == WY);
@@ -552,6 +552,7 @@ namespace GBC
 	if(LY == HEIGHT)
 	{
 	  rend.mode = Mode::VBLANK;
+	  fetch.window_line_counter = 0;
 	  interrupt->Request(INTERRUPT::VBLANK);
 	}
       }
@@ -561,7 +562,6 @@ namespace GBC
     case Mode::VBLANK:
     {
       frame_done = true;
-      fetch.window_line_counter = 0;
       
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 1);
@@ -612,7 +612,7 @@ namespace GBC
     rend.dot++;
   }
 
-  // called every t-cycle
+// called every t-cycle
   void PPU::Tick()
   {
     Render();
@@ -627,7 +627,7 @@ namespace GBC
     }
   }
 
-  // debugging only
+// debugging only
   void PPU::UpdateTiles()
   {
     int row_index = 0;
