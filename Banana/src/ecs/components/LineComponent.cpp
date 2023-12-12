@@ -1,5 +1,6 @@
 #include "ecs/components/LineComponent.h"
 #include "imgui_debug.h"
+#include "incs.h"
 
 namespace Banana
 {

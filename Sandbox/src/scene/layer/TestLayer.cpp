@@ -27,7 +27,7 @@ namespace SANDBOX
     Stats::stop_id = qcs->GetTextureID();
     Stats::step_id = qct->GetTextureID();
 
-    spec.Init("assets/roms/Dr.Mario.gb");
+    spec.Init("assets/roms/Tetris.gb");
     Stats::spec = &spec;
 
     screen.AddComponent(new Banana::LineComponent(&spec.ppu.screen));

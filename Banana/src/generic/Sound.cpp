@@ -12,7 +12,8 @@ namespace Banana
   Sound::Sound(const std::string& path_to_sound, bool loop)
   :sound_path(path_to_sound)
   {
-    InitSound(path_to_sound, loop);
+    LOG("Sorry! Miniaudio is currently deactivated");
+    //InitSound(path_to_sound, loop);
   }
 
   Sound::~Sound()
@@ -34,6 +35,8 @@ namespace Banana
     
   void Sound::InitSound(const std::string& path_to_sound, bool loop)
   {
+    LOG("Sorry! Miniaudio is currently deactivated");
+    return;
     if(int success = ma_sound_init_from_file(&Application::GetInstance().soundhelper->GetEngine(), path_to_sound.c_str(), MA_SOUND_FLAG_DECODE, NULL, NULL, &current_sound); success != MA_SUCCESS)
     {
       if(success == MA_DOES_NOT_EXIST)
