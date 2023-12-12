@@ -121,7 +121,7 @@ namespace GBC
     Tile IndexToTile(uint8_t index, bool BGW);
 
     Object OAMToObject(uint8_t index);
-    uint8_t TileToScreen(uint16_t x, uint16_t y, bool map2);
+    uint8_t TileToScreen(uint8_t x, uint8_t y, bool map2);
 
   private:
     enum class Mode
@@ -161,9 +161,11 @@ namespace GBC
     uint8_t fifo_obj[8];
     uint8_t obj_size = 0;
 
+
   public:
     uint8_t window_line_counter = 0;
     bool window_trigger = false;
+    bool line_begin = true;
     
     Object buffer[10];
     uint8_t sprite_size = 0;

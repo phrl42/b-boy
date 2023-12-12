@@ -237,7 +237,7 @@ namespace GBC
     return temp;
   }
 
-  uint8_t Fetcher::TileToScreen(uint16_t x, uint16_t y, bool map2)
+  uint8_t Fetcher::TileToScreen(uint8_t x, uint8_t y, bool map2)
   {
     uint32_t nt = 0;
     uint16_t ny = y % 8;
@@ -316,13 +316,13 @@ namespace GBC
       }
     }
     
-    if(sprite_check)
+    /*if(sprite_check)
     {
       x = x;
       y = *LY;
       tile_mode = TileMode::OBJ;
-    }
-    else if(Get_Bit_N(*LCDC, 5) && window_trigger && x >= (*WX - 7))
+      }*/
+    /*else if(Get_Bit_N(*LCDC, 5) && window_trigger && x >= (*WX - 7))
     {
       static bool first = false;
 
@@ -340,11 +340,16 @@ namespace GBC
       x = x + *WX;
       y = *LY;
       tile_mode = TileMode::W;
-    }
-    else if(Get_Bit_N(*LCDC, 0))
+      }*/
+    if(Get_Bit_N(*LCDC, 0))
     {
-      x = (x + ((*SCX%8) / 2)) % 256;
-      y = (*SCY + *LY) % 256;
+      if(line_begin)
+      {
+	x = *SCX;
+	line_begin = false;
+      }
+
+      y = *LY + *SCY;
 
       tile_mode = TileMode::BG;
     }
@@ -371,7 +376,7 @@ namespace GBC
       if(tile_mode == TileMode::BG) fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
       if(tile_mode == TileMode::W) fetch[i] = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 6));
     }
-    x = (x + 8) % 256;
+    x += 8; 
     
     state = Mode::PUSH_FIFO;
   }
@@ -412,6 +417,8 @@ namespace GBC
     obj_size = 0;
     state = Mode::READ_TILE;
     tile_mode = TileMode::NONE;
+
+    line_begin = true;
   }
 
   void Fetcher::Reset()
@@ -493,7 +500,7 @@ namespace GBC
       {
 	uint8_t index = rend.dot / 2;
 
-	fetch.OAMToObject(rend.dot * 2);
+	objects[index] = fetch.OAMToObject(index * 4);
 	
 	if(objects[index].x > 0 && (LY + 16) >= objects[index].y && (LY + 16) < (objects[index].height + objects[index].y) && fetch.sprite_size < 10)
 	{
