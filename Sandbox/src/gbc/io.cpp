@@ -15,7 +15,7 @@ namespace GBC
 
   void IO::Release()
   {
-    JOYPAD = 0x0F;
+    //JOYPAD = 0x0F;
   }
 
   uint8_t IO::Read(uint16_t address)
