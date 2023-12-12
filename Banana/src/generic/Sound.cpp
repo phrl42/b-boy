@@ -18,7 +18,7 @@ namespace Banana
 
   Sound::~Sound()
   {
-    Stop();
+    //Stop();
   }
 
   void Sound::Change(const std::string& path_to_sound, bool loop)
@@ -55,27 +55,27 @@ namespace Banana
 
   void Sound::Start()
   {
-    ma_sound_start(&current_sound);
+    //ma_sound_start(&current_sound);
   }
 
   void Sound::Stop()
   {
     if(ma_sound_is_playing(&current_sound))
     {
-      ma_sound_stop(&current_sound);
+      //ma_sound_stop(&current_sound);
     }
 
-    ma_sound_uninit(&current_sound);
+    //ma_sound_uninit(&current_sound);
   }
 
   void Sound::SetVolume(float vol)
   {
-    ma_sound_set_volume(&current_sound, vol);
+    //ma_sound_set_volume(&current_sound, vol);
   }
 
   float Sound::GetVolume()
   {
-    return ma_sound_get_volume(&current_sound);
+    return 69.42f; //ma_sound_get_volume(&current_sound);
   }
 
 }
