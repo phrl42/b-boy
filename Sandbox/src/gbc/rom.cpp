@@ -5,7 +5,8 @@ namespace GBC
 {
   bool ROM::Load_Rom(const char* rom_path)
   {
-    std::ifstream file(rom_path);
+    std::ifstream file;
+    file.open(rom_path, std::ios::binary | std::ios::in);
     
     if(!file)
     {
@@ -38,7 +39,9 @@ namespace GBC
     GBC_LOG("Loaded " + std::to_string(index) + " bytes");
 
     index = 0;
-    std::ifstream bootrom("assets/roms/bootrom.gb");
+    std::ifstream bootrom;
+    bootrom.open("assets/roms/bootrom.gb", std::ios::binary | std::ios::in);
+    
     while(bootrom.get(byte))
     {
       space[index] = byte;
