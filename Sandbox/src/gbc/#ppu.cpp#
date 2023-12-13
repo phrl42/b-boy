@@ -308,10 +308,11 @@ namespace GBC
   {
     for(uint8_t i = 0; i < 8; i++)
     {
-      if(buffer[i].x <= (x + 8) && buffer[i].x != 0)
+      if(buffer[i].x <= (x + 7) && buffer[i].x != 0)
       {
 	tile_mode = TileMode::OBJ;
-	break;
+	state = Mode::READ_DATA0;
+	return;
       }
     }
     

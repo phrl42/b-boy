@@ -20,7 +20,7 @@ namespace GBC
     file.seekg(0, file.beg);
       
     char byte = 0;
-    uint16_t index = 0;
+    uint32_t index = 0;
 
     while(file.get(byte))
     {
@@ -37,6 +37,59 @@ namespace GBC
     }
 
     GBC_LOG("Loaded " + std::to_string(index) + " bytes");
+
+    rom_size = index;
+    banks = (rom_size / 1024) / 16;
+    switch(banks)
+    {
+    case 2:
+    {
+      mask = 0b00000001;
+      break;
+    }
+
+    case 4:
+    {
+      mask = 0b00000011;
+      break;
+    }
+
+    case 8:
+    {
+      mask = 0b00000111;
+      break;
+    }
+
+    case 16:
+    {
+      mask = 0b00001111;
+      break;
+    }
+
+    case 32:
+    {
+      mask = 0b00011111;
+      break;
+    }
+
+    case 64:
+    {
+      mask = 0b00011111;
+      break;
+    }
+
+    case 128:
+    {
+      mask = 0b00011111;
+      break;
+    }
+
+    default:
+    {
+      GBC_LOG("[ROM] rom_size error when setting rom bank");
+      break;
+    }
+    }
 
     index = 0;
     std::ifstream bootrom;
@@ -76,25 +129,78 @@ namespace GBC
     }
   }
 
+  ROM::~ROM()
+  {
+    if(mbc != MBC::MBC1B) return;
+    std::ofstream save;
+    save.open(std::string(rom) + std::string(".sav"), std::ios::binary | std::ios::out);
+
+    for(uint16_t i = 0xA000; i <= 0xBFFF; i++)
+    {
+      save.put(space[i]);
+    }
+
+    save.close();
+  }
+
   uint8_t ROM::Read(uint16_t address)
   {
-    if(!(address <= 0x7FFF))
+    if(address >= 0x0000 && address <= 0x3FFF)
     {
-      GBC_LOG("[ROM] Wrong reading");
-      return 0;
+      if(mode == 0)
+      {
+	return space[address];
+      }
     }
-    return space[address];
+
+    if(address >= 0x4000 && address <= 0x7FFF)
+    {
+      uint16_t HIGH_BANK_NUM = 0;
+
+      if(banks <= 32)
+      {
+	HIGH_BANK_NUM = ROM_BANK_NUM & mask;
+      }
+      return space[0x4000 * HIGH_BANK_NUM + (address - 0x4000)];
+    }
   }
 
   void ROM::Write(uint16_t address, uint8_t value)
   {
-    if(!(address <= 0x7FFF))
+    if(address <= 0x1FFF && address >= 0x0000)
     {
-      GBC_LOG("[ROM] Wrong writing");
-      return;
+      if((value & 0x0F) == 0xA)
+      {
+	external_ram = true;
+      }
+      else
+      {
+	external_ram = false;
+      }
     }
 
-    //space[address] = value;
-    return;
+    if(address >= 0x2000 && address <= 0x3FFF)
+    {
+      if(value == 0) ROM_BANK_NUM = 1;
+      
+      value = value & mask;
+
+      ROM_BANK_NUM = value;
+    }
+
+    if(address >= 0x4000 && address <= 0x5FFF)
+    {
+      RAM_BANK_NUM = value & 0x03;
+    }
+
+    if(address >= 0x6000 && address <= 0x7FFF)
+    {
+      mode = value & 0x01;
+    }
+
+    if(address >= 0xA000 && address <= 0xBFFF)
+    {
+      if(external_ram) space[address] = value;
+    }
   }
 };

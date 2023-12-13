@@ -110,6 +110,15 @@ namespace GBC
     uint8_t height;
   };
 
+  struct FIFO
+  {
+    uint8_t bpp;
+
+    uint8_t obp;
+
+    uint8_t bg_prio;
+  };
+
   struct Fetcher
   {
     uint8_t Push(uint8_t rend_x);
@@ -126,13 +135,13 @@ namespace GBC
   private:
     enum class Mode
     {
-	READ_TILE=0, READ_DATA0, READ_DATA1, PUSH_FIFO, NONE
+      READ_TILE=0, READ_DATA0, READ_DATA1, PUSH_FIFO, NONE
     };
 
     enum class TileMode
-      {
-	BG=0, W, OBJ, NONE
-      };
+    {
+      BG=0, W, OBJ, NONE
+    };
     
     Mode state = Mode::READ_TILE;
     TileMode tile_mode = TileMode::NONE;
@@ -152,15 +161,14 @@ namespace GBC
     uint8_t x = 0;
     uint8_t y = 0;
 
-    uint8_t fetch[8];
-    uint8_t fetch_obj[8];
+    FIFO fetch[8];
+    FIFO fetch_obj[8];
 
-    uint8_t fifo_bg[8];
+    FIFO fifo_bg[8];
     uint8_t bg_size = 0;
 
-    uint8_t fifo_obj[8];
+    FIFO fifo_obj[8];
     uint8_t obj_size = 0;
-
 
   public:
     uint8_t window_line_counter = 0;
