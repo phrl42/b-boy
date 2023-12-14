@@ -10,12 +10,14 @@ namespace GBC
   void IO::Press(KEY key)
   {
     JOYPAD = (uint8_t)key;
+    press = key;
     interrupt->Request(INTERRUPT::JOYPAD);
   }
 
   void IO::Release()
   {
-    //JOYPAD = 0x0F;
+    press = KEY::NONE;
+    JOYPAD = 0xFF;
   }
 
   uint8_t IO::Read(uint16_t address)
@@ -46,9 +48,30 @@ namespace GBC
     switch(address)
     {
     case A_JOYPAD:
+    {
       JOYPAD &= 0x0F;
       JOYPAD |= value & 0xF0;
+
+      uint8_t joy = JOYPAD;
+      uint8_t check = joy & 0x30;
+
+      JOYPAD = (uint8_t)KEY::NONE;
+      if(value == 0x10)
+      {
+	if(press == KEY::START) JOYPAD = (uint8_t)KEY::START;
+	if(press == KEY::SELECT) JOYPAD = (uint8_t)KEY::SELECT;
+	if(press == KEY::A) JOYPAD = (uint8_t)KEY::A;
+	if(press == KEY::B) JOYPAD = (uint8_t)KEY::B;
+      }
+      if(value == 0x20)
+      {
+	if(press == KEY::DOWN) JOYPAD = (uint8_t)KEY::DOWN;
+	if(press == KEY::UP) JOYPAD = (uint8_t)KEY::UP;
+	if(press == KEY::LEFT) JOYPAD = (uint8_t)KEY::LEFT;
+	if(press == KEY::RIGHT) JOYPAD = (uint8_t)KEY::RIGHT;
+      }
       break;
+    } 
 
     case A_SB:
       SB = value;

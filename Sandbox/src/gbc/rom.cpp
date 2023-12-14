@@ -104,6 +104,21 @@ namespace GBC
     if(index != entry) GBC_LOG("Loading BootRom failed.");
 
     file.close();
+
+    /*if(mbc != MBC::MBC1B)
+    {
+      std::ifstream save;
+      save.open(std::string(rom_path) + std::string(".sav"), std::ios::binary | std::ios::in);
+
+      char byte = 0;
+      for(uint16_t address = 0xA000; address <= 0xBFFF; address++)
+      {
+	save.get(byte);
+	space[address] = byte;
+      }
+      
+      }*/
+    
     return true;
   }
   

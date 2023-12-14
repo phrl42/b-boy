@@ -17,13 +17,21 @@ namespace GBC
     
     void Serial_Update();
     void Serial_Print();
- 
+
     enum class KEY
       {
-	A=0x1E, B=0x1D, SELECT=0x1B, START=0x17,
-	RIGHT=0x2E, LEFT=0x2D, UP=0x2B, DOWN=0x27, NONE=0xFF
+	START = 0x17,
+	SELECT = 0x1B,
+	B = 0x1D,
+	A = 0x1E,
+	DOWN = 0x27,
+	UP = 0x2B,
+	LEFT = 0x2D,
+	RIGHT = 0x2E,
+	NONE = 0xFF
       };
 
+    KEY press;
     void Press(KEY key);
     void Release();
   private:

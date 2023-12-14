@@ -269,6 +269,7 @@ namespace Banana
     ImGui::Begin("Interrupt", nullptr, 0);
     ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_IE, false), "[FFFF] IE: "));
     ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_IF, false), "[FF0F] IF: "));
+    ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_JOYPAD, false), "JOYPAD: "));
     ImGui::End();
 
     ImGui::Begin("Timer", nullptr, 0);
