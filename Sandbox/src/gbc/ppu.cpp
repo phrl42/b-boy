@@ -288,20 +288,23 @@ namespace GBC
 
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
-    if(tile_mode != TileMode::OBJ)
+    if(bg_size == 0) return 0;
+    uint8_t bpp = fifo_bg[0].bpp;
+
+    if(obj_size != 0)
     {
-      if(bg_size == 0) return 0;
-      screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0].bpp;
-      Pop(false);
-    }
-    else if(tile_mode == TileMode::OBJ)
-    {
-      if(obj_size == 0) return 0;
-      screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_obj[0].bpp;
+      uint8_t spp = fifo_obj[0].bpp;
+
+      if(spp != 0)
+      {
+	bpp = spp;
+      }
       Pop(true);
     }
-    
 
+    screen->line[(*LY) % HEIGHT].bpp[rend_x] = bpp;
+
+    Pop(false);
     return 1;
   }
 
@@ -331,13 +334,22 @@ namespace GBC
       tile_mode = TileMode::BG;
     }
 
-    for(uint8_t i = 0; i < 8; i++)
+    if(Get_Bit_N(*LCDC, 1))
     {
-      if(buffer[i].x <= (x + 8) && buffer[i].x != 0 && Get_Bit_N(*LCDC, 1))
+      for(uint8_t i = 0; i < sprite_size; i++)
       {
-	tile_mode = TileMode::OBJ;
-	current_obj = buffer[i];
-	break;
+	if(buffer[i].x <= (x + 8) && buffer[i].x != 0)
+	{
+	  tile_mode = TileMode::OBJ;
+	  current_obj = buffer[i];
+
+	  buffer[i].x = 0;
+	  buffer[i].y = 0;
+	  buffer[i].index = 0;
+	  buffer[i].flags = 0;
+	  buffer[i].height = 0;
+	  break;
+	}
       }
     }
 
@@ -363,10 +375,10 @@ namespace GBC
       if(tile_mode == TileMode::OBJ)
       {
 	FIFO fif;
-	fif.bpp = IndexToTile(current_obj.index, false).row[*LY - current_obj.y].bpp[i];
+	fif.bpp = IndexToTile(current_obj.index, false).row[(*LY - ((current_obj.y)-16)) % 8].bpp[i];
 	fetch_obj[i] = fif;
       }
-      if(tile_mode == TileMode::BG)
+      if(tile_mode == TileMode::BG || tile_mode == TileMode::OBJ)
       {
 	FIFO fif;
 	fif.bpp = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
@@ -387,7 +399,7 @@ namespace GBC
 
   void Fetcher::Push_FIFO()
   {
-    if(bg_size == 0 && tile_mode != TileMode::OBJ)
+    if(bg_size == 0)
     {
       for(uint8_t i = 0; i < 8; i++)
       {
@@ -396,7 +408,7 @@ namespace GBC
       bg_size = 8;
       state = Mode::READ_TILE;
     }
-    else if(obj_size == 0 && tile_mode == TileMode::OBJ)
+    if(obj_size == 0 && tile_mode == TileMode::OBJ)
     {
       for(uint8_t i = 0; i < 8; i++)
       {
@@ -419,6 +431,7 @@ namespace GBC
     }
     bg_size = 0;
     obj_size = 0;
+    sprite_size = 0;
     state = Mode::READ_TILE;
 
     if(tile_mode == TileMode::W) window_line_counter++;
