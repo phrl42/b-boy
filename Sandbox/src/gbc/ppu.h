@@ -153,7 +153,7 @@ namespace GBC
     
     void Push_FIFO();
 
-    void Pop();
+    void Pop(bool obj);
 
     bool start = true;
     bool scx_done = false;
@@ -170,6 +170,7 @@ namespace GBC
     FIFO fifo_obj[8];
     uint8_t obj_size = 0;
 
+    Object current_obj;
   public:
     uint8_t window_line_counter = 0;
     bool window_trigger = false;

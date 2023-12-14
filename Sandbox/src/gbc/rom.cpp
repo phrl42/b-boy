@@ -145,6 +145,7 @@ namespace GBC
 
   uint8_t ROM::Read(uint16_t address)
   {
+    if(banks == 2) return space[address];
     if(address >= 0x0000 && address <= 0x3FFF)
     {
       if(mode == 0)

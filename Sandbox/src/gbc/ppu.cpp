@@ -266,9 +266,9 @@ namespace GBC
 
   // Fetcher
 
-  void Fetcher::Pop()
+  void Fetcher::Pop(bool obj)
   {
-    if(tile_mode != TileMode::OBJ)
+    if(!obj)
     {
       for(uint8_t i = 0; i < 7; i++)
       {
@@ -276,7 +276,7 @@ namespace GBC
       }
       bg_size--;
     }
-    else if(tile_mode == TileMode::OBJ)
+    else
     {
       for(uint8_t i = 0; i < 7; i++)
       {
@@ -292,29 +292,21 @@ namespace GBC
     {
       if(bg_size == 0) return 0;
       screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_bg[0].bpp;
+      Pop(false);
     }
     else if(tile_mode == TileMode::OBJ)
     {
       if(obj_size == 0) return 0;
       screen->line[(*LY) % HEIGHT].bpp[rend_x] = fifo_obj[0].bpp;
+      Pop(true);
     }
     
-    Pop();
 
     return 1;
   }
 
   void Fetcher::Read_Tile()
   {
-    for(uint8_t i = 0; i < 8; i++)
-    {
-      if(buffer[i].x <= (x + 8) && buffer[i].x != 0)
-      {
-	tile_mode = TileMode::OBJ;
-	break;
-      }
-    }
-    
     if(Get_Bit_N(*LCDC, 5) && window_trigger && (x + 7) >= (*WX) || tile_mode == TileMode::W)
     {
       if(window_begin)
@@ -338,6 +330,17 @@ namespace GBC
 
       tile_mode = TileMode::BG;
     }
+
+    for(uint8_t i = 0; i < 8; i++)
+    {
+      if(buffer[i].x <= (x + 8) && buffer[i].x != 0 && Get_Bit_N(*LCDC, 1))
+      {
+	tile_mode = TileMode::OBJ;
+	current_obj = buffer[i];
+	break;
+      }
+    }
+
     state = Mode::READ_DATA0;
   }
 
@@ -360,8 +363,7 @@ namespace GBC
       if(tile_mode == TileMode::OBJ)
       {
 	FIFO fif;
-	fif.bpp = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
- 
+	fif.bpp = IndexToTile(current_obj.index, false).row[*LY - current_obj.y].bpp[i];
 	fetch_obj[i] = fif;
       }
       if(tile_mode == TileMode::BG)

@@ -413,7 +413,8 @@ namespace Banana
     }
     mem_edit.DrawWindow("MEM", ram, sizeof(uint8_t) * GBC_RAM_SIZE); 
 
-    
+
+    ImGui::SetNextWindowSize(ImVec2(166*3, 144*3), ImGuiCond_Always);
     ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoDecoration);
     ImVec2 winsize = ImGui::GetWindowSize();
     
