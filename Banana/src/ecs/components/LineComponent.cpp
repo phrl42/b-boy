@@ -41,7 +41,37 @@ namespace Banana
     {
       for(uint8_t x = 0; x < WIDTH; x++)
       {
-	pixels[(y * WIDTH) + x] = palette[screen->line[y].bpp[x]];
+	uint8_t bpp = screen->line[y].fif[x].bpp;
+	uint8_t pal = screen->line[y].fif[x].palette;
+	
+	uint8_t index = 0;
+	switch(bpp)
+	{
+	case 0:
+	{
+	  index = pal & 0x03;
+	  break;
+	}
+
+	case 1:
+	{
+	  index = (pal & 0x0C) >> 2;
+	  break;
+	}
+
+	case 2:
+	{
+	  index = (pal & 0x30) >> 4;
+	  break;
+	}
+
+	case 3:
+	{
+	  index = (pal & 0xC0) >> 6;
+	  break;
+	}
+	}
+	pixels[(y * WIDTH) + x] = palette[index];
       }
     }
 

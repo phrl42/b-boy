@@ -24,6 +24,11 @@ namespace GBC
     this->fetch.map2 = map2;
 
     this->fetch.oam = oam;
+
+    this->fetch.OBP0 = &OBP0;
+    this->fetch.OBP1 = &OBP1;
+
+    this->fetch.BGP = &BGP;
   }
   
   uint8_t PPU::Read(uint16_t address)
@@ -289,20 +294,23 @@ namespace GBC
   uint8_t Fetcher::Push(uint8_t rend_x)
   {
     if(bg_size == 0) return 0;
-    uint8_t bpp = fifo_bg[0].bpp;
-
+    FIFO fif;
+    fif.bpp = fifo_bg[0].bpp;
+    fif.palette = fifo_bg[0].palette;
+    
     if(obj_size != 0)
     {
       uint8_t spp = fifo_obj[0].bpp;
 
       if(spp != 0)
       {
-	bpp = spp;
+	fif.bpp = spp;
+	fif.palette = fifo_obj[0].palette;
       }
       Pop(true);
     }
 
-    screen->line[(*LY) % HEIGHT].bpp[rend_x] = bpp;
+    screen->line[(*LY) % HEIGHT].fif[rend_x] = fif;
 
     Pop(false);
     return 1;
@@ -342,7 +350,7 @@ namespace GBC
 	{
 	  tile_mode = TileMode::OBJ;
 	  current_obj = buffer[i];
-	  
+
 	  if(buffer[i+1].x == buffer[i].x)
 	  {
 	    if(buffer[i+1].index > buffer[i].index)
@@ -392,6 +400,7 @@ namespace GBC
       if(tile_mode == TileMode::OBJ)
       {
 	FIFO fif;
+	fif.palette = Get_Bit_N(current_obj.flags, 4) ? *OBP1 : *OBP0;
 	fif.bpp = IndexToTile(current_obj.index, false).row[(*LY - ((current_obj.y)-16)) % 8].bpp[i];
 	fetch_obj[i] = fif;
       }
@@ -399,12 +408,14 @@ namespace GBC
       {
 	FIFO fif;
 	fif.bpp = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
+	fif.palette = *BGP;
 	fetch[i] = fif;
       }
       if(tile_mode == TileMode::W)
       {
 	FIFO fif;
 	fif.bpp = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 6));
+	fif.palette = *BGP;
 	fetch[i] = fif;
       }
     }

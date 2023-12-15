@@ -89,9 +89,19 @@ namespace GBC
     PixelRow row[8];
   };
 
+  
+  struct FIFO
+  {
+    uint8_t bpp;
+
+    uint8_t palette;
+
+    uint8_t bg_prio;
+  };
+  
   struct Line
   {
-    uint8_t bpp[WIDTH];
+    FIFO fif[WIDTH];
   };
   
   struct Screen
@@ -108,15 +118,6 @@ namespace GBC
     uint8_t flags;
 
     uint8_t height;
-  };
-
-  struct FIFO
-  {
-    uint8_t bpp;
-
-    uint8_t obp;
-
-    uint8_t bg_prio;
   };
 
   struct Fetcher
@@ -197,6 +198,10 @@ namespace GBC
     uint8_t *map1;
     uint8_t *map2;
     uint8_t *oam;
+
+    uint8_t *OBP0;
+    uint8_t *OBP1;
+    uint8_t *BGP;
   };
 
  
