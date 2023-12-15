@@ -89,7 +89,6 @@ namespace GBC
     PixelRow row[8];
   };
 
-  
   struct FIFO
   {
     uint8_t bpp;
