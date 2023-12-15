@@ -244,7 +244,9 @@ namespace GBC
 
     uint8_t oam[0xA0] = {0};
     Object objects[40] = {0};
-
+    
+    Object pre_buffer[40] = {0};
+    uint8_t pre_buffer_size = 0;
     void Draw_Pixel();
   public:
     // for debug only

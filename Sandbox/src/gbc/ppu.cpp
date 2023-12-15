@@ -343,6 +343,16 @@ namespace GBC
 	  tile_mode = TileMode::OBJ;
 	  current_obj = buffer[i];
 
+	  
+	  if(buffer[i+1].x == buffer[i].x)
+	  {
+	    buffer[i+1].x = 0;
+	    buffer[i+1].y = 0;
+	    buffer[i+1].index = 0;
+	    buffer[i+1].flags = 0;
+	    buffer[i+1].height = 0;
+	  }
+
 	  buffer[i].x = 0;
 	  buffer[i].y = 0;
 	  buffer[i].index = 0;
