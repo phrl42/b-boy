@@ -177,7 +177,7 @@ namespace GBC
     bool line_begin = true;
     bool window_begin = true;
     
-    Object buffer[10];
+    Object buffer[40];
     uint8_t sprite_size = 0;
     
     uint8_t *LCDC;

@@ -342,9 +342,16 @@ namespace GBC
 	{
 	  tile_mode = TileMode::OBJ;
 	  current_obj = buffer[i];
-
 	  
 	  if(buffer[i+1].x == buffer[i].x)
+	  {
+	    if(buffer[i+1].index > buffer[i].index)
+	    {
+	      current_obj = buffer[i+1];
+	    }
+	  }
+
+	  if(buffer[i+1].x <= (buffer[i].x + 7))
 	  {
 	    buffer[i+1].x = 0;
 	    buffer[i+1].y = 0;
@@ -531,16 +538,33 @@ namespace GBC
 	uint8_t index = rend.dot / 2;
 
 	objects[index] = fetch.OAMToObject(index * 4);
-	
-	if(objects[index].x > 0 && (LY + 16) >= objects[index].y && (LY + 16) < (objects[index].height + objects[index].y) && fetch.sprite_size < 10)
-	{
-	  fetch.buffer[fetch.sprite_size] = objects[index];
-	  fetch.sprite_size++;
-	}
       }
 
       if(rend.dot == P_OAM_END)
       {
+	for(uint8_t i = 0; i < 40; i++)
+	{
+	  for(uint8_t j = 0; j < 40; j++)
+	  {
+	    Object obj;
+	    if(objects[i].x < objects[j].x)
+	    {
+	      obj = objects[i];
+	      objects[i] = objects[j];
+	      objects[j] = obj;
+	    }
+	  }
+	}
+	
+	for(uint8_t i = 0; i < 40; i++)
+	{
+	  if(objects[i].x > 0 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
+	  {
+	    fetch.buffer[fetch.sprite_size] = objects[i];
+	    fetch.sprite_size++;
+	  }
+	  
+	}
 	rend.mode = Mode::DRAWING_PIXELS;
       }
       break;
