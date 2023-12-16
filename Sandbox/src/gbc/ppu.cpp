@@ -302,7 +302,7 @@ namespace GBC
     {
       uint8_t spp = fifo_obj[0].bpp;
 
-      if(spp != 0 && !fifo_obj[0].bg_prio)
+      if(spp != 0)
       {
 	fif.bpp = spp;
 	fif.palette = fifo_obj[0].palette;
@@ -322,8 +322,8 @@ namespace GBC
     {
       if(window_begin)
       {
-	x = 0;
-	y = window_line_counter;
+	w_x = 0;
+	w_y = window_line_counter;
 	window_begin = false;
       }
 
@@ -346,8 +346,15 @@ namespace GBC
     {
       for(uint8_t i = 0; i < sprite_size; i++)
       {
-	if(buffer[i].x <= (x + 8) && buffer[i].x != 0)
+	if(*LY == 64)
 	{
+	  printf("%d: buffer[i].x : %x with x: %x\n", i, buffer[i].x, x);
+	}
+	uint16_t spx = buffer[i].x-8;
+	if(!window_begin && w_x != 0) spx = buffer[i].x;
+	if(spx <= (x + 7) && buffer[i].x != 0)
+	{
+	  if(*LY == 64) printf("x: %x with size: %d\n", x, sprite_size);
 	  tile_mode = TileMode::OBJ;
 	  current_obj = buffer[i];
 
@@ -358,6 +365,7 @@ namespace GBC
 	      current_obj = buffer[i+1];
 	    }
 	  }
+	  
 	  uint16_t index = current_obj.index;
 	  
 	  if(current_obj.height == 16 && !(8 <= (*LY - (current_obj.y-16))))
@@ -378,7 +386,7 @@ namespace GBC
 	    current_obj.index = index & 0xFE;
 	  }
 
-	  if(buffer[i+1].x <= (buffer[i].x + 7))
+	  if(buffer[i+1].x < (buffer[i].x + 7))
 	  {
 	    buffer[i+1].x = 0;
 	    buffer[i+1].y = 0;
@@ -386,7 +394,7 @@ namespace GBC
 	    buffer[i+1].flags = 0;
 	    buffer[i+1].height = 0;
 	  }
-	  
+
 	  buffer[i].x = 0;
 	  buffer[i].y = 0;
 	  buffer[i].index = 0;
@@ -439,23 +447,24 @@ namespace GBC
 	fif.bg_prio = Get_Bit_N(current_obj.flags, 7);
 	fetch_obj[i] = fif;
       }
-      if(tile_mode == TileMode::BG || tile_mode == TileMode::OBJ)
+      if((tile_mode == TileMode::BG || tile_mode == TileMode::OBJ) && window_begin)
       {
 	FIFO fif;
 	fif.bpp = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
 	fif.palette = *BGP;
 	fetch[i] = fif;
       }
-      if(tile_mode == TileMode::W)
+      if((tile_mode == TileMode::W || tile_mode == TileMode::OBJ) && !window_begin)
       {
 	FIFO fif;
-	fif.bpp = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 6));
+	fif.bpp = TileToScreen(w_x+i, w_y, Get_Bit_N(*LCDC, 6));
 	fif.palette = *BGP;
 	fetch[i] = fif;
       }
     }
 
     x += 8;
+    if((tile_mode == TileMode::W || tile_mode == TileMode::OBJ) && !window_begin) w_x += 8;
   
     state = Mode::PUSH_FIFO;
   }

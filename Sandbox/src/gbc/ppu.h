@@ -161,6 +161,9 @@ namespace GBC
     uint8_t x = 0;
     uint8_t y = 0;
 
+    uint8_t w_x = 0;
+    uint8_t w_y = 0;
+
     FIFO fetch[8];
     FIFO fetch_obj[8];
 
