@@ -358,14 +358,24 @@ namespace GBC
 	      current_obj = buffer[i+1];
 	    }
 	  }
-
+	  uint16_t index = current_obj.index;
+	  
 	  if(current_obj.height == 16 && !(8 <= (*LY - (current_obj.y-16))))
 	  {
 	    current_obj.index = current_obj.index & 0xFE;
 	  }
-	  else if(8 <= (*LY - (current_obj.y-16)))
+	  else if(8 <= (*LY - (current_obj.y-16)) && current_obj.height == 16)
 	  {
 	    current_obj.index = current_obj.index | 0x01;
+	  }
+
+	  if(current_obj.height == 16 && Get_Bit_N(current_obj.flags, 6) && !(8 <= (*LY - (current_obj.y-16))))
+	  {
+	    current_obj.index = index | 0x01;
+	  }
+	  else if(current_obj.height == 16 && 8 <= (*LY - (current_obj.y-16)) && Get_Bit_N(current_obj.flags, 6))
+	  {
+	    current_obj.index = index & 0xFE;
 	  }
 
 	  if(buffer[i+1].x <= (buffer[i].x + 7))
@@ -376,7 +386,7 @@ namespace GBC
 	    buffer[i+1].flags = 0;
 	    buffer[i+1].height = 0;
 	  }
-
+	  
 	  buffer[i].x = 0;
 	  buffer[i].y = 0;
 	  buffer[i].index = 0;
@@ -414,9 +424,6 @@ namespace GBC
 	bool hflip = Get_Bit_N(current_obj.flags, 5);
 	bool vflip = Get_Bit_N(current_obj.flags, 6);
 
-	int8_t hflip_val = hflip ? 0 : 0;
-	int8_t vflip_val = vflip ? 0 : 0;
-
 	uint8_t x = i;
 	uint8_t y = ((*LY - ((current_obj.y)-16)) % 8); 
 	if(hflip)
@@ -425,7 +432,7 @@ namespace GBC
 	}
 	if(vflip)
 	{
-	  //y = (current_obj.height - 1) - y;
+	  y = 7  - y;
 	}
 
 	fif.bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
