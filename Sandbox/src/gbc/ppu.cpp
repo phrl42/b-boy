@@ -346,15 +346,10 @@ namespace GBC
     {
       for(uint8_t i = 0; i < sprite_size; i++)
       {
-	if(*LY == 64)
+	uint16_t spx = buffer[i].x;
+	if(!window_begin && w_x != 0) spx = buffer[i].x+8;
+	if((spx-8) <= (x+7) && buffer[i].x != 0)
 	{
-	  printf("%d: buffer[i].x : %x with x: %x\n", i, buffer[i].x, x);
-	}
-	uint16_t spx = buffer[i].x-8;
-	if(!window_begin && w_x != 0) spx = buffer[i].x;
-	if(spx <= (x + 7) && buffer[i].x != 0)
-	{
-	  if(*LY == 64) printf("x: %x with size: %d\n", x, sprite_size);
 	  tile_mode = TileMode::OBJ;
 	  current_obj = buffer[i];
 
@@ -364,7 +359,7 @@ namespace GBC
 	    {
 	      current_obj = buffer[i+1];
 	    }
-	  }
+	    }
 	  
 	  uint16_t index = current_obj.index;
 	  
@@ -386,20 +381,33 @@ namespace GBC
 	    current_obj.index = index & 0xFE;
 	  }
 
-	  if(buffer[i+1].x < (buffer[i].x + 7))
+	  beg = 1;
+	  if((spx-1) <= (x+7))
 	  {
+	    beg = 2;
+	  }
+
+	  if((spx-8) == x)
+	  {
+	    beg = 0;
+	  }
+	  
+	  if(buffer[i+1].x < (buffer[i].x + 7))
+	    {
 	    buffer[i+1].x = 0;
 	    buffer[i+1].y = 0;
 	    buffer[i+1].index = 0;
 	    buffer[i+1].flags = 0;
 	    buffer[i+1].height = 0;
+	    }
+	  if(beg == 0 || beg == 2)
+	  {
+	    buffer[i].x = 0;
+	    buffer[i].y = 0;
+	    buffer[i].index = 0;
+	    buffer[i].flags = 0;
+	    buffer[i].height = 0;
 	  }
-
-	  buffer[i].x = 0;
-	  buffer[i].y = 0;
-	  buffer[i].index = 0;
-	  buffer[i].flags = 0;
-	  buffer[i].height = 0;
 	  break;
 	}
       }
@@ -443,7 +451,33 @@ namespace GBC
 	  y = 7  - y;
 	}
 
-	fif.bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
+	uint8_t bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
+
+	if(beg == 1)
+	{
+	  if(i < ((current_obj.x-8) % 8))
+	  {
+	    bpp = 0;
+	  }
+	  else
+	  {
+	    bpp = IndexToTile(current_obj.index, false).row[y].bpp[x - ((current_obj.x-8) % 8)];
+	  }
+	}
+	
+	if(beg == 2)
+	{
+	  if(i < ((current_obj.x-1) % 8))
+	  {
+	    bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
+	  }
+	  else
+	  {
+	    bpp = 0;
+	  }
+	}
+
+	fif.bpp = bpp;
 	fif.bg_prio = Get_Bit_N(current_obj.flags, 7);
 	fetch_obj[i] = fif;
       }
