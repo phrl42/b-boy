@@ -301,11 +301,40 @@ namespace GBC
     if(obj_size != 0)
     {
       uint8_t spp = fifo_obj[0].bpp;
+      uint8_t pal = fifo_obj[0].palette;
+ 
+      uint8_t index = 0;
+      /*switch(spp)
+      {
+      case 0:
+      {
+	index = pal & 0x03;
+	break;
+      }
 
+      case 1:
+      {
+	index = (pal & 0x0C) >> 2;
+	break;
+      }
+
+      case 2:
+      {
+	index = (pal & 0x30) >> 4;
+	break;
+      }
+
+      case 3:
+      {
+	index = (pal & 0xC0) >> 6;
+	break;
+      }
+      }*/
+      
       if(spp != 0)
       {
 	fif.bpp = spp;
-	fif.palette = fifo_obj[0].palette;
+	fif.palette = pal;
       }
       Pop(true);
     }
@@ -346,21 +375,37 @@ namespace GBC
     {
       for(uint8_t i = 0; i < sprite_size; i++)
       {
-	uint16_t spx = buffer[i].x;
-	if(!window_begin && w_x != 0) spx = buffer[i].x+8;
-	if((spx-8) <= (x+7) && buffer[i].x != 0)
+	uint16_t spx = buffer[i].x-8;
+	//if(*LY == 64) printf("%d: x: %x | %x and size :%d\n", i, x, buffer[i].index, sprite_size);
+	if(!window_begin && w_x != 0) spx = buffer[i].x;
+	if((spx) <= (x+7) && buffer[i].x != 0)
 	{
 	  tile_mode = TileMode::OBJ;
 	  current_obj = buffer[i];
 
-	  if(buffer[i+1].x == buffer[i].x)
+	  /*if(buffer[i+1].x == spx)
 	  {
 	    if(buffer[i+1].index > buffer[i].index)
 	    {
 	      current_obj = buffer[i+1];
+	      buffer[i+1].x = 0;
+	      buffer[i+1].y = 0;
+	      buffer[i+1].index = 0;
+	      buffer[i+1].flags = 0;
+	      buffer[i+1].height = 0;
 	    }
-	    }
-	  
+	  }
+	  */
+	  /*
+	  if(buffer[i+1].x < (spx+7))
+	  {
+	      buffer[i+1].x = 0;
+	      buffer[i+1].y = 0;
+	      buffer[i+1].index = 0;
+	      buffer[i+1].flags = 0;
+	      buffer[i+1].height = 0;
+	  }
+	  */
 	  uint16_t index = current_obj.index;
 	  
 	  if(current_obj.height == 16 && !(8 <= (*LY - (current_obj.y-16))))
@@ -392,15 +437,7 @@ namespace GBC
 	    beg = 0;
 	  }
 	  
-	  if(buffer[i+1].x < (buffer[i].x + 7))
-	    {
-	    buffer[i+1].x = 0;
-	    buffer[i+1].y = 0;
-	    buffer[i+1].index = 0;
-	    buffer[i+1].flags = 0;
-	    buffer[i+1].height = 0;
-	    }
-	  if(beg == 0 || beg == 2)
+	  //if(beg == 0 || beg == 2)
 	  {
 	    buffer[i].x = 0;
 	    buffer[i].y = 0;
@@ -453,29 +490,29 @@ namespace GBC
 
 	uint8_t bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
 
-	if(beg == 1)
-	{
+	/*if(beg == 1)
+	  {
 	  if(i < ((current_obj.x-8) % 8))
 	  {
-	    bpp = 0;
+	  bpp = 0;
 	  }
 	  else
 	  {
-	    bpp = IndexToTile(current_obj.index, false).row[y].bpp[x - ((current_obj.x-8) % 8)];
+	  bpp = IndexToTile(current_obj.index, false).row[y].bpp[x - ((current_obj.x-8) % 8)];
 	  }
-	}
+	  }
 	
-	if(beg == 2)
-	{
-	  if(i < ((current_obj.x-1) % 8))
+	  if(beg == 2)
 	  {
-	    bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
+	  if(i <= ((current_obj.x-1) % 8))
+	  {
+	  bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
 	  }
 	  else
 	  {
-	    bpp = 0;
+	  bpp = 0;
 	  }
-	}
+	  }*/
 
 	fif.bpp = bpp;
 	fif.bg_prio = Get_Bit_N(current_obj.flags, 7);
@@ -631,7 +668,7 @@ namespace GBC
 
       if(rend.dot == P_OAM_END)
       {
-	for(uint8_t i = 0; i < 40; i++)
+	/*for(uint8_t i = 0; i < 40; i++)
 	{
 	  for(uint8_t j = 0; j < 40; j++)
 	  {
@@ -644,7 +681,7 @@ namespace GBC
 	    }
 	  }
 	}
-	
+	*/	
 	for(uint8_t i = 0; i < 40; i++)
 	{
 	  if(objects[i].x > 0 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
