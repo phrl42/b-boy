@@ -207,7 +207,7 @@ namespace GBC
     
   }
 
-  Tile Fetcher::IndexToTile(uint8_t index, bool BGW)
+  Tile Fetcher::IndexToTile(uint8_t index, bool BGW, bool hflip, bool vflip)
   {
     // 1 tile = 16 byte
     Tile temp = {0};
@@ -237,6 +237,32 @@ namespace GBC
 	temp.row[row_index].bpp[i] = res_bit;
       }
       row_index++;
+    }
+
+    if(hflip)
+    {
+      Tile tile_h = {0};
+      for(uint8_t y = 0; y < 8; y++)
+      {
+	for(uint8_t x = 0; x < 8; x++)
+	{
+	  tile_h.row[y].bpp[x] = temp.row[y].bpp[7 - x];
+	}
+      }
+      temp = tile_h;
+    }
+
+    if(vflip)
+    {
+      Tile tile_v = {0};
+      for(uint8_t y = 0; y < 8; y++)
+      {
+	for(uint8_t x = 0; x < 8; x++)
+	{
+	  tile_v.row[y].bpp[x] = temp.row[7 - y].bpp[x];
+	}
+      }
+      temp = tile_v;
     }
 
     return temp;
@@ -331,7 +357,7 @@ namespace GBC
       }
       }*/
       
-      if(spp != 0)
+      if(spp != 0 && spp != 5)
       {
 	fif.bpp = spp;
 	fif.palette = pal;
@@ -375,36 +401,36 @@ namespace GBC
     {
       for(uint8_t i = 0; i < sprite_size; i++)
       {
-	uint16_t spx = buffer[i].x-8;
+	uint16_t spx = buffer[i].x;
 	//if(*LY == 64) printf("%d: x: %x | %x and size :%d\n", i, x, buffer[i].index, sprite_size);
-	if(!window_begin && w_x != 0) spx = buffer[i].x;
-	if((spx) <= (x+7) && buffer[i].x != 0)
+	//if(!window_begin && w_x != 0) spx = buffer[i].x + 8;
+	if((spx-8) <= (x+7) && buffer[i].x != 0)
 	{
 	  tile_mode = TileMode::OBJ;
 	  current_obj = buffer[i];
 
 	  /*if(buffer[i+1].x == spx)
-	  {
+	    {
 	    if(buffer[i+1].index > buffer[i].index)
 	    {
-	      current_obj = buffer[i+1];
-	      buffer[i+1].x = 0;
-	      buffer[i+1].y = 0;
-	      buffer[i+1].index = 0;
-	      buffer[i+1].flags = 0;
-	      buffer[i+1].height = 0;
+	    current_obj = buffer[i+1];
+	    buffer[i+1].x = 0;
+	    buffer[i+1].y = 0;
+	    buffer[i+1].index = 0;
+	    buffer[i+1].flags = 0;
+	    buffer[i+1].height = 0;
 	    }
-	  }
+	    }
 	  */
 	  /*
-	  if(buffer[i+1].x < (spx+7))
-	  {
-	      buffer[i+1].x = 0;
-	      buffer[i+1].y = 0;
-	      buffer[i+1].index = 0;
-	      buffer[i+1].flags = 0;
-	      buffer[i+1].height = 0;
-	  }
+	    if(buffer[i+1].x < (spx+7))
+	    {
+	    buffer[i+1].x = 0;
+	    buffer[i+1].y = 0;
+	    buffer[i+1].index = 0;
+	    buffer[i+1].flags = 0;
+	    buffer[i+1].height = 0;
+	    }
 	  */
 	  uint16_t index = current_obj.index;
 	  
@@ -437,7 +463,7 @@ namespace GBC
 	    beg = 0;
 	  }
 	  
-	  //if(beg == 0 || beg == 2)
+	  if(beg == 0 || beg == 2)
 	  {
 	    buffer[i].x = 0;
 	    buffer[i].y = 0;
@@ -479,40 +505,33 @@ namespace GBC
 
 	uint8_t x = i;
 	uint8_t y = ((*LY - ((current_obj.y)-16)) % 8); 
-	if(hflip)
-	{
-	  x = 7 - x;
-	}
-	if(vflip)
-	{
-	  y = 7  - y;
-	}
 
-	uint8_t bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
+	uint8_t bpp = IndexToTile(current_obj.index, false, hflip, vflip).row[y].bpp[x];
 
-	/*if(beg == 1)
-	  {
+	if(beg == 1)
+	{
 	  if(i < ((current_obj.x-8) % 8))
 	  {
-	  bpp = 0;
+	    bpp = 5;
 	  }
 	  else
 	  {
-	  bpp = IndexToTile(current_obj.index, false).row[y].bpp[x - ((current_obj.x-8) % 8)];
+	    bpp = IndexToTile(current_obj.index, false, hflip, vflip).row[y].bpp[x - ((current_obj.x-8) % 8)];
 	  }
-	  }
-	
-	  if(beg == 2)
-	  {
+	}
+	else if(beg == 2)
+	{
 	  if(i <= ((current_obj.x-1) % 8))
 	  {
-	  bpp = IndexToTile(current_obj.index, false).row[y].bpp[x];
+	    uint8_t offset = ((current_obj.x-1) % 8) + 1;
+	    offset = 8 - offset;
+	    bpp = IndexToTile(current_obj.index, false, hflip, vflip).row[y].bpp[x + offset];
 	  }
 	  else
 	  {
-	  bpp = 0;
+	    bpp = 5;
 	  }
-	  }*/
+	}
 
 	fif.bpp = bpp;
 	fif.bg_prio = Get_Bit_N(current_obj.flags, 7);
@@ -644,7 +663,12 @@ namespace GBC
 
   void PPU::Render()
   {
-    if(!Get_Bit_N(LCDC, 7)) return;
+    if(!Get_Bit_N(LCDC, 7))
+    {
+      Set_Bit_N(&STAT, 0, 0);
+      Set_Bit_N(&STAT, 1, 0);
+      return;
+    }
     
     switch(rend.mode)
     {
@@ -669,18 +693,18 @@ namespace GBC
       if(rend.dot == P_OAM_END)
       {
 	/*for(uint8_t i = 0; i < 40; i++)
-	{
+	  {
 	  for(uint8_t j = 0; j < 40; j++)
 	  {
-	    Object obj;
-	    if(objects[i].x < objects[j].x)
-	    {
-	      obj = objects[i];
-	      objects[i] = objects[j];
-	      objects[j] = obj;
-	    }
+	  Object obj;
+	  if(objects[i].x < objects[j].x)
+	  {
+	  obj = objects[i];
+	  objects[i] = objects[j];
+	  objects[j] = obj;
 	  }
-	}
+	  }
+	  }
 	*/	
 	for(uint8_t i = 0; i < 40; i++)
 	{

@@ -127,7 +127,7 @@ namespace GBC
     void Discard();
     void Reset();
     
-    Tile IndexToTile(uint8_t index, bool BGW);
+    Tile IndexToTile(uint8_t index, bool BGW, bool hflip = false, bool vflip = false);
 
     Object OAMToObject(uint8_t index);
     uint8_t TileToScreen(uint8_t x, uint8_t y, bool map2);
