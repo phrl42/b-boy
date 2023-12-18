@@ -178,6 +178,9 @@ namespace GBC
     // 1 : begin
     // 2 : end
     uint8_t beg = 0;
+
+    Object next_obj;
+    bool cobj = false;
   public:
     uint8_t window_line_counter = 0;
     bool window_trigger = false;

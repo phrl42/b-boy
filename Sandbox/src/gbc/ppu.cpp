@@ -277,7 +277,7 @@ namespace GBC
     nt = (x / 8) + ((y / 8) * 32) % 1024;
 
     int index = map2 ? this->map2[nt] : this->map1[nt];
-    Tile tile = IndexToTile(index, tile_mode == TileMode::OBJ ? false : true);
+    Tile tile = IndexToTile(index, true);
 
     return tile.row[ny].bpp[nx];
   }
@@ -329,38 +329,18 @@ namespace GBC
       uint8_t spp = fifo_obj[0].bpp;
       uint8_t pal = fifo_obj[0].palette;
  
-      uint8_t index = 0;
-      /*switch(spp)
+      fif.bpp = spp;
+      fif.palette = pal;
+      if(spp == 5 || spp == 0)
       {
-      case 0:
-      {
-	index = pal & 0x03;
-	break;
+	fif.bpp = fifo_bg[0].bpp;
+	fif.palette = fifo_bg[0].palette;
       }
-
-      case 1:
-      {
-	index = (pal & 0x0C) >> 2;
-	break;
-      }
-
-      case 2:
-      {
-	index = (pal & 0x30) >> 4;
-	break;
-      }
-
-      case 3:
-      {
-	index = (pal & 0xC0) >> 6;
-	break;
-      }
-      }*/
       
-      if(spp != 0 && spp != 5)
+      if(fifo_obj[0].bg_prio && fifo_bg[0].bpp != 0)
       {
-	fif.bpp = spp;
-	fif.palette = pal;
+	fif.bpp = fifo_bg[0].bpp;
+	fif.palette = fifo_bg[0].palette;
       }
       Pop(true);
     }
@@ -462,7 +442,33 @@ namespace GBC
 	  {
 	    beg = 0;
 	  }
-	  
+
+	 if(i != sprite_size-1)
+	  {
+	    if((buffer[i+1].x-8) <= x+7)
+	    {
+	      cobj = true;
+	      next_obj = buffer[i+1];
+	      if(next_obj.height == 16 && !(8 <= (*LY - (next_obj.y-16))))
+	      {
+		next_obj.index = next_obj.index & 0xFE;
+	      }
+	      else if(8 <= (*LY - (next_obj.y-16)) && next_obj.height == 16)
+	      {
+		next_obj.index = next_obj.index | 0x01;
+	      }
+
+	      if(next_obj.height == 16 && Get_Bit_N(next_obj.flags, 6) && !(8 <= (*LY - (next_obj.y-16))))
+	      {
+		next_obj.index = index | 0x01;
+	      }
+	      else if(next_obj.height == 16 && 8 <= (*LY - (next_obj.y-16)) && Get_Bit_N(next_obj.flags, 6))
+	      {
+		next_obj.index = index & 0xFE;
+	      }
+	    }
+	  }
+
 	  if(beg == 0 || beg == 2)
 	  {
 	    buffer[i].x = 0;
@@ -508,6 +514,8 @@ namespace GBC
 
 	uint8_t bpp = IndexToTile(current_obj.index, false, hflip, vflip).row[y].bpp[x];
 
+	fif.bg_prio = Get_Bit_N(current_obj.flags, 7);
+
 	if(beg == 1)
 	{
 	  if(i < ((current_obj.x-8) % 8))
@@ -530,11 +538,18 @@ namespace GBC
 	  else
 	  {
 	    bpp = 5;
+	    if(cobj)
+	    {
+	      hflip = Get_Bit_N(next_obj.flags, 5);
+	      vflip = Get_Bit_N(next_obj.flags, 6);
+	      fif.bg_prio = Get_Bit_N(next_obj.flags, 7);
+	      bpp = IndexToTile(next_obj.index, false, hflip, vflip).row[y].bpp[x - ((next_obj.x-8) % 8)];
+	    }
 	  }
 	}
 
 	fif.bpp = bpp;
-	fif.bg_prio = Get_Bit_N(current_obj.flags, 7);
+
 	fetch_obj[i] = fif;
       }
       if((tile_mode == TileMode::BG || tile_mode == TileMode::OBJ) && window_begin)
@@ -555,7 +570,7 @@ namespace GBC
 
     x += 8;
     if((tile_mode == TileMode::W || tile_mode == TileMode::OBJ) && !window_begin) w_x += 8;
-  
+    if(cobj) cobj = false;
     state = Mode::PUSH_FIFO;
   }
 
@@ -692,20 +707,20 @@ namespace GBC
 
       if(rend.dot == P_OAM_END)
       {
-	/*for(uint8_t i = 0; i < 40; i++)
-	  {
+	for(uint8_t i = 0; i < 40; i++)
+	{
 	  for(uint8_t j = 0; j < 40; j++)
 	  {
-	  Object obj;
-	  if(objects[i].x < objects[j].x)
-	  {
-	  obj = objects[i];
-	  objects[i] = objects[j];
-	  objects[j] = obj;
+	    Object obj;
+	    if(objects[i].x < objects[j].x)
+	    {
+	      obj = objects[i];
+	      objects[i] = objects[j];
+	      objects[j] = obj;
+	    }
 	  }
-	  }
-	  }
-	*/	
+	}
+	
 	for(uint8_t i = 0; i < 40; i++)
 	{
 	  if(objects[i].x > 0 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
