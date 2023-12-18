@@ -2,11 +2,18 @@
 
 Currently Work In Progress!
 
+<img src="screenshot.png"></a>
 # Resources:
 <a href="https://en.wikipedia.org/wiki/Game_Boy_Color">Wikipedia</a>
 <a href="https://gbdev.io/pandocs/Specifications.html">Reference</a>
 
 # To-Do
+- [ ] fix sprite bugs
+- [ ] port to android
+- [ ] fix timing
+- [ ] more mbc support for pokemon
+- [ ] sound
+- [ ] saving and save states
 
 ## Passing tests
 - [X] 01-special
