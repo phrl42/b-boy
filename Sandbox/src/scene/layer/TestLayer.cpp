@@ -86,43 +86,78 @@ namespace SANDBOX
       emu = std::thread(&TestLayer::UpdateEmu, this);
     }
 
+    // please forgive me
     if(Banana::Input::IsKeyPressed(KEY_A))
     {
       spec.io.Press(GBC::IO::KEY::A);
-    } 
-    else if(Banana::Input::IsKeyPressed(KEY_B))
+    }
+    else
+    {
+      spec.io.Release(GBC::IO::KEY::A);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_B))
     {
       spec.io.Press(GBC::IO::KEY::B);
     }
-    else if(Banana::Input::IsKeyPressed(KEY_LEFT))
+    else
+    {
+      spec.io.Release(GBC::IO::KEY::B);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_LEFT))
     {
       spec.io.Press(GBC::IO::KEY::LEFT);
     }
-    else if(Banana::Input::IsKeyPressed(KEY_RIGHT))
+    else
+    {
+      spec.io.Release(GBC::IO::KEY::LEFT);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_RIGHT))
     {
       spec.io.Press(GBC::IO::KEY::RIGHT);
     }
-    else if(Banana::Input::IsKeyPressed(KEY_UP))
+    else
+    {
+      spec.io.Release(GBC::IO::KEY::RIGHT);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_UP))
     {
       spec.io.Press(GBC::IO::KEY::UP);
     }
-    else if(Banana::Input::IsKeyPressed(KEY_DOWN))
+    else
+    {
+      spec.io.Release(GBC::IO::KEY::UP);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_DOWN))
     {
       spec.io.Press(GBC::IO::KEY::DOWN);
     }
-    else if(Banana::Input::IsKeyPressed(KEY_ENTER))
+    else
+    {
+      spec.io.Release(GBC::IO::KEY::DOWN);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_ENTER))
     {
       spec.io.Press(GBC::IO::KEY::START);
     }
-    else if(Banana::Input::IsKeyPressed(KEY_BACKSPACE))
+    else
+    {
+      spec.io.Release(GBC::IO::KEY::START);
+    }
+
+    if(Banana::Input::IsKeyPressed(KEY_BACKSPACE))
     {
       spec.io.Press(GBC::IO::KEY::SELECT);
     }
     else
     {
-      spec.io.Release();
-    }
-
+      spec.io.Release(GBC::IO::KEY::SELECT);
+    } 
 
     Banana::LineComponent *screent = (Banana::LineComponent*)screen.GetComponent("LineComponent");
     Banana::TileComponent *tc = (Banana::TileComponent*)tmap1.GetComponent("TileComponent");

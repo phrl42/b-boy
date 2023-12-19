@@ -9,28 +9,18 @@ namespace GBC
 
   void IO::Press(KEY key)
   {
-    if(((uint8_t)(key) & 0x20) == 0x20)
-    {
-      press_dpad &= (uint8_t)key;
-    }
-    else if(((uint8_t)(key) & 0x10) == 0x10)
-    {
-      press_button &= (uint8_t)key;
-    }
+    presses.push_back(key);
+    //JOYPAD = (uint8_t)key;
     interrupt->Request(INTERRUPT::JOYPAD);
   }
 
   void IO::Release(KEY key)
   {
-    uint8_t mod = (~(uint8_t)(key)) & 0x0F;
-    if(((uint8_t)(key) & 0x20) == 0x20)
+    for(std::vector<KEY>::iterator it; it != presses.end())
     {
-      press_dpad |= (uint8_t)mod;
+      
     }
-    else if(((uint8_t)(key) & 0x10) == 0x10)
-    {
-      press_button |= (uint8_t)mod;
-    }
+    JOYPAD = 0xFF;
   }
 
   uint8_t IO::Read(uint16_t address)
@@ -71,11 +61,17 @@ namespace GBC
       JOYPAD = (uint8_t)KEY::NONE;
       if(value == 0x10)
       {
-	JOYPAD = press_button;
+	if(press == KEY::START) JOYPAD = (uint8_t)KEY::START;
+	if(press == KEY::SELECT) JOYPAD = (uint8_t)KEY::SELECT;
+	if(press == KEY::A) JOYPAD = (uint8_t)KEY::A;
+	if(press == KEY::B) JOYPAD = (uint8_t)KEY::B;
       }
       if(value == 0x20)
       {
-	JOYPAD = press_dpad;
+	if(press == KEY::DOWN) JOYPAD = (uint8_t)KEY::DOWN;
+	if(press == KEY::UP) JOYPAD = (uint8_t)KEY::UP;
+	if(press == KEY::LEFT) JOYPAD = (uint8_t)KEY::LEFT;
+	if(press == KEY::RIGHT) JOYPAD = (uint8_t)KEY::RIGHT;
       }
       break;
     } 

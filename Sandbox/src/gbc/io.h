@@ -31,9 +31,10 @@ namespace GBC
 	NONE = 0xFF
       };
 
-    KEY press;
+    uint8_t press_dpad = 0;
+    uint8_t press_button = 0;
     void Press(KEY key);
-    void Release();
+    void Release(KEY key);
   private:
     uint8_t JOYPAD = 0xFF;
     uint8_t SB = 0;
