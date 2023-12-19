@@ -105,11 +105,12 @@ namespace GBC
 
     file.close();
 
-    /*if(mbc != MBC::MBC1B)
-    {
-      std::ifstream save;
-      save.open(std::string(rom_path) + std::string(".sav"), std::ios::binary | std::ios::in);
+    std::ifstream save;
+    save.open(std::string(rom_path) + std::string(".sav"), std::ios::binary | std::ios::in);
 
+    if(save)
+    {
+      GBC_LOG("Loaded save at " + std::string(rom_path) + std::string(".sav"));
       char byte = 0;
       for(uint16_t address = 0xA000; address <= 0xBFFF; address++)
       {
@@ -117,7 +118,7 @@ namespace GBC
 	space[address] = byte;
       }
       
-      }*/
+    }
     
     return true;
   }
@@ -146,7 +147,7 @@ namespace GBC
 
   ROM::~ROM()
   {
-    if(mbc != MBC::MBC1B) return;
+    //if(mbc != MBC::MBC1B) return;
     std::ofstream save;
     save.open(std::string(rom) + std::string(".sav"), std::ios::binary | std::ios::out);
 
@@ -156,6 +157,7 @@ namespace GBC
     }
 
     save.close();
+    GBC_LOG("Saved game to " + std::string(rom) + std::string(".sav"));
   }
 
   uint8_t ROM::Read(uint16_t address)
@@ -179,6 +181,11 @@ namespace GBC
       }
       return space[0x4000 * HIGH_BANK_NUM + (address - 0x4000)];
     }
+
+    if(address >= 0xA000 && address <= 0xBFFF)
+    {
+      return space[address];
+    }
   }
 
   void ROM::Write(uint16_t address, uint8_t value)
@@ -188,10 +195,6 @@ namespace GBC
       if((value & 0x0F) == 0xA)
       {
 	external_ram = true;
-      }
-      else
-      {
-	external_ram = false;
       }
     }
 
@@ -216,7 +219,8 @@ namespace GBC
 
     if(address >= 0xA000 && address <= 0xBFFF)
     {
-      if(external_ram) space[address] = value;
+      //if(external_ram)
+      space[address] = value;
     }
   }
 };
