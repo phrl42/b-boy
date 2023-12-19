@@ -56,13 +56,6 @@ namespace SANDBOX
 
   void TestLayer::OnAttach()
   {
-    for(size_t y = 0; y < TFT_HEIGHT; y++)
-    {
-      for(size_t x = 0; x < TFT_WIDTH; x++)
-      {
-	//ent[y][x].AddComponent(new Banana::QuadComponent());
-      }
-    }
 
   }
 

@@ -675,7 +675,7 @@ namespace GBC
 
     rend.x += fetch.Push(rend.x);
   }
-
+  uint32_t adot = 0;
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7))
@@ -810,7 +810,8 @@ namespace GBC
 	Set_Bit_N(&STAT, 2, 0);
 
 	rend.mode = Mode::OAM_SCAN;
-
+	//printf("frame cycle count: :%d\n", adot);
+	adot = 0;
 	frames++;
 	fetch.window_trigger = false;
       }
@@ -829,6 +830,7 @@ namespace GBC
       interrupt->Request(INTERRUPT::LCD);
     }
     rend.dot++;
+    adot++;
   }
 
 // called every t-cycle
