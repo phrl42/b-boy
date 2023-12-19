@@ -65,7 +65,7 @@ namespace Banana
     return src;
   }
   
-  uint16_t String_To_Hex(const std::string& hex)
+  uint32_t String_To_Hex(const std::string& hex)
   {
     std::stringstream str;
     str << hex;
@@ -200,10 +200,10 @@ namespace Banana
     ImGui::Begin("Debugger", nullptr, 0);
 
     static std::string adstop = "FFFFF";
-    static std::string breakaddr = "";
+    static std::string breakaddr = "FFFF";
 
     static std::string adop = "FFF";
-    static std::string breakop = "";
+    static std::string breakop = "FFF";
     
     ImGui::Text(std::string("Break: 0x" + breakaddr).c_str());
     
@@ -213,8 +213,10 @@ namespace Banana
       breakaddr = adstop;
       Stats::spec->breakaddr = String_To_Hex(adstop);
     }
-   
-    if(String_To_Hex(breakaddr) == Stats::spec->cpu.PC)
+
+    static bool menu = false;
+    
+    if(String_To_Hex(breakaddr) == Stats::spec->cpu.PC && menu)
     {
       Stats::spec->dstate = GBC::Debug::STOP;
     }
@@ -393,17 +395,25 @@ namespace Banana
     
     }
 
-    ImGui::BeginChild("Scrolling");
-    auto char_height = ImGui::CalcTextSize("NIGG").y;
-    for (int n = 0; n < Stats::spec->instructions.size(); n++)
+    if(ImGui::Button("DEBUG"))
     {
-      auto chose = red;
-      if(Stats::spec->instructions[n].first == Stats::spec->cpu.PC) chose = green;
-      ImGui::TextColored(chose, "[%x]: %s", Stats::spec->instructions[n].first, Stats::spec->instructions[n].second.c_str());
+      menu = !menu;
     }
-    if(Stats::spec->dstate != GBC::Debug::STOP) ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (Stats::spec->cpu.PC * char_height) + char_height * 25);
-    ImGui::EndChild();
-    
+
+    if(menu)
+    {
+      ImGui::BeginChild("Scrolling");
+      auto char_height = ImGui::CalcTextSize("NIGG").y;
+      for (int n = 0; n < Stats::spec->instructions.size(); n++)
+      {
+	auto chose = red;
+	if(Stats::spec->instructions[n].first == Stats::spec->cpu.PC) chose = green;
+	ImGui::TextColored(chose, "[%x]: %s", Stats::spec->instructions[n].first, Stats::spec->instructions[n].second.c_str());
+      }
+      if(Stats::spec->dstate != GBC::Debug::STOP) ImGui::SetScrollFromPosY(ImGui::GetCursorStartPos().y + (Stats::spec->cpu.PC * char_height) + char_height * 25);
+      ImGui::EndChild();
+    }
+
     ImGui::End();
     
     static MemoryEditor mem_edit;

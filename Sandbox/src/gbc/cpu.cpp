@@ -33,7 +33,7 @@ namespace GBC
     if(opcode == 0xCB) tstates = lookup_cb[bus->Read(PC+1, false)].cycle;
     int8_t val = (this->*lookup[opcode].opfun)(lookup[opcode].dest, lookup[opcode].w, lookup[opcode].src, lookup[opcode].r);
  
-    bus->Emulate_Cycle(4, true);
+    bus->Emulate_Cycle(1, true);
     PC += 1;
   }
 
