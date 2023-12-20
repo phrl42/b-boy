@@ -174,6 +174,7 @@ namespace GBC
     uint8_t obj_size = 0;
 
     Object current_obj;
+
     // 0 : x == x
     // 1 : begin
     // 2 : end
@@ -182,6 +183,8 @@ namespace GBC
     Object next_obj;
     bool cobj = false;
   public:
+    FIFO sprite_line[WIDTH];
+
     uint8_t window_line_counter = 0;
     bool window_trigger = false;
     bool line_begin = true;
