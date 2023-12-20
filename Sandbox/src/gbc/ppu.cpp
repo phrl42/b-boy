@@ -324,35 +324,29 @@ namespace GBC
     fif.bpp = fifo_bg[0].bpp;
     fif.palette = fifo_bg[0].palette;
 
-    FIFO obj_fif;
-    obj_fif = sprite_line[rend_x];
-    if(obj_fif.bpp != 5)
+    if(Get_Bit_N(*LCDC, 1))
     {
-      fif.bpp = obj_fif.bpp;
-      fif.palette = obj_fif.palette; 
-    }
+      FIFO obj_fif = sprite_line[rend_x];
     
-    /*if(obj_size != 0)
-    {
-      uint8_t spp = fifo_obj[0].bpp;
-      uint8_t pal = fifo_obj[0].palette;
+      uint8_t spp = obj_fif.bpp;
+      uint8_t pal = obj_fif.palette;
  
       fif.bpp = spp;
       fif.palette = pal;
      
-      if(fifo_obj[0].bg_prio && fifo_bg[0].bpp != 0)
+      if(sprite_line[rend_x].bg_prio && fifo_bg[0].bpp != 0)
       {
 	fif.bpp = fifo_bg[0].bpp;
 	fif.palette = fifo_bg[0].palette;
       }
 
-      if(spp == 5 || spp == 0)
+      if(obj_fif.bpp == 5 || obj_fif.bpp == 0)
       {
 	fif.bpp = fifo_bg[0].bpp;
 	fif.palette = fifo_bg[0].palette;
       }
-       Pop(true);
-       }*/
+
+    }
     
     screen->line[(*LY) % HEIGHT].fif[rend_x] = fif;
 
@@ -384,11 +378,6 @@ namespace GBC
       y = *LY + *SCY;
 
       tile_mode = TileMode::BG;
-    }
-
-    if(Get_Bit_N(*LCDC, 1))
-    {
-      //tile_mode = TileMode::OBJ;
     }
 
     state = Mode::READ_DATA0;
@@ -592,7 +581,7 @@ namespace GBC
 	// filter sprites
 	for(uint8_t i = 0; i < 40; i++)
 	{
-	  if(objects[i].x > 0 && objects[i].x < 160 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
+	  if(objects[i].x > 0 && objects[i].x <= 152 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
 	  {
 	    fetch.buffer[fetch.sprite_size] = objects[i];
 	    fetch.sprite_size++;
@@ -611,9 +600,22 @@ namespace GBC
 	}
 
 	// put sprites into line
-	for(uint8_t s = 0; s < fetch.sprite_size; s++)
+	for(int s = fetch.sprite_size-1; s >= 0; s--)
 	{
 	  Object obj = fetch.buffer[s];
+	  if(s != 0)
+	  {
+	    if(fetch.buffer[s-1].x == obj.x)
+	    {
+	      if(obj.index > fetch.buffer[s-1].index)
+	      {
+		fetch.buffer[s-1] = obj;
+	      }
+		
+	      continue;
+	    }
+	  }
+
 	  for(uint8_t i = 0; i < 8; i++)
 	  {
 	    FIFO fif;
@@ -784,7 +786,6 @@ namespace GBC
 	uint8_t lower_bit = Get_Bit_N(lower_row, 7 - i);
 	uint8_t higher_bit = Get_Bit_N(higher_row, 7 - i);
 
-	// reverse order is required by gpu
 	res_bit = higher_bit << 1 | lower_bit;
 	tile[tile_index].row[row_index].bpp[i] = res_bit;
       }
