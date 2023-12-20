@@ -323,8 +323,16 @@ namespace GBC
     FIFO fif;
     fif.bpp = fifo_bg[0].bpp;
     fif.palette = fifo_bg[0].palette;
+
+    FIFO obj_fif;
+    obj_fif = sprite_line[rend_x];
+    if(obj_fif.bpp != 5)
+    {
+      fif.bpp = obj_fif.bpp;
+      fif.palette = obj_fif.palette; 
+    }
     
-    if(obj_size != 0)
+    /*if(obj_size != 0)
     {
       uint8_t spp = fifo_obj[0].bpp;
       uint8_t pal = fifo_obj[0].palette;
@@ -338,13 +346,13 @@ namespace GBC
 	fif.palette = fifo_bg[0].palette;
       }
 
-      if(spp == 5)
+      if(spp == 5 || spp == 0)
       {
 	fif.bpp = fifo_bg[0].bpp;
 	fif.palette = fifo_bg[0].palette;
       }
        Pop(true);
-    }
+       }*/
     
     screen->line[(*LY) % HEIGHT].fif[rend_x] = fif;
 
@@ -428,7 +436,7 @@ namespace GBC
     }
 
     x += 8;
-    if((tile_mode == TileMode::W || tile_mode == TileMode::OBJ) && !window_begin) w_x += 8;
+    if(!window_begin) w_x += 8;
     if(cobj) cobj = false;
     state = Mode::PUSH_FIFO;
   }
