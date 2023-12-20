@@ -553,11 +553,9 @@ namespace GBC
       // set PPU Mode
       Set_Bit_N(&STAT, 0, 0);
       Set_Bit_N(&STAT, 1, 1);
-
       if(rend.dot % 2 == 0)
       {
 	uint8_t index = rend.dot / 2;
-
 	objects[index] = fetch.OAMToObject(index * 4);
       }
 
@@ -581,7 +579,7 @@ namespace GBC
 	// filter sprites
 	for(uint8_t i = 0; i < 40; i++)
 	{
-	  if(objects[i].x > 0 && objects[i].x <= 152 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
+	  if(objects[i].x > 0 && objects[i].x <= 160 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
 	  {
 	    fetch.buffer[fetch.sprite_size] = objects[i];
 	    fetch.sprite_size++;
@@ -689,7 +687,7 @@ namespace GBC
 	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0); 
 
-	rend.dot = 0;
+	rend.dot = -1;
 	rend.x = 0;
 	rend.mode = Mode::OAM_SCAN;
 	if(LY == HEIGHT)
@@ -719,7 +717,7 @@ namespace GBC
       if(rend.dot == P_HBLANK_END)
       {
 	LY += 1;
-	rend.dot = 0;
+	rend.dot = -1;
 	rend.x = 0;
 	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0);
@@ -728,7 +726,7 @@ namespace GBC
       if(LY == P_VBLANK_END)
       {
 	LY = 0;
-	rend.dot = 0;
+	rend.dot = -1;
 	rend.x = 0;
 	line_interrupt_done = false;
 	Set_Bit_N(&STAT, 2, 0);
