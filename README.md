@@ -8,13 +8,14 @@ Currently Work In Progress!
 <a href="https://gbdev.io/pandocs/Specifications.html">Reference</a>
 
 # To-Do
-- [ ] fix sprite bugs
+- [X] fix sprite bugs
 - [ ] port to android
-- [ ] fix timing
-- [ ] more mbc support for pokemon
+- [ ] fix slowness
+- [ ] full mbc1 / mbc3 support
 - [ ] sound
 - [ ] saving and save states
 
+- [ ] G a m e B o y C o l o r
 ## Passing tests
 - [X] 01-special
 - [X] 02-interrupts
@@ -28,6 +29,8 @@ Currently Work In Progress!
 - [X] 10-bit ops
 - [X] 11-op a,(hl)
 
+- [X] dmg-acid2 (this was hell)
+ 
 # Instructions
 
 Generate build files:
@@ -40,15 +43,16 @@ Then open the Visual Studio Solution and compile the "Sandbox" Project.
 
 ## Linux:
 
-You should install premake5 on linux.
+premake5 should be installed on the system
 
 ```premake5 gmake2```
 
 ```make```
 
-Run game binary:
-
 ```./run.sh```
 
 # Info
 This is Linux and Windows compatible. All dependencies are within this repository.
+
+# Motivation
+Playing retro games is not enough joy for me. I crave the need to emulate the console. I am probably insane
