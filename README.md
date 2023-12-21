@@ -7,15 +7,17 @@ Currently Work In Progress!
 <a href="https://en.wikipedia.org/wiki/Game_Boy_Color">Wikipedia</a>
 <a href="https://gbdev.io/pandocs/Specifications.html">Reference</a>
 
+A huge thanks for all the support in the Emulation Development Discord!
+
 # To-Do
-- [X] fix sprite bugs
-- [ ] port to android
-- [ ] fix slowness
-- [ ] full mbc1 / mbc3 support
-- [ ] sound
-- [ ] saving and save states
+- [X] Fix sprite bugs
+- [ ] Fix slowness
+- [ ] Better MBC 1/3 support
+- [ ] APU
 
 - [ ] G a m e B o y C o l o r
+- [ ] port to android
+
 ## Passing tests
 - [X] 01-special
 - [X] 02-interrupts
