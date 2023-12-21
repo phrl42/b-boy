@@ -2,7 +2,7 @@
 
 Currently Work In Progress!
 
-<img src="screenshot.png" width=250px height=250px></a>
+<img src="screenshot.png" width=500px height=500px></a>
 # Resources:
 <a href="https://en.wikipedia.org/wiki/Game_Boy_Color">Wikipedia</a>
 <a href="https://gbdev.io/pandocs/Specifications.html">Reference</a>
