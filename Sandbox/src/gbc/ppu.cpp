@@ -648,6 +648,8 @@ namespace GBC
 	    }
 	    
 	    fif.bpp = fetch.IndexToTile(obj.index, false, hflip, vflip).row[y].bpp[i];
+
+	    if(fif.bpp == 0 && fetch.sprite_line[(obj.x-8)+i].bpp != 0) continue;
 	    fetch.sprite_line[(obj.x-8)+i] = fif;
 	  }
 	}
