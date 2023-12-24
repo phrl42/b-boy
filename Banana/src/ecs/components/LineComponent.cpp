@@ -36,7 +36,7 @@ namespace Banana
   {
     Pixel palette[4] = {{224, 248, 208, 255}, {136, 192, 112, 255}, {52, 104, 86, 255}, {8, 24, 32, 255}};
 
-    //if(!Stats::spec->ppu.frame_done) return;
+    if(!Stats::spec->ppu.frame_done) return;
     for(uint8_t y = 0; y < HEIGHT; y++)
     {
       for(uint8_t x = 0; x < WIDTH; x++)

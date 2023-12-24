@@ -46,7 +46,11 @@ project "Banana"
   filter "configurations:Debug"
     defines "BUILD_DEBUG"
     symbols "On"
+    buildoptions { "" }
+    linkoptions { "" }
 
   filter "configurations:Release"
     defines "BUILD_RELEASE"
     optimize "On"
+    buildoptions { "" }
+    linkoptions { "" }

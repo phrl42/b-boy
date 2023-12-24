@@ -76,13 +76,13 @@ namespace GBC
 	add_address(i);
       }
     }
-	  
+    
     if(!adt)
     {
       adt = true;
     }
 
-    if(cpu.state == State::RUN && breakaddr != cpu.PC && dstate != Debug::STOP)
+    if(cpu.state == State::RUN) //&& breakaddr != cpu.PC && dstate != Debug::STOP)
     {
       adt = false;
       cpu.Validate_Opcode();
@@ -96,7 +96,7 @@ namespace GBC
     if(cpu.state == State::HALT)
     {
       bus.Emulate_Cycle(4, true);
-      if(bus.Read(A_IF) & bus.Read(A_IE))
+      if(bus.Read(A_IF, false) & bus.Read(A_IE, false))
       {
 	cpu.state = State::RUN;
       }
@@ -107,7 +107,7 @@ namespace GBC
       interrupt.Handle(&cpu);
     }
 
-    io.Serial_Update();
+    //io.Serial_Update();
   }
   
 };

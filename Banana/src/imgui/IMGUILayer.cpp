@@ -286,6 +286,7 @@ namespace Banana
     ImGui::End();
     
     ImGui::Begin("PPU", nullptr, 0);
+    ImGui::Text(Stats::spec->ppu.GetRenderMode().c_str());
     ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_LCDC, false), "", true));
     ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_STAT, false), "", true));
     ImGui::Text(Hex_To_CString(Stats::spec->bus.Read(A_SCX, false), "[FF42] SCX: ", false));

@@ -268,6 +268,22 @@ namespace GBC
     return temp;
   }
 
+  void Fetcher::PreLoadTiles(uint8_t y)
+  {
+    for(uint8_t i = 0; i < 160; i += 8)
+    {
+      uint32_t nt = 0;
+
+      nt = (i / 8) + ((y / 8) * 32) % 1024;
+
+      int index = map2 ? this->map2[nt] : this->map1[nt];
+      Tile tile = IndexToTile(index, true);
+
+      tile_line[i/8] = tile;
+    }
+    
+  }
+
   uint8_t Fetcher::TileToScreen(uint8_t x, uint8_t y, bool map2)
   {
     uint32_t nt = 0;
@@ -297,24 +313,13 @@ namespace GBC
 
   // Fetcher
 
-  void Fetcher::Pop(bool obj)
+  void Fetcher::Pop()
   {
-    if(!obj)
+    for(uint8_t i = 0; i < 7; i++)
     {
-      for(uint8_t i = 0; i < 7; i++)
-      {
-	fifo_bg[i] = fifo_bg[i+1];
-      }
-      bg_size--;
+      fifo_bg[i] = fifo_bg[i+1];
     }
-    else
-    {
-      for(uint8_t i = 0; i < 7; i++)
-      {
-	fifo_obj[i] = fifo_obj[i+1];
-      }
-      obj_size--;
-    }
+    bg_size--;
   }
 
   uint8_t Fetcher::Push(uint8_t rend_x)
@@ -345,12 +350,13 @@ namespace GBC
 	fif.bpp = fifo_bg[0].bpp;
 	fif.palette = fifo_bg[0].palette;
       }
-
+    
     }
     
     screen->line[(*LY) % HEIGHT].fif[rend_x] = fif;
 
-    Pop(false);
+    Pop();
+    
     return 1;
   }
 
@@ -399,23 +405,14 @@ namespace GBC
 
     for(uint8_t i = 0; i < 8; i++)
     {
-      if(tile_mode == TileMode::OBJ)
-      {
-	FIFO fif;
-	fif.bpp = sprite_line[x+i].bpp;
-	fif.bg_prio = sprite_line[x+i].bg_prio;
-	fif.palette = sprite_line[x+i].palette;
-
-	fetch_obj[i] = fif;
-      }
-      if((tile_mode == TileMode::BG || tile_mode == TileMode::OBJ) && window_begin)
+      if((tile_mode == TileMode::BG) && window_begin)
       {
 	FIFO fif;
 	fif.bpp = TileToScreen(x+i, y, Get_Bit_N(*LCDC, 3));
 	fif.palette = *BGP;
 	fetch[i] = fif;
       }
-      if((tile_mode == TileMode::W || tile_mode == TileMode::OBJ) && !window_begin)
+      if((tile_mode == TileMode::W) && !window_begin)
       {
 	FIFO fif;
 	fif.bpp = TileToScreen(w_x+i, w_y, Get_Bit_N(*LCDC, 6));
@@ -426,7 +423,6 @@ namespace GBC
 
     x += 8;
     if(!window_begin) w_x += 8;
-    if(cobj) cobj = false;
     state = Mode::PUSH_FIFO;
   }
 
@@ -441,15 +437,6 @@ namespace GBC
       bg_size = 8;
       state = Mode::READ_TILE;
     }
-    if(obj_size == 0 && tile_mode == TileMode::OBJ)
-    {
-      for(uint8_t i = 0; i < 8; i++)
-      {
-	fifo_obj[i] = fetch_obj[i];
-      }
-      obj_size = 8;
-      state = Mode::READ_TILE;
-    }
   }
 
   void Fetcher::Discard()
@@ -458,12 +445,8 @@ namespace GBC
     {
       fifo_bg[i] = FIFO();
       fetch[i] = FIFO();
-      
-      fetch_obj[i] = FIFO();
-      fifo_obj[i] = FIFO();
     }
     bg_size = 0;
-    obj_size = 0;
     sprite_size = 0;
     state = Mode::READ_TILE;
 
@@ -532,6 +515,7 @@ namespace GBC
     rend.x += fetch.Push(rend.x);
   }
 
+  // consumes a lot of resources
   void PPU::Render()
   {
     if(!Get_Bit_N(LCDC, 7))
@@ -653,6 +637,7 @@ namespace GBC
 	    fetch.sprite_line[(obj.x-8)+i] = fif;
 	  }
 	}
+	fetch.PreLoadTiles(LY);
 	
 	rend.mode = Mode::DRAWING_PIXELS;
       }
@@ -778,7 +763,7 @@ namespace GBC
     {
       uint16_t lower_row = tile_data[pos];
       uint16_t higher_row = tile_data[pos+1];
-      
+
       for(uint8_t i = 0; i <= 7; i++)
       {
 	uint8_t res_bit = 0;

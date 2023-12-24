@@ -153,7 +153,7 @@ namespace GBC
     
     void Push_FIFO();
 
-    void Pop(bool obj);
+    void Pop();
 
     bool start = true;
     bool scx_done = false;
@@ -165,24 +165,19 @@ namespace GBC
     uint8_t w_y = 0;
 
     FIFO fetch[8];
-    FIFO fetch_obj[8];
 
     FIFO fifo_bg[8];
     uint8_t bg_size = 0;
-
-    FIFO fifo_obj[8];
-    uint8_t obj_size = 0;
-
-    Object current_obj;
 
     // 0 : x == x
     // 1 : begin
     // 2 : end
     uint8_t beg = 0;
 
-    Object next_obj;
-    bool cobj = false;
+    Tile tile_line[20] = {0};
+
   public:
+    void PreLoadTiles(uint8_t y);
     FIFO sprite_line[WIDTH];
 
     uint8_t window_line_counter = 0;
@@ -235,7 +230,8 @@ namespace GBC
     
     void Render();
     void Tick();
- 
+
+
   private:
     Interrupt *interrupt;
 
@@ -267,6 +263,37 @@ namespace GBC
     void Draw_Pixel();
   public:
     // for debug only
+    inline std::string GetRenderMode()
+    {
+      switch(rend.mode)
+      {
+      case Mode::OAM_SCAN:
+      {
+	return std::string("OAM SCAN");
+	break;
+      }
+
+      case Mode::DRAWING_PIXELS:
+      {
+	return std::string("DRAWING PIXELS");
+	break;
+      }
+
+      case Mode::HBLANK:
+      {
+	return std::string("HBLANK");
+	break;
+      }
+
+      case Mode::VBLANK:
+      {
+	return std::string("VBLANK");
+	break;
+      }
+      }
+      return std::string("n-word");
+    }
+
     int frames = 0;
     bool frame_done = false;
     
