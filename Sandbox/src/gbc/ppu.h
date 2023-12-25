@@ -174,6 +174,8 @@ namespace GBC
     // 2 : end
     uint8_t beg = 0;
 
+    Tile tile_line[20] = {0};
+    Tile tile_line_w[20] = {0};
   public:
     void PreLoadTiles(uint8_t y);
     FIFO sprite_line[WIDTH];

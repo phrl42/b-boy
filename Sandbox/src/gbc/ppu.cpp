@@ -270,8 +270,10 @@ namespace GBC
 
   void Fetcher::PreLoadTiles(uint8_t y)
   {
-    uint8_t index = 0;
-    for(uint8_t i = 0; i < 160; i += 8)
+    bool map2 = Get_Bit_N(*LCDC, 3);
+    bool map2_w = Get_Bit_N(*LCDC, 6);
+    
+    for(size_t i = 0; i < 160; i += 8)
     {
       uint32_t nt = 0;
 
@@ -280,8 +282,7 @@ namespace GBC
       int index = map2 ? this->map2[nt] : this->map1[nt];
       Tile tile = IndexToTile(index, true);
 
-      //tile_line[index] = tile;
-      index++;
+      tile_line[i/8] = tile;
     }
     
   }
@@ -295,9 +296,25 @@ namespace GBC
     nt = (x / 8) + ((y / 8) * 32) % 1024;
 
     int index = map2 ? this->map2[nt] : this->map1[nt];
-    Tile tile = IndexToTile(index, true);
 
-    return tile.row[ny].bpp[nx];
+    uint16_t start = index * 16;
+
+    if(!Get_Bit_N(*LCDC, 4))
+    {
+      start = 0x1000 + (int8_t)(index) * 16;
+    }
+
+    uint16_t lower_row = tile_data[start + (2 * ny)];
+    uint16_t higher_row = tile_data[start+1 + (2 * ny)];
+
+    uint8_t res_bit = 0;
+
+    uint8_t lower_bit = Get_Bit_N(lower_row, 7 - (nx));
+    uint8_t higher_bit = Get_Bit_N(higher_row, 7 - (nx));
+
+    res_bit = higher_bit << 1 | lower_bit;
+
+    return res_bit;
   }
 
   Object Fetcher::OAMToObject(uint8_t index)
@@ -639,7 +656,7 @@ namespace GBC
 	    fetch.sprite_line[(obj.x-8)+i] = fif;
 	  }
 	}
-	fetch.PreLoadTiles(LY);
+	//fetch.PreLoadTiles(LY);
 	
 	rend.mode = Mode::DRAWING_PIXELS;
       }
