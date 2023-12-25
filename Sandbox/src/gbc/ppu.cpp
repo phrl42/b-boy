@@ -351,7 +351,7 @@ namespace GBC
 	fif.palette = fifo_bg[0].palette;
       }
     }
-    
+      
     screen->line[(*LY) % HEIGHT].fif[rend_x] = fif;
 
     Pop();
@@ -562,7 +562,7 @@ namespace GBC
 	// filter sprites
 	for(uint8_t i = 0; i < 40; i++)
 	{
-	  if(objects[i].x > 0 && objects[i].x <= 160 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
+	  if(objects[i].x > 0 && objects[i].x < 168 && (LY + 16) >= objects[i].y && (LY + 16) < (objects[i].height + objects[i].y) && fetch.sprite_size < 10)
 	  {
 	    fetch.buffer[fetch.sprite_size] = objects[i];
 	    fetch.sprite_size++;
@@ -599,6 +599,7 @@ namespace GBC
 
 	  for(uint8_t i = 0; i < 8; i++)
 	  {
+	    if(((uint8_t)((obj.x-8)+i)) >= 160) continue;
 	    FIFO fif;
 	    fif.bg_prio = Get_Bit_N(obj.flags, 7);
 	    fif.palette = Get_Bit_N(obj.flags, 4) ? OBP1 : OBP0;
@@ -636,6 +637,7 @@ namespace GBC
 	    fetch.sprite_line[(obj.x-8)+i] = fif;
 	  }
 	}
+	
 	rend.mode = Mode::DRAWING_PIXELS;
       }
       break;
