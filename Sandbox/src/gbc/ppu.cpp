@@ -268,25 +268,6 @@ namespace GBC
     return temp;
   }
 
-  void Fetcher::PreLoadTiles(uint8_t y)
-  {
-    bool map2 = Get_Bit_N(*LCDC, 3);
-    bool map2_w = Get_Bit_N(*LCDC, 6);
-    
-    for(size_t i = 0; i < 160; i += 8)
-    {
-      uint32_t nt = 0;
-
-      nt = (i / 8) + ((y / 8) * 32) % 1024;
-
-      int index = map2 ? this->map2[nt] : this->map1[nt];
-      Tile tile = IndexToTile(index, true);
-
-      tile_line[i/8] = tile;
-    }
-    
-  }
-
   uint8_t Fetcher::TileToScreen(uint8_t x, uint8_t y, bool map2)
   {
     uint32_t nt = 0;
@@ -369,7 +350,6 @@ namespace GBC
 	fif.bpp = fifo_bg[0].bpp;
 	fif.palette = fifo_bg[0].palette;
       }
-    
     }
     
     screen->line[(*LY) % HEIGHT].fif[rend_x] = fif;
@@ -656,8 +636,6 @@ namespace GBC
 	    fetch.sprite_line[(obj.x-8)+i] = fif;
 	  }
 	}
-	//fetch.PreLoadTiles(LY);
-	
 	rend.mode = Mode::DRAWING_PIXELS;
       }
       break;
