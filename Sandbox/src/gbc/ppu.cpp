@@ -270,6 +270,7 @@ namespace GBC
 
   void Fetcher::PreLoadTiles(uint8_t y)
   {
+    uint8_t index = 0;
     for(uint8_t i = 0; i < 160; i += 8)
     {
       uint32_t nt = 0;
@@ -279,7 +280,8 @@ namespace GBC
       int index = map2 ? this->map2[nt] : this->map1[nt];
       Tile tile = IndexToTile(index, true);
 
-      tile_line[i/8] = tile;
+      //tile_line[index] = tile;
+      index++;
     }
     
   }
