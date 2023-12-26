@@ -11,7 +11,8 @@ A huge thanks for all the support in the Emulation Development Discord!
 
 # To-Do
 - [X] Fix sprite bugs
-- [ ] Fix slowness
+- [X] Fix slowness
+- [ ] Cycle accurate emulation (currently runs at fullspeed)
 - [ ] Better MBC 1/3 support
 - [ ] APU
 
