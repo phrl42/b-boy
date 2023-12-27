@@ -38,55 +38,191 @@ namespace GBC
 
     GBC_LOG("Loaded " + std::to_string(index) + " bytes");
 
-    rom_size = index;
-    banks = (rom_size / 1024) / 16;
-    switch(banks)
+    uint8_t mbc_type = space[0x0147];
+
+    switch(mbc_type)
     {
-    case 2:
+    case 0x00:
     {
-      mask = 0b00000001;
+      mbc = MBC::NONE;
       break;
     }
 
-    case 4:
+    case 0x01:
     {
-      mask = 0b00000011;
+      mbc = MBC::MBC1;
       break;
     }
 
-    case 8:
+    case 0x02:
     {
-      mask = 0b00000111;
+      mbc = MBC::MBC1;
       break;
     }
 
-    case 16:
+    case 0x03:
     {
-      mask = 0b00001111;
-      break;
-    }
-
-    case 32:
-    {
-      mask = 0b00011111;
-      break;
-    }
-
-    case 64:
-    {
-      mask = 0b00011111;
-      break;
-    }
-
-    case 128:
-    {
-      mask = 0b00011111;
+      mbc = MBC::MBC1B;
       break;
     }
 
     default:
     {
-      GBC_LOG("[ROM] rom_size error when setting rom bank");
+      GBC_LOG("Unsupported MBC detected");
+      break;
+    }
+    }
+     
+    uint8_t ram_size = space[0x0149];
+
+    switch(ram_size)
+    {
+    case 0x00:
+    {
+      ram = SIZE::NONE;
+      break;
+    }
+
+    case 0x01:
+    {
+      ram = SIZE::KB2;
+      ram_size_bytes = 1024 * 2;
+      break;
+    }
+
+    case 0x02:
+    {
+      ram = SIZE::KB8;
+      ram_size_bytes = 1024 * 8;
+      break;
+    }
+
+    case 0x03:
+    {
+      ram = SIZE::KB32;
+      ram_size_bytes = 1024 * 32;
+      break;
+    }
+
+    case 0x04:
+    {
+      ram = SIZE::KB128;
+      ram_size_bytes = 1024 * 128;
+      break;
+    }
+
+    case 0x05:
+    {
+      ram = SIZE::KB64;
+      ram_size_bytes = 1024 * 64;
+      break;
+    }
+    
+    default:
+    {
+      GBC_LOG("Could not determine ram size");
+      break;
+    }
+    }
+
+    uint8_t rom_size = space[0x0148];
+
+    ZERO_BANK_NUMBER = 0;
+    HIGH_BANK_NUMBER = 0;
+    
+    switch(rom_size)
+    {
+    case 0x00:
+    {
+      rom = SIZE::KB32;
+      mask = 0b00000001;
+      rom_size_bytes = 1024 * 32;
+      break;
+    }
+
+    case 0x01:
+    {
+      rom = SIZE::KB64;
+      mask = 0b00000011;
+      rom_size_bytes = 1024 * 64;
+      break;
+    }
+
+    case 0x02:
+    {
+      rom = SIZE::KB128;
+      mask = 0b00000111;
+      rom_size_bytes = 1024 * 128;
+      break;
+    }
+
+    case 0x03:
+    {
+      rom = SIZE::KB256;
+      mask = 0b00001111;
+      rom_size_bytes = 1024 * 256;
+      break;
+    }
+
+    case 0x04:
+    {
+      rom = SIZE::KB512;
+      mask = 0b00011111;
+      rom_size_bytes = 1024 * 512;
+      break;
+    }
+
+    case 0x05:
+    {
+      rom = SIZE::MB1;
+      mask = 0b00011111;
+      rom_size_bytes = 1024 * (1024);
+      ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x01) << 5;
+      break;
+    }
+
+    case 0x06:
+    {
+      rom = SIZE::MB2;
+      mask = 0b00011111;
+      rom_size_bytes = 1024 * (1024 * 2);
+      ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x03) << 5;
+      break;
+    }
+
+    case 0x07:
+    {
+      rom = SIZE::MB4;
+      break;
+    }
+
+    case 0x08:
+    {
+      rom = SIZE::MB8;
+      break;
+    }
+
+    case 0x52:
+    {
+      rom = SIZE::MB1_1;
+      break;
+    }
+
+    case 0x53:
+    {
+      rom = SIZE::MB1_2;
+      break;
+    }
+
+    case 0x54:
+    {
+      rom = SIZE::MB1_5;
+      break;
+    }
+
+    default:
+    {
+      GBC_LOG("Could not determine rom size");
       break;
     }
     }
@@ -134,7 +270,7 @@ namespace GBC
       GBC_LOG("Loaded ROM '" + std::string(rom_path) + "'");
     }
 
-    rom = rom_path;
+    srom_path = rom_path;
   }
 
   void ROM::Post_Bios()
@@ -147,9 +283,9 @@ namespace GBC
 
   ROM::~ROM()
   {
-    //if(mbc != MBC::MBC1B) return;
+    if(mbc != MBC::MBC1B) return;
     std::ofstream save;
-    save.open(std::string(rom) + std::string(".sav"), std::ios::binary | std::ios::out);
+    save.open(std::string(srom_path) + std::string(".sav"), std::ios::binary | std::ios::out);
 
     for(uint16_t i = 0xA000; i <= 0xBFFF; i++)
     {
@@ -157,29 +293,25 @@ namespace GBC
     }
 
     save.close();
-    GBC_LOG("Saved game to " + std::string(rom) + std::string(".sav"));
+    GBC_LOG("Saved game to " + std::string(srom_path) + std::string(".sav"));
   }
 
   uint8_t ROM::Read(uint16_t address)
   {
-    if(banks == 2) return space[address];
+    //if(banks == 2) return space[address];
     if(address >= 0x0000 && address <= 0x3FFF)
     {
       if(mode == 0)
       {
 	return space[address];
       }
+
+      return space[0x4000 * ZERO_BANK_NUMBER + address];
     }
 
     if(address >= 0x4000 && address <= 0x7FFF)
     {
-      uint16_t HIGH_BANK_NUM = 0;
-
-      if(banks <= 32)
-      {
-	HIGH_BANK_NUM = ROM_BANK_NUM & mask;
-      }
-      return space[0x4000 * HIGH_BANK_NUM + (address - 0x4000)];
+      return space[0x4000 * HIGH_BANK_NUMBER + (address - 0x4000)];
     }
 
     if(address >= 0xA000 && address <= 0xBFFF)
@@ -200,16 +332,24 @@ namespace GBC
 
     if(address >= 0x2000 && address <= 0x3FFF)
     {
-      if(value == 0) ROM_BANK_NUM = 1;
+      if(value == 0) ROM_BANK_NUMBER = 1;
       
       value = value & mask;
 
-      ROM_BANK_NUM = value;
+      ROM_BANK_NUMBER = value;
+      
+      ZERO_BANK_NUMBER = 0;
+      if(rom == SIZE::MB1) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x01) << 5; 
+      if(rom == SIZE::MB2) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x03) << 5;
     }
 
     if(address >= 0x4000 && address <= 0x5FFF)
     {
-      RAM_BANK_NUM = value & 0x03;
+      RAM_BANK_NUMBER = value & 0x03;
+
+      HIGH_BANK_NUMBER = ROM_BANK_NUMBER & mask;
+      if(rom == SIZE::MB1) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x01) << 5;
+      if(rom == SIZE::MB2) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x03) << 5;
     }
 
     if(address >= 0x6000 && address <= 0x7FFF)
@@ -219,8 +359,14 @@ namespace GBC
 
     if(address >= 0xA000 && address <= 0xBFFF)
     {
-      //if(external_ram)
-      space[address] = value;
+      if(!external_ram) return;
+      uint16_t addr = address;
+
+      if(ram == SIZE::KB2 || ram == SIZE::KB8) addr = ((address - 0xA000) % rom_size_bytes);
+      if(mode == 1 && ram == SIZE::KB32) addr = 0x2000 * RAM_BANK_NUMBER + (address - 0xA000);
+      if(mode == 0) addr = address - 0xA000;
+      
+      space[addr] = value;
     }
   }
 };

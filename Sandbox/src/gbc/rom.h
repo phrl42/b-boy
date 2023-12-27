@@ -19,6 +19,12 @@ namespace GBC
       {
 	NONE=0, MBC1, MBC1B
       };
+
+    enum class SIZE
+    {
+      NONE=0, KB2, KB8, KB32, KB64, KB128, KB256, KB512, MB1, MB2, MB4, MB8, MB1_1, MB1_2, MB1_5 
+    };
+
     bool Load_Rom(const char* rom_path);
     void Init(const char* rom_path);
 
@@ -28,24 +34,31 @@ namespace GBC
 
     void Post_Bios();
 
-    inline const char* Get_Rom_Name() { return rom; }
+    inline const char* Get_Rom_Name() { return srom_path; }
   private:
-    MBC mbc;
-    const char* rom;
-    uint8_t space[32768 * 64];
 
+    MBC mbc = MBC::NONE;
+
+    SIZE ram = SIZE::NONE;
+    uint32_t ram_size_bytes = 0;
+
+    SIZE rom = SIZE::NONE;
+    uint32_t rom_size_bytes = 0;
+    
+    bool external_ram = false;
+    
+    const char* srom_path;
+    uint8_t space[32768 * 64];
     uint8_t lower_game[0x0100];
 
-    uint8_t ROM_BANK_NUM = 0;
-    uint8_t RAM_BANK_NUM = 0;
-
     uint8_t mode = 0;
-
-    bool external_ram = false;
-
-    uint32_t rom_size = 0;
     uint8_t banks = 0;
-
     uint8_t mask = 0;
+
+    uint8_t ROM_BANK_NUMBER = 0;
+    uint8_t RAM_BANK_NUMBER = 0;
+
+    uint8_t ZERO_BANK_NUMBER = 0;
+    uint8_t HIGH_BANK_NUMBER = 0;
   };
 };
