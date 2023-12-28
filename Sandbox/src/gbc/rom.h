@@ -33,10 +33,12 @@ namespace GBC
     void Write(uint16_t address, uint8_t value);
 
     void Post_Bios();
+    void Load_Save();
 
     inline const char* Get_Rom_Name() { return srom_path; }
   private:
-
+    bool post_bios = false;
+    bool loaded_save = false;
     MBC mbc = MBC::NONE;
 
     SIZE ram = SIZE::NONE;

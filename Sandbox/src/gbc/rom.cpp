@@ -241,29 +241,40 @@ namespace GBC
 
     file.close();
 
+    return true;
+  }
+
+  void ROM::Load_Save()
+  {
     std::ifstream save;
-    save.open(std::string(rom_path) + std::string(".sav"), std::ios::binary | std::ios::in);
+    save.open(std::string(srom_path) + std::string(".sav"), std::ios::binary | std::ios::in);
 
     if(save)
     {
-      GBC_LOG("Loaded save at " + std::string(rom_path) + std::string(".sav"));
+      GBC_LOG("Loaded save at " + std::string(srom_path) + std::string(".sav"));
       char byte = 0;
+
+      uint16_t addr = 0xA000;
+
+      if(ram == SIZE::KB2 || ram == SIZE::KB8) addr = ((0xA000 - 0xA000) % rom_size_bytes);
+      if(mode == 1 && ram == SIZE::KB32) addr = 0x2000 * RAM_BANK_NUMBER + (0xA000 - 0xA000);
       for(uint16_t address = 0xA000; address <= 0xBFFF; address++)
       {
 	save.get(byte);
-	space[address] = byte;
+	space[addr] = byte;
+	addr++;
       }
-      
+
     }
-    
-    return true;
+    loaded_save = true;
   }
-  
+
   void ROM::Init(const char* rom_path)
   {
     if(!Load_Rom(rom_path))
     {
       GBC_LOG("Could not load ROM at: " + std::string(rom_path));
+      exit(-1);
     }
     else
     {
@@ -279,6 +290,9 @@ namespace GBC
     {
       space[i] = lower_game[i];
     }
+    post_bios = true;
+
+    //Load_Save();
   }
 
   ROM::~ROM()
@@ -298,7 +312,7 @@ namespace GBC
 
   uint8_t ROM::Read(uint16_t address)
   {
-    //if(banks == 2) return space[address];
+    if(post_bios == false || mbc == MBC::NONE) return space[address];
     if(address >= 0x0000 && address <= 0x3FFF)
     {
       if(mode == 0)
@@ -306,22 +320,37 @@ namespace GBC
 	return space[address];
       }
 
+      ZERO_BANK_NUMBER = 0;
+      if(rom == SIZE::MB1) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x01) << 5; 
+      if(rom == SIZE::MB2) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x03) << 5;
       return space[0x4000 * ZERO_BANK_NUMBER + address];
     }
 
     if(address >= 0x4000 && address <= 0x7FFF)
     {
+      HIGH_BANK_NUMBER = ROM_BANK_NUMBER & mask;
+      if(rom == SIZE::MB1) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x01) << 5;
+      if(rom == SIZE::MB2) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x03) << 5;
       return space[0x4000 * HIGH_BANK_NUMBER + (address - 0x4000)];
     }
 
     if(address >= 0xA000 && address <= 0xBFFF)
     {
-      return space[address];
+      if(!external_ram) return 0xFF;
+      
+      uint16_t addr = address;
+
+      if(ram == SIZE::KB2 || ram == SIZE::KB8) addr = ((address - 0xA000) % rom_size_bytes);
+      if(mode == 1 && ram == SIZE::KB32) addr = 0x2000 * RAM_BANK_NUMBER + (address - 0xA000);
+      if(mode == 0 && ram == SIZE::KB32) addr = address - 0xA000;
+
+      return space[addr];
     }
   }
 
   void ROM::Write(uint16_t address, uint8_t value)
   {
+    if(post_bios == false || mbc == MBC::NONE) return; 
     if(address <= 0x1FFF && address >= 0x0000)
     {
       if((value & 0x0F) == 0xA)
@@ -337,24 +366,18 @@ namespace GBC
       value = value & mask;
 
       ROM_BANK_NUMBER = value;
-      
-      ZERO_BANK_NUMBER = 0;
-      if(rom == SIZE::MB1) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x01) << 5; 
-      if(rom == SIZE::MB2) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x03) << 5;
     }
 
     if(address >= 0x4000 && address <= 0x5FFF)
     {
       RAM_BANK_NUMBER = value & 0x03;
-
-      HIGH_BANK_NUMBER = ROM_BANK_NUMBER & mask;
-      if(rom == SIZE::MB1) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x01) << 5;
-      if(rom == SIZE::MB2) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x03) << 5;
+      
+      if(!loaded_save) Load_Save();
     }
 
     if(address >= 0x6000 && address <= 0x7FFF)
     {
-      mode = value & 0x01;
+      mode = value;
     }
 
     if(address >= 0xA000 && address <= 0xBFFF)
@@ -364,7 +387,7 @@ namespace GBC
 
       if(ram == SIZE::KB2 || ram == SIZE::KB8) addr = ((address - 0xA000) % rom_size_bytes);
       if(mode == 1 && ram == SIZE::KB32) addr = 0x2000 * RAM_BANK_NUMBER + (address - 0xA000);
-      if(mode == 0) addr = address - 0xA000;
+      if(mode == 0 && ram == SIZE::KB32) addr = address - 0xA000;
       
       space[addr] = value;
     }
