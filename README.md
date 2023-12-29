@@ -1,6 +1,8 @@
 # GameBoy Color Emulator
 
-Currently Work In Progress!
+This emulator features the most basic things, like playing TLOZ or Kirby's Dream Land 2 with save games and basic mbc1 functionality implemented.
+
+As always, this project is also WIP.
 
 <img src="screenshot.png" width=500px height=500px></a>
 # Resources:
@@ -12,9 +14,10 @@ A huge thanks for all the support in the Emulation Development Discord!
 # To-Do
 - [X] Fix sprite bugs
 - [X] Fix slowness
-- [ ] Cycle accurate emulation (currently runs at fullspeed)
-- [ ] Better MBC 1/3 support
+- [X] MBC1 Support
+- [ ] MBC3 Support 
 - [ ] APU
+- [ ] Cycle accurate emulation (currently runs at fullspeed)
 
 - [ ] G a m e B o y C o l o r
 - [ ] port to android
@@ -58,4 +61,4 @@ premake5 should be installed on the system
 This is Linux and Windows compatible. All dependencies are within this repository.
 
 # Motivation
-Playing retro games is not enough joy for me. I crave the need to emulate the console. I am probably insane
+For me, playing games is not enough. I rather prefer to emulate the game's console to fullfill my insanity.
