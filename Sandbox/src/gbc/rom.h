@@ -53,11 +53,13 @@ namespace GBC
     uint8_t space[32768 * 64];
     uint8_t lower_game[0x0100];
 
+    uint8_t ram_bank[32768 * 2] = {0};
+
     uint8_t mode = 0;
     uint8_t banks = 0;
     uint8_t mask = 0;
 
-    uint8_t ROM_BANK_NUMBER = 0;
+    uint8_t ROM_BANK_NUMBER = 0x01;
     uint8_t RAM_BANK_NUMBER = 0;
 
     uint8_t ZERO_BANK_NUMBER = 0;

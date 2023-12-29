@@ -254,15 +254,10 @@ namespace GBC
       GBC_LOG("Loaded save at " + std::string(srom_path) + std::string(".sav"));
       char byte = 0;
 
-      uint16_t addr = 0xA000;
-
-      if(ram == SIZE::KB2 || ram == SIZE::KB8) addr = ((0xA000 - 0xA000) % rom_size_bytes);
-      if(mode == 1 && ram == SIZE::KB32) addr = 0x2000 * RAM_BANK_NUMBER + (0xA000 - 0xA000);
-      for(uint16_t address = 0xA000; address <= 0xBFFF; address++)
+      for(uint32_t address = 0; address < 0x10000; address++)
       {
 	save.get(byte);
-	space[addr] = byte;
-	addr++;
+	ram_bank[address] = byte;
       }
 
     }
@@ -292,7 +287,7 @@ namespace GBC
     }
     post_bios = true;
 
-    //Load_Save();
+    Load_Save();
   }
 
   ROM::~ROM()
@@ -301,9 +296,9 @@ namespace GBC
     std::ofstream save;
     save.open(std::string(srom_path) + std::string(".sav"), std::ios::binary | std::ios::out);
 
-    for(uint16_t i = 0xA000; i <= 0xBFFF; i++)
+    for(uint32_t i = 0; i < 0x10000; i++)
     {
-      save.put(space[i]);
+      save.put(ram_bank[i]);
     }
 
     save.close();
@@ -338,13 +333,9 @@ namespace GBC
     {
       if(!external_ram) return 0xFF;
       
-      uint16_t addr = address;
+      uint16_t addr = (address - 0xA000) + (RAM_BANK_NUMBER * 0x2000);
 
-      if(ram == SIZE::KB2 || ram == SIZE::KB8) addr = ((address - 0xA000) % rom_size_bytes);
-      if(mode == 1 && ram == SIZE::KB32) addr = 0x2000 * RAM_BANK_NUMBER + (address - 0xA000);
-      if(mode == 0 && ram == SIZE::KB32) addr = address - 0xA000;
-
-      return space[addr];
+      return ram_bank[addr];
     }
   }
 
@@ -371,8 +362,6 @@ namespace GBC
     if(address >= 0x4000 && address <= 0x5FFF)
     {
       RAM_BANK_NUMBER = value & 0x03;
-      
-      if(!loaded_save) Load_Save();
     }
 
     if(address >= 0x6000 && address <= 0x7FFF)
@@ -383,13 +372,9 @@ namespace GBC
     if(address >= 0xA000 && address <= 0xBFFF)
     {
       if(!external_ram) return;
-      uint16_t addr = address;
 
-      if(ram == SIZE::KB2 || ram == SIZE::KB8) addr = ((address - 0xA000) % rom_size_bytes);
-      if(mode == 1 && ram == SIZE::KB32) addr = 0x2000 * RAM_BANK_NUMBER + (address - 0xA000);
-      if(mode == 0 && ram == SIZE::KB32) addr = address - 0xA000;
-      
-      space[addr] = value;
+      uint16_t addr = (address - 0xA000) + (RAM_BANK_NUMBER * 0x2000);
+      ram_bank[addr] = value;
     }
   }
 };

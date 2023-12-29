@@ -42,6 +42,11 @@ namespace GBC
       // VRAM reading
       value = ppu->Read(address);
     }
+    else if(address <= 0xBFFF)
+    {
+      // external ram reading
+      value = rom->Read(address);
+    }
     else if(address <= 0xDFFF)
     {
       value = space[address];
@@ -106,6 +111,11 @@ namespace GBC
     {
       // VRAM writing
       ppu->Write(address, value);
+    }
+    else if(address <= 0xBFFF)
+    {
+      // external RAM writing
+      rom->Write(address, value);
     }
     else if(address <= 0xDFFF)
     {
