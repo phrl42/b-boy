@@ -28,7 +28,7 @@ namespace SANDBOX
     Stats::step_id = qct->GetTextureID();
 
     //spec.Init("assets/roms/kirby.gb");
-    spec.Init("/home/pherel/Games/other/Emus_roms/Roms/gb/Links_Awakening.gb");
+    spec.Init("/home/pherel/Games/other/Emus_roms/Roms/gb/Dr.Mario.gb");
     Stats::spec = &spec;
 
     screen.AddComponent(new Banana::LineComponent(&spec.ppu.screen));
