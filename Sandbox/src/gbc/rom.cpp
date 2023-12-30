@@ -316,13 +316,14 @@ namespace GBC
       }
 
       ZERO_BANK_NUMBER = 0;
-      if(rom == SIZE::MB1) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x01) << 5; 
-      if(rom == SIZE::MB2) ZERO_BANK_NUMBER = (ROM_BANK_NUMBER & 0x03) << 5;
-      return space[0x4000 * ZERO_BANK_NUMBER + address];
+      if(rom == SIZE::MB1) ZERO_BANK_NUMBER = (RAM_BANK_NUMBER & 0x01) << 5; 
+      if(rom == SIZE::MB2) ZERO_BANK_NUMBER = (RAM_BANK_NUMBER & 0x03) << 5;
+      return space[0x4000 * (ZERO_BANK_NUMBER) + address];
     }
 
     if(address >= 0x4000 && address <= 0x7FFF)
     {
+      if(ROM_BANK_NUMBER == 0) ROM_BANK_NUMBER = 1;
       HIGH_BANK_NUMBER = ROM_BANK_NUMBER & mask;
       if(rom == SIZE::MB1) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x01) << 5;
       if(rom == SIZE::MB2) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x03) << 5;

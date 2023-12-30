@@ -67,7 +67,7 @@ namespace GBC
       // no use
       if(emu) GBC_LOG("ILLEGAL READ");
     }
-    else if(address <= 0xFFFF)
+    else
     {
       // IO / HRAM / Interrupt / Timer
       if(address <= A_SC && address >= A_JOYPAD)
@@ -137,7 +137,7 @@ namespace GBC
       // no use
       GBC_LOG("ILLEGAL WRITE");
     }
-    else if(address <= 0xFFFF)
+    else
     {
       // IO / HRAM / Interrupt / Timer
       if(address <= A_SC && address >= A_JOYPAD)

@@ -41,11 +41,11 @@ project "Sandbox"
   filter "configurations:Debug"
     defines "BUILD_DEBUG"
     symbols "On"
-    buildoptions { "-fstack-protector" }
-    linkoptions { "-fstack-protector" }
+    buildoptions { "-fstack-protector -Wall " }
+    linkoptions { "-fstack-protector -Wall " }
 
   filter "configurations:Release"
     defines "BUILD_RELEASE"
-    buildoptions { "-fstack-protector" }
-    linkoptions { "-fstack-protector" }
+    buildoptions { "-fstack-protector -Wall " }
+    linkoptions { "-fstack-protector -Wall " }
     optimize "On"

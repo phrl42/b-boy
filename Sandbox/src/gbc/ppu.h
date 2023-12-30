@@ -110,13 +110,13 @@ namespace GBC
 
   struct Object
   {
-    uint8_t y;
-    uint8_t x;
+    uint8_t y = 0;
+    uint8_t x = 0;
 
-    uint8_t index;
-    uint8_t flags;
+    uint8_t index = 0;
+    uint8_t flags = 0;
 
-    uint8_t height;
+    uint8_t height = 0;
   };
 
   struct Fetcher
