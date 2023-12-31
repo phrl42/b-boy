@@ -2,8 +2,11 @@
 
 #include "Application.hpp"
 
+#include <chrono>
+
 namespace GBC
 {
+  static auto start = std::chrono::high_resolution_clock::now();
   void Bus::Emulate_Cycle(uint8_t n, bool normal)
   {
     uint8_t cpu_speed = NORMAL_SPEED;
@@ -16,6 +19,16 @@ namespace GBC
     {
       timer->Tick();
       ppu->Tick();
+
+      auto end = std::chrono::high_resolution_clock::now();
+
+      auto val = std::chrono::duration_cast<std::chrono::nanoseconds>(end-start).count();
+
+      while(val < 100.4186f)
+      {
+	val = std::chrono::duration_cast<std::chrono::nanoseconds>((std::chrono::high_resolution_clock::now())-start).count();
+      }
+      start = std::chrono::high_resolution_clock::now();
       cycles++;
     }
   }
