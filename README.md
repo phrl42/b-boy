@@ -17,7 +17,7 @@ A huge thanks for all the support in the Emulation Development Discord!
 - [X] MBC1 Support
 - [ ] MBC3 Support 
 - [ ] APU
-- [ ] Cycle accurate emulation (currently runs at fullspeed)
+- [X] Implement cycle accuracy and fullspeed
 
 - [ ] G a m e B o y C o l o r
 - [ ] port to android
