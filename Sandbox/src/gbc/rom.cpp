@@ -246,6 +246,7 @@ namespace GBC
 
   void ROM::Load_Save()
   {
+    if(mbc != MBC::MBC1B) return;
     std::ifstream save;
     save.open(std::string(srom_path) + std::string(".sav"), std::ios::binary | std::ios::in);
 
@@ -323,7 +324,6 @@ namespace GBC
 
     if(address >= 0x4000 && address <= 0x7FFF)
     {
-      if(ROM_BANK_NUMBER == 0) ROM_BANK_NUMBER = 1;
       HIGH_BANK_NUMBER = ROM_BANK_NUMBER & mask;
       if(rom == SIZE::MB1) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x01) << 5;
       if(rom == SIZE::MB2) HIGH_BANK_NUMBER = (RAM_BANK_NUMBER & 0x03) << 5;
@@ -353,11 +353,12 @@ namespace GBC
 
     if(address >= 0x2000 && address <= 0x3FFF)
     {
-      if(value == 0) ROM_BANK_NUMBER = 1;
-      
-      value = value & mask;
+      uint8_t val = 0;
+      val = value & mask;
 
-      ROM_BANK_NUMBER = value;
+      if(value == 0) val = 1;
+
+      ROM_BANK_NUMBER = val;
     }
 
     if(address >= 0x4000 && address <= 0x5FFF)
@@ -367,7 +368,7 @@ namespace GBC
 
     if(address >= 0x6000 && address <= 0x7FFF)
     {
-      mode = value;
+      mode = value & 0x01;
     }
 
     if(address >= 0xA000 && address <= 0xBFFF)
