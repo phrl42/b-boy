@@ -1,4 +1,4 @@
-# GameBoy Color Emulator
+# GameBoy (Color) Emulator
 
 This emulator features the most basic things, like playing TLOZ or Kirby's Dream Land 2 with save games and basic mbc1 functionality implemented.
 
