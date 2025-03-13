@@ -59,6 +59,3 @@ premake5 should be installed on the system
 
 # Info
 This is Linux and Windows compatible. All dependencies are within this repository.
-
-# Motivation
-For me, playing games is not enough. I rather prefer to emulate the game's console to fullfill my insanity.
